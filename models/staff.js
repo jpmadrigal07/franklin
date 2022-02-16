@@ -1,13 +1,12 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
-// CREATE DB SCHEMA OF USERS
-const course = new Schema({
-    courseName: {
-        type: String,
-        unique: true
+const staff = new Schema({
+    userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
     },
-    courseCode: String,
+    name: String,
     createdAt: {
         type: Date,
         default: Date.now
@@ -16,4 +15,4 @@ const course = new Schema({
     deletedAt: Date
 });
 
-module.exports = mongoose.model('Course', course);
+module.exports = mongoose.model('Staff', staff);
