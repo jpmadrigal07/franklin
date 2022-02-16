@@ -8,7 +8,8 @@ const { UNKNOW_ERROR_OCCURED } = require("../constants");
 // @desc    Get All Customer
 // @access  Public
 router.get("/", async (req, res) => {
-  const condition = req.query.condition ? JSON.parse(req.query.condition) : {};
+  const condition = req.query.condition ?
+  JSON.parse(req.query.condition) : {};
   if (!condition.deletedAt) {
     condition.deletedAt = {
       $exists: false,
