@@ -3,17 +3,9 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const cookieSession = require("cookie-session");
 const keys = require("./config/keys");
-const AuthRoute = require('./routes/auth');
-const CampusCollegeRoute = require("./routes/campusCollege")
-const CollegeRoute = require("./routes/college")
-const CollegeCoursesRoute = require("./routes/collegeCourses")
-const CourseRoute = require("./routes/course")
-const MainCampusRoute = require("./routes/mainCampus")
-const SatelliteCampusRoute = require("./routes/satelliteCampus")
-const StudentRoute = require("./routes/student")
-const UserRoute = require("./routes/user")
-const Document = require("./routes/document")
-const UserDocument = require("./routes/userDocument")
+const UserRoute = require("./routes/user");
+const StaffRoute = require("./routes/staff");
+const CustomerRoute = require("./routes/customer");
 const app = express();
 
 // Connect to Mongo
@@ -39,17 +31,9 @@ app.use(
 );
 
 // REST API
-app.use("/", AuthRoute);
-app.use("/api/campusCollege", CampusCollegeRoute);
-app.use("/api/college", CollegeRoute);
-app.use("/api/collegeCourses", CollegeCoursesRoute);
-app.use("/api/course", CourseRoute);
-app.use("/api/mainCampus", MainCampusRoute);
-app.use("/api/satelliteCampus", SatelliteCampusRoute);
-app.use("/api/student", StudentRoute);
-app.use("/api/user", UserRoute);
-app.use("/api/document", Document);
-app.use("/api/userDocument", UserDocument);
+app.use("/api/users", UserRoute);
+app.use("/api/staffs", StaffRoute);
+app.use("/api/customers", CustomerRoute);
 
 const port = process.env.PORT || 5000;
 
