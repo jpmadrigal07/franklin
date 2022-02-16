@@ -11,10 +11,10 @@ router.get("/", async (req, res) => {
   const condition = req.query.condition ? JSON.parse(req.query.condition) : {};
   if (!condition.deletedAt) {
     condition.deletedAt = {
-        $exists: false
-    }
+      $exists: false,
+    };
   }
-  console.log('wewe', condition)
+  console.log("wewe", condition);
   try {
     const getAllUser = await User.find(condition);
     res.json(getAllUser);
@@ -33,20 +33,20 @@ router.post("/", async (req, res) => {
     const newUser = new User({
       username,
       password,
-      userType
+      userType,
     });
     try {
       const getUser = await User.find({
         username,
         deletedAt: {
-          $exists: false
-        }
+          $exists: false,
+        },
       });
       if (getUser.length === 0) {
         const createUser = await newUser.save();
         res.json(createUser);
       } else {
-        throw new Error('Username must be unique');
+        throw new Error("Username must be unique");
       }
     } catch ({ message: errMessage }) {
       const message = errMessage ? errMessage : UNKNOW_ERROR_OCCURED;
@@ -64,11 +64,15 @@ router.patch("/:id", async (req, res) => {
   const condition = req.body;
   if (!isEmpty(condition)) {
     try {
-        const updateUser = await User.findByIdAndUpdate(req.params.id, {
+      const updateUser = await User.findByIdAndUpdate(
+        req.params.id,
+        {
           $set: condition,
           updatedAt: Date.now(),
-        }, { new: true });
-        res.json(updateUser);
+        },
+        { new: true }
+      );
+      res.json(updateUser);
     } catch ({ message: errMessage }) {
       const message = errMessage ? errMessage : UNKNOW_ERROR_OCCURED;
       res.status(500).json(message);
@@ -86,8 +90,8 @@ router.delete("/:id", async (req, res) => {
     const getUser = await User.find({
       _id: req.params.id,
       deletedAt: {
-        $exists: false
-      }
+        $exists: false,
+      },
     });
     if (getUser.length > 0) {
       const deleteUser = await User.findByIdAndUpdate(req.params.id, {
@@ -97,7 +101,7 @@ router.delete("/:id", async (req, res) => {
       });
       res.json(deleteUser);
     } else {
-      throw new Error('User is already deleted');
+      throw new Error("User is already deleted");
     }
   } catch ({ message: errMessage }) {
     const message = errMessage ? errMessage : UNKNOW_ERROR_OCCURED;

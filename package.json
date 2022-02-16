@@ -4,9 +4,11 @@
   "description": "Develop by John Madrigal for Franlin's Dry and Wash Fold. To contact the developer, you can message him through Messenger.",
   "main": "server.js",
   "scripts": {
-    "start": "set REACT_APP_STAGE=local && nodemon server.js",
-    "start-dev": "set REACT_APP_STAGE=development && nodemon server.js",
-    "start-prod": "set REACT_APP_STAGE=production && nodemon server.js"
+    "server": "set REACT_APP_STAGE=local && nodemon server.js",
+    "client": "npm run dev --prefix client",
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "pretty": "prettier --write \"./**/*.{js,jsx,json}\"",
+    "precommit": "pretty-quick --staged"
   },
   "author": "John Patrick M. Madrigal",
   "license": "ISC",

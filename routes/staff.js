@@ -27,18 +27,12 @@ router.get("/", async (req, res) => {
 // @desc    Add A Staff
 // @access  Private
 router.post("/", async (req, res) => {
-  const {
-    userId,
-    name,
-  } = req.body;
+  const { userId, name } = req.body;
 
-  if (
-    userId &&
-    name
-  ) {
+  if (userId && name) {
     const newStaff = new Staff({
-        userId,
-        name,
+      userId,
+      name,
     });
     try {
       const getStaffUserId = await Staff.find({
@@ -75,10 +69,14 @@ router.patch("/:id", async (req, res) => {
   const condition = req.body;
   if (!isEmpty(condition)) {
     try {
-      const updateStaff = await Staff.findByIdAndUpdate(req.params.id, {
-        $set: condition,
-        updatedAt: Date.now(),
-      }, { new: true });
+      const updateStaff = await Staff.findByIdAndUpdate(
+        req.params.id,
+        {
+          $set: condition,
+          updatedAt: Date.now(),
+        },
+        { new: true }
+      );
       res.json(updateStaff);
     } catch ({ message: errMessage }) {
       const message = errMessage ? errMessage : UNKNOW_ERROR_OCCURED;

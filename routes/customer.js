@@ -97,10 +97,14 @@ router.patch("/:id", async (req, res) => {
   const condition = req.body;
   if (!isEmpty(condition)) {
     try {
-      const updateCustomer = await Customer.findByIdAndUpdate(req.params.id, {
-        $set: condition,
-        updatedAt: Date.now(),
-      }, { new: true });
+      const updateCustomer = await Customer.findByIdAndUpdate(
+        req.params.id,
+        {
+          $set: condition,
+          updatedAt: Date.now(),
+        },
+        { new: true }
+      );
       res.json(updateCustomer);
     } catch ({ message: errMessage }) {
       const message = errMessage ? errMessage : UNKNOW_ERROR_OCCURED;
