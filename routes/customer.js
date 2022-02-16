@@ -86,7 +86,7 @@ router.post("/", async (req, res) => {
       res.status(500).json(message);
     }
   } else {
-    res.status(500).json("Required values are either invalid or empty");
+    res.status(500).json("Required values are empty");
   }
 });
 
