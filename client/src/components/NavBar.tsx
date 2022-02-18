@@ -2,8 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Icon } from "@iconify/react";
 import moment from "moment";
 import { NAVBAR_MENU } from "../constants";
-import { useRouter } from "next/router";
-import Link from "next/link";
+import { useLocation, useNavigate } from "react-router-dom";
 
 type T_MENU = {
   page: string;
@@ -11,7 +10,8 @@ type T_MENU = {
 };
 
 const Navbar = () => {
-  const router = useRouter();
+  const router = useLocation();
+  const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState("");
   const [time, setTime] = useState(new Date().getTime());
   setInterval(() => {
@@ -46,15 +46,14 @@ const Navbar = () => {
         <div className="h-[50px] grid grid-cols-7 gap-4 content-center ml-[200px] mr-[200px] text-white text-center">
           {NAVBAR_MENU.map((res: T_MENU, index: number) => {
             return (
-              <Link key={index} href={res.path} passHref={true}>
-                <span
-                  className={`hover:cursor-pointer ${
-                    res.path === currentPage ? "border-2 border-white" : ""
-                  }`}
-                >
-                  {res.page}
-                </span>
-              </Link>
+              <span
+                onClick={() => navigate(res.path)}
+                className={`hover:cursor-pointer ${
+                  res.path === currentPage ? "border-2 border-white" : ""
+                }`}
+              >
+                {res.page}
+              </span>
             );
           })}
         </div>

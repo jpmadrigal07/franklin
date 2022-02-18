@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "server": "set REACT_APP_STAGE=local && nodemon server.js",
-    "client": "npm run dev --prefix client",
+    "client": "npm start --prefix client",
     "dev": "concurrently \"npm run server\" \"npm run client\"",
     "pretty": "prettier --write \"./**/*.{js,jsx,json}\"",
     "prepare": "husky install"
