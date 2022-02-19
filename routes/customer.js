@@ -8,14 +8,16 @@ const { UNKNOW_ERROR_OCCURED } = require("../constants");
 // @desc    Get All Customer
 // @access  Public
 router.get("/", async (req, res) => {
-  const condition = req.query.conditions ? JSON.parse(req.query.condition) : {};
+  const condition = req.query.condition ? JSON.parse(req.query.condition) : {};
   if (!condition.deletedAt) {
     condition.deletedAt = {
       $exists: false,
     };
   }
   try {
-    const getAllCustomer = await Customer.find(condition);
+    const getAllCustomer = await Customer.find(condition).sort({
+      createdAt: -1,
+    });
     res.json(getAllCustomer);
   } catch ({ message: errMessage }) {
     const message = errMessage ? errMessage : UNKNOW_ERROR_OCCURED;
@@ -32,13 +34,16 @@ router.post("/", async (req, res) => {
     lastName,
     street,
     barangayVillage,
-    city,
+    cityProvince,
     postalZipcode,
     birthday,
     contactNumber,
     landline,
     email,
     notes,
+    bdMonth,
+    bdDay,
+    bdYear,
   } = req.body;
 
   if (
@@ -46,9 +51,8 @@ router.post("/", async (req, res) => {
     lastName &&
     street &&
     barangayVillage &&
-    city &&
+    cityProvince &&
     postalZipcode &&
-    birthday &&
     contactNumber &&
     landline &&
     email
@@ -58,13 +62,16 @@ router.post("/", async (req, res) => {
       lastName,
       street,
       barangayVillage,
-      city,
+      cityProvince,
       postalZipcode,
       birthday,
       contactNumber,
       landline,
       email,
       notes,
+      bdMonth,
+      bdDay,
+      bdYear,
     });
     try {
       const getCustomer = await Customer.find({

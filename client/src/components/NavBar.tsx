@@ -49,7 +49,7 @@ const Navbar = () => {
               <span
                 onClick={() => navigate(res.path)}
                 className={`hover:cursor-pointer ${
-                  res.path === currentPage ? "border-2 border-white" : ""
+                  currentPage.includes(res.path) ? "border-2 border-white" : ""
                 }`}
               >
                 {res.page}
