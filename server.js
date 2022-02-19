@@ -6,6 +6,7 @@ const keys = require("./config/keys");
 const UserRoute = require("./routes/user");
 const StaffRoute = require("./routes/staff");
 const CustomerRoute = require("./routes/customer");
+const InventoryRoute = require("./routes/inventory");
 const path = require("path");
 const app = express();
 
@@ -35,6 +36,7 @@ app.use(
 app.use("/api/users", UserRoute);
 app.use("/api/staffs", StaffRoute);
 app.use("/api/customers", CustomerRoute);
+app.use("/api/inventory", InventoryRoute);
 
 // Serve static assets if in production
 if (process.env.NODE_ENV === "production") {
