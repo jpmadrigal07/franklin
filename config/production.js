@@ -1,8 +1,8 @@
 // Development keys
 
 module.exports = {
-  mongoURI: "mongodb://localhost:27017/franklin",
-  cookieKey: "2PaNsDWA1sdjXP2",
-  sessionKey: "aew86O4Qs48f7CO",
-  redirectDomain: "http://localhost:3000/",
+  mongoURI: process.env.MONGO_URI,
+  cookieKey: process.env.COOKIE_KEY,
+  sessionKey: process.env.SESSION_KEY,
+  redirectDomain: process.env.REDIRECT_DOMAIN,
 };
