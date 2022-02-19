@@ -249,7 +249,7 @@ const Add = () => {
             Save
           </button>
           <button
-            className="bg-primary pt-1 pl-5 pb-1 pr-5 rounded-xl bg-white border-2 border-primary text-primary"
+            className="pt-1 pl-5 pb-1 pr-5 rounded-xl bg-white border-2 border-primary text-primary"
             type="button"
             disabled={isAddCustomerLoading}
             onClick={() => navigate("/customers")}
