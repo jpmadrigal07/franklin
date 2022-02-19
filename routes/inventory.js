@@ -1,11 +1,11 @@
 const express = require("express");
 const router = express.Router();
-const User = require("../models/user");
+const Inventory = require("../models/inventory");
 const isEmpty = require("lodash/isEmpty");
 const { UNKNOW_ERROR_OCCURED } = require("../constants");
 
-// @route   GET api/user
-// @desc    Get All User
+// @route   GET api/inventory
+// @desc    Get All Inventory
 // @access  Public
 router.get("/", async (req, res) => {
   const condition = req.query.condition ? JSON.parse(req.query.condition) : {};
@@ -15,55 +15,61 @@ router.get("/", async (req, res) => {
     };
   }
   try {
-    const getAllUser = await User.find(condition);
-    res.json(getAllUser);
+    const getAllInventory = await Inventory.find(condition).sort({
+      createdAt: -1,
+    });
+    res.json(getAllInventory);
   } catch ({ message: errMessage }) {
     const message = errMessage ? errMessage : UNKNOW_ERROR_OCCURED;
     res.status(500).json(message);
   }
 });
 
-// @route   POST api/user/add
-// @desc    Add A User
+// @route   POST api/inventory/add
+// @desc    Add A Inventory
 // @access  Private
 router.post("/", async (req, res) => {
-  const { username, password, userType } = req.body;
-  if (username && password && userType) {
-    const newUser = new User({
-      username,
-      password,
-      userType,
+  const { type, stockCode, name, unitCost, stock } = req.body;
+
+  if (type && stockCode && name && unitCost && stock) {
+    const newInventory = new Inventory({
+      type,
+      stockCode,
+      name,
+      unitCost,
+      stock,
     });
     try {
-      const getUser = await User.find({
-        username,
+      const getInventory = await Inventory.find({
+        stockCode,
+        name,
         deletedAt: {
           $exists: false,
         },
       });
-      if (getUser.length === 0) {
-        const createUser = await newUser.save();
-        res.json(createUser);
+      if (getInventory.length === 0) {
+        const createInventory = await newInventory.save();
+        res.json(createInventory);
       } else {
-        throw new Error("Username must be unique");
+        throw new Error("Code and name must be unique");
       }
     } catch ({ message: errMessage }) {
       const message = errMessage ? errMessage : UNKNOW_ERROR_OCCURED;
       res.status(500).json(message);
     }
   } else {
-    res.status(500).json("Required values are either invalid or empty");
+    res.status(500).json("Required values are empty");
   }
 });
 
-// @route   PATCH api/user/:id
-// @desc    Update A User
+// @route   PATCH api/inventory/:id
+// @desc    Update A Inventory
 // @access  Private
 router.patch("/:id", async (req, res) => {
   const condition = req.body;
   if (!isEmpty(condition)) {
     try {
-      const updateUser = await User.findByIdAndUpdate(
+      const updateInventory = await Inventory.findByIdAndUpdate(
         req.params.id,
         {
           $set: condition,
@@ -71,36 +77,36 @@ router.patch("/:id", async (req, res) => {
         },
         { new: true }
       );
-      res.json(updateUser);
+      res.json(updateInventory);
     } catch ({ message: errMessage }) {
       const message = errMessage ? errMessage : UNKNOW_ERROR_OCCURED;
       res.status(500).json(message);
     }
   } else {
-    res.status(500).json("User cannot be found");
+    res.status(500).json("Item cannot be found");
   }
 });
 
-// @route   DELETE api/user/:id
-// @desc    Delete A User
+// @route   DELETE api/inventory/:id
+// @desc    Delete A Inventory
 // @access  Private
 router.delete("/:id", async (req, res) => {
   try {
-    const getUser = await User.find({
+    const getInventory = await Inventory.find({
       _id: req.params.id,
       deletedAt: {
         $exists: false,
       },
     });
-    if (getUser.length > 0) {
-      const deleteUser = await User.findByIdAndUpdate(req.params.id, {
+    if (getInventory.length > 0) {
+      const deleteInventory = await Inventory.findByIdAndUpdate(req.params.id, {
         $set: {
           deletedAt: Date.now(),
         },
       });
-      res.json(deleteUser);
+      res.json(deleteInventory);
     } else {
-      throw new Error("User is already deleted");
+      throw new Error("Item is already deleted");
     }
   } catch ({ message: errMessage }) {
     const message = errMessage ? errMessage : UNKNOW_ERROR_OCCURED;
