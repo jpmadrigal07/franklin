@@ -1,11 +1,11 @@
 const express = require("express");
 const router = express.Router();
-const User = require("../models/user");
+const Staff = require("../models/staff");
 const isEmpty = require("lodash/isEmpty");
 const { UNKNOW_ERROR_OCCURED } = require("../constants");
 
-// @route   GET api/user
-// @desc    Get All User
+// @route   GET api/staff
+// @desc    Get All Staff
 // @access  Public
 router.get("/", async (req, res) => {
   const condition = req.query.condition ? JSON.parse(req.query.condition) : {};
@@ -14,39 +14,44 @@ router.get("/", async (req, res) => {
       $exists: false,
     };
   }
-  console.log("wewe", condition);
   try {
-    const getAllUser = await User.find(condition);
-    res.json(getAllUser);
+    const getAllStaff = await Staff.find(condition);
+    res.json(getAllStaff);
   } catch ({ message: errMessage }) {
     const message = errMessage ? errMessage : UNKNOW_ERROR_OCCURED;
     res.status(500).json(message);
   }
 });
 
-// @route   POST api/user/add
-// @desc    Add A User
+// @route   POST api/staff/add
+// @desc    Add A Staff
 // @access  Private
 router.post("/", async (req, res) => {
-  const { username, password, userType } = req.body;
-  if (username && password && userType) {
-    const newUser = new User({
-      username,
-      password,
-      userType,
+  const { userId, name } = req.body;
+
+  if (userId && name) {
+    const newStaff = new Staff({
+      userId,
+      name,
     });
     try {
-      const getUser = await User.find({
-        username,
+      const getStaffUserId = await Staff.find({
+        userId,
         deletedAt: {
           $exists: false,
         },
       });
-      if (getUser.length === 0) {
-        const createUser = await newUser.save();
-        res.json(createUser);
+      const getStaffName = await Staff.find({
+        name,
+        deletedAt: {
+          $exists: false,
+        },
+      });
+      if (getStaffUserId.length === 0 && getStaffName.length === 0) {
+        const createStaff = await newStaff.save();
+        res.json(createStaff);
       } else {
-        throw new Error("Username must be unique");
+        throw new Error("Staff must be unique");
       }
     } catch ({ message: errMessage }) {
       const message = errMessage ? errMessage : UNKNOW_ERROR_OCCURED;
@@ -57,14 +62,14 @@ router.post("/", async (req, res) => {
   }
 });
 
-// @route   PATCH api/user/:id
-// @desc    Update A User
+// @route   PATCH api/staff/:id
+// @desc    Update A Staff
 // @access  Private
 router.patch("/:id", async (req, res) => {
   const condition = req.body;
   if (!isEmpty(condition)) {
     try {
-      const updateUser = await User.findByIdAndUpdate(
+      const updateStaff = await Staff.findByIdAndUpdate(
         req.params.id,
         {
           $set: condition,
@@ -72,36 +77,36 @@ router.patch("/:id", async (req, res) => {
         },
         { new: true }
       );
-      res.json(updateUser);
+      res.json(updateStaff);
     } catch ({ message: errMessage }) {
       const message = errMessage ? errMessage : UNKNOW_ERROR_OCCURED;
       res.status(500).json(message);
     }
   } else {
-    res.status(500).json("User cannot be found");
+    res.status(500).json("Staff cannot be found");
   }
 });
 
-// @route   DELETE api/user/:id
-// @desc    Delete A User
+// @route   DELETE api/staff/:id
+// @desc    Delete A Staff
 // @access  Private
 router.delete("/:id", async (req, res) => {
   try {
-    const getUser = await User.find({
+    const getStaff = await Staff.find({
       _id: req.params.id,
       deletedAt: {
         $exists: false,
       },
     });
-    if (getUser.length > 0) {
-      const deleteUser = await User.findByIdAndUpdate(req.params.id, {
+    if (getStaff.length > 0) {
+      const deleteStaff = await Staff.findByIdAndUpdate(req.params.id, {
         $set: {
           deletedAt: Date.now(),
         },
       });
-      res.json(deleteUser);
+      res.json(deleteStaff);
     } else {
-      throw new Error("User is already deleted");
+      throw new Error("Staff is already deleted");
     }
   } catch ({ message: errMessage }) {
     const message = errMessage ? errMessage : UNKNOW_ERROR_OCCURED;
