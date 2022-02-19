@@ -6,6 +6,7 @@ const keys = require("./config/keys");
 const UserRoute = require("./routes/user");
 const StaffRoute = require("./routes/staff");
 const CustomerRoute = require("./routes/customer");
+const path = require("path");
 const app = express();
 
 // Connect to Mongo
