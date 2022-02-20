@@ -1,8 +1,11 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Icon } from "@iconify/react";
 import moment from "moment";
 import { NAVBAR_MENU } from "../constants";
+import { useMutation } from "react-query";
+import { verify } from "../utils/auth";
 import { useLocation, useNavigate } from "react-router-dom";
+import Cookies from "js-cookie";
 
 type T_MENU = {
   page: string;
@@ -14,6 +17,20 @@ const Navbar = () => {
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState("");
   const [time, setTime] = useState(new Date().getTime());
+
+  const sessionToken = Cookies.get("sessionToken");
+
+  const { mutate: triggerTokenVerify, isLoading: isTokenVerifyLoading } =
+    useMutation(async (tokenVerify: any) => verify(tokenVerify), {
+      onError: async () => {
+        navigate("/");
+      },
+    });
+
+  useEffect(() => {
+    triggerTokenVerify({ token: sessionToken });
+  }, [sessionToken, triggerTokenVerify]);
+
   setInterval(() => {
     setTime(new Date().getTime());
   }, 1000);
@@ -21,6 +38,13 @@ const Navbar = () => {
   useEffect(() => {
     setCurrentPage(router.pathname);
   }, [router.pathname]);
+
+  const _removeSessionToken = () => {
+    if (sessionToken) {
+      Cookies.remove("sessionToken");
+      navigate("/");
+    }
+  };
 
   return (
     <>
@@ -31,14 +55,15 @@ const Navbar = () => {
             {moment(time).format(" h:mm:ss A, D MMMM YYYY")}
           </p>
           <div className="col-span-5 text-right">
-            <span className="font-bold">Hello Staff!</span>
-            <a className="ml-10" href="#">
-              <Icon
-                icon="bi:box-arrow-in-right"
-                className="inline"
-                height={24}
-              />
-            </a>
+            <span className="font-bold">
+              {isTokenVerifyLoading ? "Loading..." : `Hello Staff!`}
+            </span>
+            <Icon
+              icon="bi:box-arrow-in-right"
+              className="inline ml-10"
+              height={24}
+              onClick={() => _removeSessionToken()}
+            />
           </div>
         </div>
       </div>
