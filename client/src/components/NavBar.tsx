@@ -60,7 +60,7 @@ const Navbar = () => {
             </span>
             <Icon
               icon="bi:box-arrow-in-right"
-              className="inline ml-10"
+              className="inline ml-10 hover:cursor-pointer"
               height={24}
               onClick={() => _removeSessionToken()}
             />
