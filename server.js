@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const cookieSession = require("cookie-session");
 const keys = require("./config/keys");
+const AuthRoute = require("./routes/auth");
 const UserRoute = require("./routes/user");
 const StaffRoute = require("./routes/staff");
 const CustomerRoute = require("./routes/customer");
@@ -33,6 +34,7 @@ app.use(
 );
 
 // REST API
+app.use("/api/auth", AuthRoute);
 app.use("/api/users", UserRoute);
 app.use("/api/staffs", StaffRoute);
 app.use("/api/customers", CustomerRoute);
