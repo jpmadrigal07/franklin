@@ -56,6 +56,34 @@ router.post("/", async (req, res) => {
   }
 });
 
+// @route   POST api/user/add
+// @desc    Add A User
+// @access  Private
+router.post("/verify-password", async (req, res) => {
+  const { password } = req.body;
+  if (password) {
+    try {
+      const getUser = await User.find({
+        password,
+        userType: "Admin",
+        deletedAt: {
+          $exists: false,
+        },
+      });
+      if (getUser.length > 0) {
+        res.json("Password was verified");
+      } else {
+        throw new Error("Wrong password");
+      }
+    } catch ({ message: errMessage }) {
+      const message = errMessage ? errMessage : UNKNOW_ERROR_OCCURED;
+      res.status(500).json(message);
+    }
+  } else {
+    res.status(500).json("Required values are either invalid or empty");
+  }
+});
+
 // @route   PATCH api/user/:id
 // @desc    Update A User
 // @access  Private

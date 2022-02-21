@@ -16,3 +16,5 @@ export const addCustomer = (body: any = null) =>
   apiCall(`${BASE}`, POST_HEADERS, "POST", body);
 export const updateCustomer = (body: any = null, id: string = "") =>
   apiCall(`${BASE}/${id}`, POST_HEADERS, "PATCH", body);
+export const deleteCustomer = (id: string = "") =>
+  apiCall(`${BASE}/${id}`, POST_HEADERS, "DELETE");

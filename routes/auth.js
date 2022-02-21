@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const jwt = require("jsonwebtoken");
 const User = require("../models/user");
+const Staff = require("../models/staff");
 const keys = require("../config/keys");
 const { UNKNOW_ERROR_OCCURED } = require("../constants");
 
@@ -22,9 +23,11 @@ router.post("/", async (req, res) => {
       keys.cookieKey,
       { expiresIn: "1d" }
     );
+    const staff = await Staff.findOne({ userId: user.id });
     res.json({
       token,
       user,
+      name: staff ? staff.name : "",
     });
   } catch ({ message: errMessage }) {
     const message = errMessage ? errMessage : UNKNOW_ERROR_OCCURED;

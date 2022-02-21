@@ -22,6 +22,7 @@ const Table = () => {
   const [cityProvince, setCityProvince] = useState("");
   const [postalZipcode, setPostalZipcode] = useState("");
   const [notes, setNotes] = useState("");
+
   const { data: customerData, isLoading: isCustomerDataLoading } = useQuery(
     "customer",
     () => getAllCustomer(`{"_id":"${paramId}"}`)
@@ -74,7 +75,7 @@ const Table = () => {
       <h1 className="font-bold text-primary text-center mt-10 mb-10">
         View Customer
       </h1>
-      <div className="mx-[400px]">
+      <div className="mx-[200px]">
         <div className="flex justify-between mt-11">
           <div>
             <p className="font-bold">
@@ -180,7 +181,7 @@ const Table = () => {
                         @mdo
                       </td>
                       <td className="text-sm text-gray-900 px-6 py-2 whitespace-nowrap">
-                        @mdo
+                        View
                       </td>
                     </tr>
                     <tr className="bg-accent border-b border-accent">
@@ -197,7 +198,7 @@ const Table = () => {
                         @mdo
                       </td>
                       <td className="text-sm text-gray-900 px-6 py-2 whitespace-nowrap">
-                        @mdo
+                        View
                       </td>
                     </tr>
                     <tr>
@@ -214,7 +215,7 @@ const Table = () => {
                         @mdo
                       </td>
                       <td className="text-sm text-gray-900 px-6 py-2 whitespace-nowrap">
-                        @mdo
+                        View
                       </td>
                     </tr>
                   </tbody>
@@ -233,7 +234,7 @@ const Table = () => {
               className="bg-primary text-white pt-1 pl-5 pb-1 pr-5 rounded-xl"
               type="button"
             >
-              Aadd DO
+              Add DO
             </button>
           </div>
         </div>

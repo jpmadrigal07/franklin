@@ -5,17 +5,29 @@ import "./index.css";
 import Router from "./routes";
 import { QueryClient, QueryClientProvider } from "react-query";
 import reportWebVitals from "./reportWebVitals";
+import { composeWithDevTools } from "redux-devtools-extension";
+import { Provider } from "react-redux";
+import { createStore, applyMiddleware } from "redux";
+import reducers from "./reducers";
+import reduxThunk from "redux-thunk";
+const store = createStore(
+  reducers,
+  {},
+  composeWithDevTools(applyMiddleware(reduxThunk))
+);
 
 const queryClient = new QueryClient();
 
 ReactDOM.render(
-  <React.StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <Router />
-      </BrowserRouter>
-    </QueryClientProvider>
-  </React.StrictMode>,
+  <Provider store={store}>
+    <React.StrictMode>
+      <QueryClientProvider client={queryClient}>
+        <BrowserRouter>
+          <Router />
+        </BrowserRouter>
+      </QueryClientProvider>
+    </React.StrictMode>
+  </Provider>,
   document.getElementById("root")
 );
 

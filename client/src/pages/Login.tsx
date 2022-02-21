@@ -1,12 +1,15 @@
 import { useState } from "react";
+import { connect } from "react-redux";
 import { useMutation } from "react-query";
 import { login } from "../utils/auth";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import { useNavigate } from "react-router-dom";
+import { setAuthenticatedUser } from "../actions/authenticatedUserActions";
 import Cookies from "js-cookie";
 
-const Login = () => {
+const Login = (props: any) => {
+  const { setAuthenticatedUser } = props;
   const MySwal = withReactContent(Swal);
   const navigate = useNavigate();
   const [username, setUsername] = useState("");
@@ -16,6 +19,12 @@ const Login = () => {
     {
       onSuccess: async (data) => {
         Cookies.set("sessionToken", data.token);
+        const { _id, userType } = data.user;
+        setAuthenticatedUser({
+          id: _id,
+          type: userType,
+          name: data.name,
+        });
         navigate("/dashboard");
       },
       onError: async (err: any) => {
@@ -85,4 +94,6 @@ const Login = () => {
   );
 };
 
-export default Login;
+const mapStateToProps = () => ({});
+
+export default connect(mapStateToProps, { setAuthenticatedUser })(Login);
