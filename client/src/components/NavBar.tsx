@@ -1,26 +1,56 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
+import { connect } from "react-redux";
 import { Icon } from "@iconify/react";
 import moment from "moment";
 import { NAVBAR_MENU } from "../constants";
+import { useMutation } from "react-query";
+import { verify } from "../utils/auth";
 import { useLocation, useNavigate } from "react-router-dom";
+import { setAuthenticatedUser } from "../actions/authenticatedUserActions";
+import Cookies from "js-cookie";
 
 type T_MENU = {
   page: string;
   path: string;
 };
 
-const Navbar = () => {
+const NavBar = (props: any) => {
+  const { setAuthenticatedUser, name } = props;
   const router = useLocation();
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState("");
   const [time, setTime] = useState(new Date().getTime());
-  setInterval(() => {
-    setTime(new Date().getTime());
-  }, 1000);
+
+  const sessionToken = Cookies.get("sessionToken");
+
+  const loggedInName = name ? name : "Staff";
+
+  const { mutate: triggerTokenVerify, isLoading: isTokenVerifyLoading } =
+    useMutation(async (tokenVerify: any) => verify(tokenVerify), {
+      onError: async () => {
+        navigate("/");
+      },
+    });
+
+  useEffect(() => {
+    triggerTokenVerify({ token: sessionToken });
+  }, [sessionToken, triggerTokenVerify]);
+
+  // setInterval(() => {
+  //   setTime(new Date().getTime());
+  // }, 1000);
 
   useEffect(() => {
     setCurrentPage(router.pathname);
   }, [router.pathname]);
+
+  const _removeSessionToken = () => {
+    if (sessionToken) {
+      Cookies.remove("sessionToken");
+      setAuthenticatedUser({});
+      navigate("/");
+    }
+  };
 
   return (
     <>
@@ -31,14 +61,15 @@ const Navbar = () => {
             {moment(time).format(" h:mm:ss A, D MMMM YYYY")}
           </p>
           <div className="col-span-5 text-right">
-            <span className="font-bold">Hello Staff!</span>
-            <a className="ml-10" href="#">
-              <Icon
-                icon="bi:box-arrow-in-right"
-                className="inline"
-                height={24}
-              />
-            </a>
+            <span className="font-bold">
+              {isTokenVerifyLoading ? "Loading..." : `Hello ${loggedInName}!`}
+            </span>
+            <Icon
+              icon="bi:box-arrow-in-right"
+              className="inline ml-10 hover:cursor-pointer"
+              height={24}
+              onClick={() => _removeSessionToken()}
+            />
           </div>
         </div>
       </div>
@@ -47,6 +78,7 @@ const Navbar = () => {
           {NAVBAR_MENU.map((res: T_MENU, index: number) => {
             return (
               <span
+                key={index}
                 onClick={() => navigate(res.path)}
                 className={`hover:cursor-pointer ${
                   currentPage.includes(res.path) ? "border-2 border-white" : ""
@@ -62,4 +94,8 @@ const Navbar = () => {
   );
 };
 
-export default Navbar;
+const mapStateToProps = (global: any) => ({
+  name: global.authenticatedUser.user.name,
+});
+
+export default connect(mapStateToProps, { setAuthenticatedUser })(NavBar);
