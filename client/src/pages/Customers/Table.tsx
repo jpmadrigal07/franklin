@@ -11,7 +11,7 @@ import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 
 const Table = (props: any) => {
-  const { userType: loggedInUserType } = props;
+  const { loggedInUserType } = props;
   const navigate = useNavigate();
   const MySwal = withReactContent(Swal);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -345,7 +345,7 @@ const Table = (props: any) => {
 };
 
 const mapStateToProps = (global: any) => ({
-  userType: global.authenticatedUser.user.userType,
+  loggedInUserType: global.authenticatedUser.user.type,
 });
 
 export default connect(mapStateToProps)(Table);
