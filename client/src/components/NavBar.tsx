@@ -23,7 +23,7 @@ const NavBar = (props: any) => {
 
   const sessionToken = Cookies.get("sessionToken");
 
-  const loggedInName = name ? name : "Staff";
+  const loggedInName = name ? name : "Admin";
 
   const { mutate: triggerTokenVerify, isLoading: isTokenVerifyLoading } =
     useMutation(async (tokenVerify: any) => verify(tokenVerify), {
