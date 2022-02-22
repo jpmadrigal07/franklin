@@ -27,6 +27,14 @@ const NavBar = (props: any) => {
 
   const { mutate: triggerTokenVerify, isLoading: isTokenVerifyLoading } =
     useMutation(async (tokenVerify: any) => verify(tokenVerify), {
+      onSuccess: async (data) => {
+        const { _id, userType } = data.user;
+        setAuthenticatedUser({
+          id: _id,
+          type: userType,
+          name: data.name,
+        });
+      },
       onError: async () => {
         navigate("/");
       },

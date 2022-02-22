@@ -55,8 +55,12 @@ router.post("/verify", async (req, res) => {
     if (Math.sign(elapsedSeconds) === -1) {
       throw new Error("Token is expired");
     }
+    const staff = await Staff.findOne({ userId: user.id });
     // Return isVerified true if all 3 condition passed
-    res.json("User authentication is verified");
+    res.json({
+      user,
+      name: staff ? staff.name : "",
+    });
   } catch ({ message: errMessage }) {
     const message = errMessage ? errMessage : UNKNOW_ERROR_OCCURED;
     if (message === "jwt malformed") {

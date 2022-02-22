@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.1
+
+- Added global state set for authenticated user on Navbar
+
 ## 1.0.0
 
 - Added Redux packages
