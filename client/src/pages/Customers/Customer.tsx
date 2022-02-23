@@ -75,7 +75,7 @@ const Table = () => {
       <h1 className="font-bold text-primary text-center mt-10 mb-10">
         View Customer
       </h1>
-      <div className="mx-[200px]">
+      <div>
         <div className="flex justify-between mt-11">
           <div>
             <p className="font-bold">

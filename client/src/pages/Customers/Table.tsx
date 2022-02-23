@@ -9,6 +9,12 @@ import { useNavigate } from "react-router-dom";
 import moment from "moment";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
+import DataTable from "../../components/Table";
+
+type T_Header = {
+  header: string;
+  dataName: string;
+};
 
 const Table = (props: any) => {
   const { loggedInUserType } = props;
@@ -86,15 +92,110 @@ const Table = (props: any) => {
     }
   }, [searchPhrase, customerData]);
 
-  useEffect(() => {
-    if (customerData && customerData.length > 0) {
-      setCustomers(customerData);
-    }
-  }, [customerData]);
-
   const _openAdminPassword = () => {
     setIsDeleteModalOpen(false);
     setIsAdminPasswordModal(true);
+  };
+
+  useEffect(() => {
+    if (customerData && customerData.length > 0) {
+      setCustomers(_remappedData(customerData));
+    }
+  }, [customerData]);
+
+  const tableHeader = [
+    { header: "", dataName: "frontActions" },
+    { header: "Name", dataName: "name" },
+    { header: "Mobile No.", dataName: "contactNumber" },
+    { header: "Email", dataName: "email" },
+    { header: "Landline", dataName: "landline" },
+    { header: "Address", dataName: "street" },
+    { header: "Birthdate", dataName: "birthDate" },
+    { header: "Action", dataName: "endActions" },
+  ];
+
+  const tableFrontActions = ["New DIY", "New DO"];
+
+  const tableEndActions = ["View", "Edit", "Delete"];
+
+  const deleteItem = (id: string, name: string) => {
+    setIsDeleteModalOpen(true);
+    setSelectedCustomerId(id);
+    setSelectedCustomerName(name);
+  };
+
+  const _remappedData = (data: any) => {
+    const newData = data.map((res: any) => {
+      const mainData = tableHeader.map((res2: any) => {
+        let value;
+        if (res2.dataName === "name") {
+          value = `${res.firstName} ${res.lastName}`;
+        } else if (res2.dataName === "birthDate") {
+          value = moment(`${res.bdMonth}/${res.bdDay}/${res.bdYear}`).format(
+            "MMM D, YYYY"
+          );
+        } else if (res2.dataName === "frontActions") {
+          value = tableFrontActions.map((res3: any) => {
+            if (res3 === "New DIY") {
+              return _constructTableActions(res3, null, false);
+            } else if (res3 === "New DO") {
+              return _constructTableActions(res3, null, true);
+            }
+          });
+        } else if (res2.dataName === "endActions") {
+          value = tableEndActions.map((res3: any) => {
+            if (res3 === "View") {
+              return _constructTableActions(
+                res3,
+                () => navigate(`/customers/${res._id}`),
+                false
+              );
+            } else if (res3 === "Edit") {
+              return _constructTableActions(
+                res3,
+                () => navigate(`/customers/edit/${res._id}`),
+                false
+              );
+            } else if (res3 === "Delete") {
+              return _constructTableActions(
+                res3,
+                () => deleteItem(res._id, `${res.firstName} ${res.lastName}`),
+                true
+              );
+            }
+          });
+        } else {
+          value = res[res2.dataName] ? res[res2.dataName] : "";
+        }
+        return value;
+      });
+      const obj: any = {};
+      tableHeader.forEach((element: T_Header, index: number) => {
+        obj[element.dataName] = mainData[index];
+      });
+
+      return obj;
+    });
+
+    return newData;
+  };
+
+  const _constructTableActions = (
+    actions: any,
+    callback: any,
+    isLast: boolean
+  ) => {
+    return (
+      <>
+        <span
+          onClick={() => callback()}
+          className="hover:cursor-pointer text-primary hover:underline font-bold"
+        >
+          {actions}
+        </span>
+        {!isLast ? " | " : null}
+      </>
+    );
   };
 
   return (
@@ -126,159 +227,11 @@ const Table = (props: any) => {
           <Icon icon="bi:search" className="inline" height={24} />
         </div>
       </div>
-      <div className="flex flex-col">
-        <div className="overflow-x-auto sm:-mx-6 lg:-mx-8">
-          <div className="py-2 inline-block min-w-full sm:px-6 lg:px-8">
-            <div className="overflow-hidden">
-              <table className="min-w-full">
-                <thead className="border-b-2">
-                  <tr>
-                    <th
-                      scope="col"
-                      className="text-sm font-bold text-gray-900 px-6 py-2 text-left"
-                    ></th>
-                    <th
-                      scope="col"
-                      className="text-sm font-bold text-gray-900 px-6 py-2 text-left"
-                    >
-                      Name
-                    </th>
-                    <th
-                      scope="col"
-                      className="text-sm font-bold text-gray-900 px-6 py-2 text-left"
-                    >
-                      Mobile No.
-                    </th>
-                    <th
-                      scope="col"
-                      className="text-sm font-bold text-gray-900 px-6 py-2 text-left"
-                    >
-                      Email
-                    </th>
-                    <th
-                      scope="col"
-                      className="text-sm font-bold text-gray-900 px-6 py-2 text-left"
-                    >
-                      Landline
-                    </th>
-                    <th
-                      scope="col"
-                      className="text-sm font-bold text-gray-900 px-6 py-2 text-left"
-                    >
-                      Address
-                    </th>
-                    <th
-                      scope="col"
-                      className="text-sm font-bold text-gray-900 px-6 py-2 text-left"
-                    >
-                      Birthdate
-                    </th>
-                    <th
-                      scope="col"
-                      className="text-sm font-bold text-gray-900 px-6 py-2 text-left"
-                    >
-                      Action
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {isCustomerDataLoading ? (
-                    <p className="mt-3">Loading...</p>
-                  ) : customerData &&
-                    customerData.length > 0 &&
-                    customers.length > 0 ? (
-                    customers.map((res: any, index: number) => {
-                      const dateString = res.bdMonth
-                        ? moment(
-                            `${res.bdMonth}/${res.bdDay}/${res.bdYear}`
-                          ).format("MMM D, YYYY")
-                        : "--- --- ---";
-                      return (
-                        <>
-                          <tr
-                            className={`border-b ${
-                              index !== customers.length - 1
-                                ? "border-accent"
-                                : "border-light"
-                            } ${index % 2 !== 0 ? "bg-accent" : ""}`}
-                          >
-                            <td className="text-sm text-gray-900 px-6 py-2 whitespace-nowrap">
-                              <span className="hover:cursor-pointer text-primary hover:underline font-bold">
-                                New DIY
-                              </span>
-                              {" | "}
-                              <span className="hover:cursor-pointer text-primary hover:underline font-bold">
-                                New DO
-                              </span>
-                            </td>
-                            <td className="text-sm text-gray-900 px-6 py-2 whitespace-nowrap">
-                              {res.firstName} {res.lastName}
-                            </td>
-                            <td className="text-sm text-gray-900 px-6 py-2 whitespace-nowrap">
-                              {res.contactNumber}
-                            </td>
-                            <td className="text-sm text-gray-900 px-6 py-2 whitespace-nowrap">
-                              {res.email}
-                            </td>
-                            <td className="text-sm text-gray-900 px-6 py-2 whitespace-nowrap">
-                              {res.landline}
-                            </td>
-                            <td className="text-sm text-gray-900 px-6 py-2 whitespace-nowrap">
-                              {res.street}
-                            </td>
-                            <td className="text-sm text-gray-900 px-6 py-2 whitespace-nowrap">
-                              {dateString}
-                            </td>
-                            <td className="text-sm text-gray-900 px-6 py-2 whitespace-nowrap">
-                              <span
-                                onClick={() =>
-                                  navigate(`/customers/${res._id}`)
-                                }
-                                className="hover:cursor-pointer text-primary hover:underline font-bold"
-                              >
-                                View
-                              </span>
-                              {" | "}
-                              <span
-                                onClick={() =>
-                                  navigate(`/customers/edit/${res._id}`)
-                                }
-                                className="hover:cursor-pointer text-primary hover:underline font-bold"
-                              >
-                                Edit
-                              </span>
-
-                              {loggedInUserType === "Admin" ? (
-                                <>
-                                  {" | "}
-                                  <span
-                                    onClick={() => {
-                                      setIsDeleteModalOpen(true);
-                                      setSelectedCustomerId(res._id);
-                                      setSelectedCustomerName(
-                                        `${res.firstName} ${res.lastName}`
-                                      );
-                                    }}
-                                    className="hover:cursor-pointer text-primary hover:underline font-bold"
-                                  >
-                                    Delete
-                                  </span>
-                                </>
-                              ) : null}
-                            </td>
-                          </tr>
-                        </>
-                      );
-                    })
-                  ) : (
-                    <p className="mt-3">No data found</p>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div>
+      <DataTable
+        header={tableHeader}
+        isLoading={isCustomerDataLoading}
+        data={customers}
+      />
       <Modal
         state={isDeleteModalOpen}
         toggle={() => setIsDeleteModalOpen(!isDeleteModalOpen)}

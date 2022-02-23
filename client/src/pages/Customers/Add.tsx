@@ -4,6 +4,7 @@ import { addCustomer } from "../../utils/customer";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import { useNavigate } from "react-router-dom";
+import Asterisk from "../../components/Asterisk";
 
 const Add = () => {
   const MySwal = withReactContent(Swal);
@@ -77,6 +78,7 @@ const Add = () => {
           <div className="basis-1/2 mr-2">
             <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">
               Last Name
+              <Asterisk />
             </label>
             <input
               className="pt-1 pb-1 pl-2 rounded-sm mr-2 w-full border-2 border-accent"
@@ -89,6 +91,7 @@ const Add = () => {
           <div className="basis-1/2 mx-1">
             <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">
               Given Name
+              <Asterisk />
             </label>
             <input
               className="pt-1 pb-1 pl-2 rounded-sm mr-2 w-full border-2 border-accent"
@@ -101,6 +104,10 @@ const Add = () => {
           <div className="basis-1/4 ml-2">
             <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">
               Birthdate
+              <Asterisk />{" "}
+              <span className="italic text-dark text-[10px]">
+                (Year is optional)
+              </span>
             </label>
             <div className="flex flex-row">
               <div className="basis-1/4 mr-2">
@@ -140,6 +147,7 @@ const Add = () => {
           <div className="basis-1/3 mr-2">
             <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">
               Mobile No.
+              <Asterisk />
             </label>
             <input
               className="pt-1 pb-1 pl-2 rounded-sm mr-2 w-full border-2 border-accent"

@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.2
+
+- Made a reusable Table
+- Made Customer table reusable
+- Required Last Name, First Name, Birth Day, Birth month and Mobile number on Customer Edit and Add
+- Change pages margin from 250px to 25px
+
 ## 1.0.1
 
 - Added global state set for authenticated user on Navbar
