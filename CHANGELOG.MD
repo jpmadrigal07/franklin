@@ -1,5 +1,15 @@
 # Changelog
 
+## 2.0.0
+
+- Made Inventory table reusable
+- Added asterisk on required fields on Add and Edit Inventory Table
+- Added Add Stock on Inventory Table
+- Added Delete on Inventory Table
+- Added Delete confirm password of Admin function on Inventory Table
+- Created constrcutTableActions function file for reusability
+- Exclude Edit and Delete function for Staffs on Inventory Table
+
 ## 1.0.2
 
 - Made a reusable Table

@@ -48,7 +48,10 @@ export default function Router() {
         { path: "inventory", element: <Inventory /> },
         {
           path: "inventory",
-          children: [{ path: "add", element: <AddInventory /> }],
+          children: [
+            { path: "add", element: <AddInventory /> },
+            { path: "edit/:id", element: <EditInventory /> },
+          ],
         },
         { path: "staff", element: <Staff /> },
         { path: "reports", element: <Reports /> },
@@ -72,5 +75,6 @@ const ViewCustomer = Loadable(
 const Orders = Loadable(lazy(() => import("../pages/Orders")));
 const Inventory = Loadable(lazy(() => import("../pages/Inventory/Table")));
 const AddInventory = Loadable(lazy(() => import("../pages/Inventory/Add")));
+const EditInventory = Loadable(lazy(() => import("../pages/Inventory/Edit")));
 const Staff = Loadable(lazy(() => import("../pages/Staff")));
 const Reports = Loadable(lazy(() => import("../pages/Reports")));

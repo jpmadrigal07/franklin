@@ -89,7 +89,7 @@ const Edit = () => {
       },
     });
 
-  const _addCustomer = () => {
+  const _updateCustomer = () => {
     const customer = {
       lastName,
       firstName,
@@ -357,7 +357,7 @@ const Edit = () => {
           <button
             className="bg-primary text-white pt-1 pl-5 pb-1 pr-5 rounded-xl mr-4"
             type="button"
-            onClick={() => _addCustomer()}
+            onClick={() => _updateCustomer()}
             disabled={
               isUpdateCustomerLoading || isCustomerDataLoading || !customerData
             }

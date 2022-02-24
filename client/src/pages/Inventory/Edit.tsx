@@ -1,22 +1,33 @@
-import { useState } from "react";
-import { useMutation } from "react-query";
-import { addInventory } from "../../utils/inventory";
+import { useState, useEffect } from "react";
+import { useMutation, useQuery } from "react-query";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import { updateInventory, getAllInventory } from "../../utils/inventory";
 import Asterisk from "../../components/Asterisk";
 
-const Add = () => {
+const Update = (props: any) => {
+  const { loggedInUserType } = props;
   const MySwal = withReactContent(Swal);
   const navigate = useNavigate();
+  const { id: paramId } = useParams();
   const [type, setType] = useState("");
   const [stockCode, setStockCode] = useState("");
   const [name, setName] = useState("");
   const [stock, setStock] = useState(0);
   const [unitCost, setUnitCost] = useState(0);
 
-  const { mutate: triggerAddInventory, isLoading: isAddInventoryLoading } =
-    useMutation(async (inventory: any) => addInventory(inventory), {
+  const { data: inventoryData, isLoading: isInventoryDataLoading } = useQuery(
+    "invetory",
+    () => getAllInventory(`{"_id":"${paramId}"}`)
+  );
+
+  const {
+    mutate: triggerUpdateInventory,
+    isLoading: isUpdateInventoryLoading,
+  } = useMutation(
+    async (inventory: any) => updateInventory(inventory, paramId),
+    {
       onSuccess: async () => {
         MySwal.fire({
           title: "Stock created!",
@@ -38,22 +49,48 @@ const Add = () => {
           confirmButtonColor: "#274c77",
         });
       },
-    });
+    }
+  );
 
-  const _addInventory = () => {
-    triggerAddInventory({
-      type,
-      stockCode,
-      name,
-      stock,
-      unitCost,
-    });
+  useEffect(() => {
+    if (inventoryData && inventoryData.length > 0) {
+      const { type, stockCode, name, stock, unitCost } = inventoryData[0];
+      setType(type);
+      setStockCode(stockCode);
+      setName(name);
+      setStock(stock);
+      setUnitCost(unitCost);
+    }
+  }, [inventoryData]);
+
+  const _updateInventory = () => {
+    if (loggedInUserType === "Admin") {
+      const inventory = {
+        type,
+        stockCode,
+        name,
+        stock,
+        unitCost,
+      };
+      const filteredInventory = Object.fromEntries(
+        Object.entries(inventory).filter(([_, v]) => v != null)
+      );
+      triggerUpdateInventory(filteredInventory);
+    } else {
+      MySwal.fire({
+        title: "Ooops!",
+        text: "Only the Admin can make an action for this",
+        icon: "warning",
+        confirmButtonText: "Okay",
+        confirmButtonColor: "#274c77",
+      });
+    }
   };
 
   return (
     <>
       <h1 className="font-bold text-primary text-center mt-10 mb-10">
-        Add Customer
+        Update Inventory
       </h1>
       <form className="w-full">
         <div className="flex flex-row">
@@ -67,7 +104,12 @@ const Add = () => {
               id="grid-first-name"
               type="text"
               onChange={(e: any) => setType(e.target.value)}
-              disabled={isAddInventoryLoading}
+              value={type}
+              disabled={
+                isUpdateInventoryLoading ||
+                isInventoryDataLoading ||
+                !inventoryData
+              }
             />
           </div>
           <div className="basis-1/2 ml-2">
@@ -79,8 +121,13 @@ const Add = () => {
               className="pt-1 pb-1 pl-2 rounded-sm mr-2 w-full border-2 border-accent"
               id="grid-first-name"
               type="text"
+              value={stockCode}
               onChange={(e: any) => setStockCode(e.target.value)}
-              disabled={isAddInventoryLoading}
+              disabled={
+                isUpdateInventoryLoading ||
+                isInventoryDataLoading ||
+                !inventoryData
+              }
             />
           </div>
         </div>
@@ -93,8 +140,13 @@ const Add = () => {
             className="pt-1 pb-1 pl-2 rounded-sm mr-2 w-full border-2 border-accent"
             id="grid-first-name"
             type="text"
+            value={name}
             onChange={(e: any) => setName(e.target.value)}
-            disabled={isAddInventoryLoading}
+            disabled={
+              isUpdateInventoryLoading ||
+              isInventoryDataLoading ||
+              !inventoryData
+            }
           />
         </div>
         <div className="flex flex-row mt-5">
@@ -108,8 +160,9 @@ const Add = () => {
               id="grid-first-name"
               type="number"
               autoComplete="off"
+              value={stock}
               onChange={(e: any) => setStock(e.target.value)}
-              disabled={isAddInventoryLoading}
+              disabled={true}
             />
           </div>
           <div className="basis-1/2 ml-2">
@@ -122,8 +175,13 @@ const Add = () => {
               id="grid-first-name"
               type="number"
               autoComplete="off"
+              value={unitCost}
               onChange={(e: any) => setUnitCost(e.target.value)}
-              disabled={isAddInventoryLoading}
+              disabled={
+                isUpdateInventoryLoading ||
+                isInventoryDataLoading ||
+                !inventoryData
+              }
             />
           </div>
         </div>
@@ -131,15 +189,19 @@ const Add = () => {
           <button
             className="bg-primary text-white pt-1 pl-5 pb-1 pr-5 rounded-xl mr-4"
             type="button"
-            onClick={() => _addInventory()}
-            disabled={isAddInventoryLoading}
+            onClick={() => _updateInventory()}
+            disabled={
+              isUpdateInventoryLoading ||
+              isInventoryDataLoading ||
+              !inventoryData
+            }
           >
             Save
           </button>
           <button
             className="pt-1 pl-5 pb-1 pr-5 rounded-xl bg-white border-2 border-primary text-primary"
             type="button"
-            disabled={isAddInventoryLoading}
+            disabled={isUpdateInventoryLoading}
             onClick={() => navigate("/inventory")}
           >
             Cancel
@@ -150,4 +212,4 @@ const Add = () => {
   );
 };
 
-export default Add;
+export default Update;

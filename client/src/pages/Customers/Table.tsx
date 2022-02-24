@@ -10,6 +10,7 @@ import moment from "moment";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import DataTable from "../../components/Table";
+import _constructTableActions from "../../utils/constructTableActions";
 
 type T_Header = {
   header: string;
@@ -78,7 +79,7 @@ const Table = (props: any) => {
   useEffect(() => {
     if (searchPhrase === "") {
       if (customerData && customerData.length > 0) {
-        setCustomers(customerData);
+        setCustomers(_remappedData(customerData));
       }
     } else {
       if (customerData && customerData.length > 0) {
@@ -87,7 +88,7 @@ const Table = (props: any) => {
             res.firstName.toLowerCase().includes(searchPhrase.toLowerCase()) ||
             res.lastName.toLowerCase().includes(searchPhrase.toLowerCase())
         );
-        setCustomers(filteredCustomerData);
+        setCustomers(_remappedData(filteredCustomerData));
       }
     }
   }, [searchPhrase, customerData]);
@@ -118,7 +119,7 @@ const Table = (props: any) => {
 
   const tableEndActions = ["View", "Edit", "Delete"];
 
-  const deleteItem = (id: string, name: string) => {
+  const _deleteItem = (id: string, name: string) => {
     setIsDeleteModalOpen(true);
     setSelectedCustomerId(id);
     setSelectedCustomerName(name);
@@ -129,7 +130,7 @@ const Table = (props: any) => {
       const mainData = tableHeader.map((res2: any) => {
         let value;
         if (res2.dataName === "name") {
-          value = `${res.firstName} ${res.lastName}`;
+          value = `${res.firstName} ${res.lastName}${res.notes ? "*" : ""}`;
         } else if (res2.dataName === "birthDate") {
           value = moment(`${res.bdMonth}/${res.bdDay}/${res.bdYear}`).format(
             "MMM D, YYYY"
@@ -154,12 +155,12 @@ const Table = (props: any) => {
               return _constructTableActions(
                 res3,
                 () => navigate(`/customers/edit/${res._id}`),
-                false
+                loggedInUserType === "Staff"
               );
-            } else if (res3 === "Delete") {
+            } else if (res3 === "Delete" && loggedInUserType === "Admin") {
               return _constructTableActions(
                 res3,
-                () => deleteItem(res._id, `${res.firstName} ${res.lastName}`),
+                () => _deleteItem(res._id, `${res.firstName} ${res.lastName}`),
                 true
               );
             }
@@ -178,24 +179,6 @@ const Table = (props: any) => {
     });
 
     return newData;
-  };
-
-  const _constructTableActions = (
-    actions: any,
-    callback: any,
-    isLast: boolean
-  ) => {
-    return (
-      <>
-        <span
-          onClick={() => callback()}
-          className="hover:cursor-pointer text-primary hover:underline font-bold"
-        >
-          {actions}
-        </span>
-        {!isLast ? " | " : null}
-      </>
-    );
   };
 
   return (
