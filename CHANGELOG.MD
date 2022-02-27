@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.0.1
+
+- Added input label error for Customers
+- Added input label error for Inventory
+- Added ajv validation
+- Added ajv errors
+- Added ajv formats
+
 ## 2.0.0
 
 - Made Inventory table reusable

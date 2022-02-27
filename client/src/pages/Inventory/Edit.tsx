@@ -1,10 +1,15 @@
 import { useState, useEffect } from "react";
+import { connect } from "react-redux";
 import { useMutation, useQuery } from "react-query";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import { useNavigate, useParams } from "react-router-dom";
 import { updateInventory, getAllInventory } from "../../utils/inventory";
 import Asterisk from "../../components/Asterisk";
+import validate from "../../validation/inventory";
+import getErrorsFromValidation from "../../utils/getErrorsFromValidation";
+import findInputError from "../../utils/findInputError";
+import clean from "../../utils/cleanObject";
 
 const Update = (props: any) => {
   const { loggedInUserType } = props;
@@ -16,6 +21,8 @@ const Update = (props: any) => {
   const [name, setName] = useState("");
   const [stock, setStock] = useState(0);
   const [unitCost, setUnitCost] = useState(0);
+
+  const [formErrors, setFormErrors] = useState<any[]>([]);
 
   const { data: inventoryData, isLoading: isInventoryDataLoading } = useQuery(
     "invetory",
@@ -65,17 +72,20 @@ const Update = (props: any) => {
 
   const _updateInventory = () => {
     if (loggedInUserType === "Admin") {
-      const inventory = {
+      const values = {
         type,
         stockCode,
         name,
         stock,
         unitCost,
       };
-      const filteredInventory = Object.fromEntries(
-        Object.entries(inventory).filter(([_, v]) => v != null)
-      );
-      triggerUpdateInventory(filteredInventory);
+      const filteredValues = clean(values);
+      const validatedData: any = validate(filteredValues);
+      if (!validatedData) {
+        triggerUpdateInventory(filteredValues);
+      } else {
+        setFormErrors(getErrorsFromValidation(validatedData));
+      }
     } else {
       MySwal.fire({
         title: "Ooops!",
@@ -111,6 +121,13 @@ const Update = (props: any) => {
                 !inventoryData
               }
             />
+            {findInputError(formErrors, "type") ? (
+              <p className="text-[12px] text-red">
+                {findInputError(formErrors, "type")}
+              </p>
+            ) : (
+              ""
+            )}
           </div>
           <div className="basis-1/2 ml-2">
             <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">
@@ -129,6 +146,13 @@ const Update = (props: any) => {
                 !inventoryData
               }
             />
+            {findInputError(formErrors, "stockCode") ? (
+              <p className="text-[12px] text-red">
+                {findInputError(formErrors, "stockCode")}
+              </p>
+            ) : (
+              ""
+            )}
           </div>
         </div>
         <div className="mt-5">
@@ -148,6 +172,13 @@ const Update = (props: any) => {
               !inventoryData
             }
           />
+          {findInputError(formErrors, "name") ? (
+            <p className="text-[12px] text-red">
+              {findInputError(formErrors, "name")}
+            </p>
+          ) : (
+            ""
+          )}
         </div>
         <div className="flex flex-row mt-5">
           <div className="basis-1/2 mr-2">
@@ -164,6 +195,13 @@ const Update = (props: any) => {
               onChange={(e: any) => setStock(e.target.value)}
               disabled={true}
             />
+            {findInputError(formErrors, "stock") ? (
+              <p className="text-[12px] text-red">
+                {findInputError(formErrors, "stock")}
+              </p>
+            ) : (
+              ""
+            )}
           </div>
           <div className="basis-1/2 ml-2">
             <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">
@@ -183,6 +221,13 @@ const Update = (props: any) => {
                 !inventoryData
               }
             />
+            {findInputError(formErrors, "unitCost") ? (
+              <p className="text-[12px] text-red">
+                {findInputError(formErrors, "unitCost")}
+              </p>
+            ) : (
+              ""
+            )}
           </div>
         </div>
         <div className="flex justify-end mt-5">
@@ -212,4 +257,8 @@ const Update = (props: any) => {
   );
 };
 
-export default Update;
+const mapStateToProps = (global: any) => ({
+  loggedInUserType: global.authenticatedUser.user.type,
+});
+
+export default connect(mapStateToProps)(Update);
