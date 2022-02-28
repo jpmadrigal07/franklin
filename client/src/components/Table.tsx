@@ -1,6 +1,11 @@
-// import isArray from 'lodash/isArray';
-
-const Table = ({ header = [], isLoading = false, data = [] }: any) => {
+const Table = ({
+  header = [],
+  isLoading = false,
+  data = [],
+  customTextColor = "",
+  columnWithCustomText = "",
+  hideColumn = "",
+}: any) => {
   const _renderData = () => {
     if (!isLoading) {
       if (data && data.length > 0) {
@@ -12,13 +17,22 @@ const Table = ({ header = [], isLoading = false, data = [] }: any) => {
                   index !== data.length - 1 ? "border-accent" : "border-light"
                 } ${index % 2 !== 0 ? "bg-accent" : ""}`}
               >
-                {header.map((res2: any) => {
-                  return (
-                    <td className="text-sm text-gray-900 px-6 py-2 whitespace-nowrap">
-                      {res[res2.dataName]}
-                    </td>
-                  );
-                })}
+                {header
+                  .filter((res3: any) => res3.dataName !== hideColumn)
+                  .map((res2: any) => {
+                    const textColor = `text-${customTextColor}`;
+                    return (
+                      <td
+                        className={`text-sm text-gray-900 px-6 py-2 whitespace-nowrap ${
+                          res2.dataName === columnWithCustomText
+                            ? textColor
+                            : ""
+                        }`}
+                      >
+                        {res[res2.dataName]}
+                      </td>
+                    );
+                  })}
               </tr>
             </>
           );
@@ -39,14 +53,35 @@ const Table = ({ header = [], isLoading = false, data = [] }: any) => {
               <table className="min-w-full">
                 <thead className="border-b-2">
                   <tr>
-                    {header.map((res: any) => (
-                      <th
-                        scope="col"
-                        className="text-sm font-bold text-gray-900 px-6 py-2 text-left"
-                      >
-                        {res.header}
-                      </th>
-                    ))}
+                    {header.map((res: any) => {
+                      if (
+                        res.dataName === "endActions" &&
+                        data[0] &&
+                        data[0].endActions &&
+                        res.dataName !== hideColumn
+                      ) {
+                        return (
+                          <th
+                            scope="col"
+                            className="text-sm font-bold text-gray-900 px-6 py-2 text-left"
+                          >
+                            {res.header}
+                          </th>
+                        );
+                      } else if (
+                        res.dataName !== "endActions" &&
+                        res.dataName !== hideColumn
+                      ) {
+                        return (
+                          <th
+                            scope="col"
+                            className="text-sm font-bold text-gray-900 px-6 py-2 text-left"
+                          >
+                            {res.header}
+                          </th>
+                        );
+                      }
+                    })}
                   </tr>
                 </thead>
                 <tbody>{_renderData()}</tbody>

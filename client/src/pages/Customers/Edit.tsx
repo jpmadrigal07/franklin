@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useMutation, useQuery } from "react-query";
+import { useMutation, useQuery, useQueryClient } from "react-query";
 import { updateCustomer, getAllCustomer } from "../../utils/customer";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
@@ -13,6 +13,7 @@ import clean from "../../utils/cleanObject";
 const Edit = () => {
   const MySwal = withReactContent(Swal);
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { id: paramId } = useParams();
   const [lastName, setLastName] = useState("");
   const [firstName, setFirstName] = useState("");
@@ -32,7 +33,7 @@ const Edit = () => {
   const [formErrors, setFormErrors] = useState<any[]>([]);
 
   const { data: customerData, isLoading: isCustomerDataLoading } = useQuery(
-    "customer",
+    "editCustomer",
     () => getAllCustomer(`{"_id":"${paramId}"}`)
   );
 
@@ -118,6 +119,11 @@ const Edit = () => {
     } else {
       setFormErrors(getErrorsFromValidation(validatedData));
     }
+  };
+
+  const _cancel = () => {
+    queryClient.removeQueries("editCustomer", { exact: true });
+    navigate("/customers");
   };
 
   return (
@@ -294,7 +300,11 @@ const Edit = () => {
               Email
             </label>
             <input
-              className="pt-1 pb-1 pl-2 rounded-sm mr-2 w-full border-2 border-accent"
+              className={`pt-1 pb-1 pl-2 rounded-sm mr-2 w-full border-2 ${
+                findInputError(formErrors, "email")
+                  ? "border-red"
+                  : "border-accent"
+              }`}
               id="grid-first-name"
               type="email"
               onChange={(e: any) => setEmail(e.target.value)}
@@ -305,6 +315,13 @@ const Edit = () => {
               }
               value={email}
             />
+            {findInputError(formErrors, "email") ? (
+              <p className="text-[12px] text-red">
+                {findInputError(formErrors, "email")}
+              </p>
+            ) : (
+              ""
+            )}
           </div>
           <div className="basis-1/3 ml-2">
             <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">
@@ -429,7 +446,7 @@ const Edit = () => {
             type="button"
             disabled={isUpdateCustomerLoading}
             value={lastName}
-            onClick={() => navigate("/customers")}
+            onClick={() => _cancel()}
           >
             Cancel
           </button>

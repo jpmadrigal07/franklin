@@ -1,5 +1,16 @@
 # Changelog
 
+## 3.0.0
+
+- Added Services page
+- Added dry endpoint
+- Added wash endpoint
+- Added laundry endpoint
+- Added add on endpoint
+- Added dry endpoint
+- Fix add edit on customer page
+- Fix add edit on inventory page
+
 ## 2.0.1
 
 - Added input label error for Customers

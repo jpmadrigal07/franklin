@@ -132,9 +132,9 @@ const Table = (props: any) => {
         if (res2.dataName === "name") {
           value = `${res.firstName} ${res.lastName}${res.notes ? "*" : ""}`;
         } else if (res2.dataName === "birthDate") {
-          value = moment(`${res.bdMonth}/${res.bdDay}/${res.bdYear}`).format(
-            "MMM D, YYYY"
-          );
+          value = moment(
+            `${res.bdMonth}/${res.bdDay}/${res.bdYear ? res.bdYear : "1970"}`
+          ).format(`${res.bdYear ? "MMM D, YYYY" : "MMM D"}`);
         } else if (res2.dataName === "frontActions") {
           value = tableFrontActions.map((res3: any) => {
             if (res3 === "New DIY") {

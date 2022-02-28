@@ -159,7 +159,7 @@ const Add = () => {
               id="grid-first-name"
               type="number"
               autoComplete="off"
-              onChange={(e: any) => setStock(e.target.value)}
+              onChange={(e: any) => setStock(parseInt(e.target.value))}
               disabled={isAddInventoryLoading}
             />
             {findInputError(formErrors, "stock") ? (
@@ -184,7 +184,7 @@ const Add = () => {
               id="grid-first-name"
               type="number"
               autoComplete="off"
-              onChange={(e: any) => setUnitCost(e.target.value)}
+              onChange={(e: any) => setUnitCost(parseInt(e.target.value))}
               disabled={isAddInventoryLoading}
             />
             {findInputError(formErrors, "unitCost") ? (

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { connect } from "react-redux";
-import { useMutation, useQuery } from "react-query";
+import { useMutation, useQuery, useQueryClient } from "react-query";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import { useNavigate, useParams } from "react-router-dom";
@@ -15,6 +15,7 @@ const Update = (props: any) => {
   const { loggedInUserType } = props;
   const MySwal = withReactContent(Swal);
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { id: paramId } = useParams();
   const [type, setType] = useState("");
   const [stockCode, setStockCode] = useState("");
@@ -25,7 +26,7 @@ const Update = (props: any) => {
   const [formErrors, setFormErrors] = useState<any[]>([]);
 
   const { data: inventoryData, isLoading: isInventoryDataLoading } = useQuery(
-    "invetory",
+    "editInvetory",
     () => getAllInventory(`{"_id":"${paramId}"}`)
   );
 
@@ -37,7 +38,7 @@ const Update = (props: any) => {
     {
       onSuccess: async () => {
         MySwal.fire({
-          title: "Stock created!",
+          title: "Stock updated!",
           text: "You will be redirected",
           icon: "success",
           allowOutsideClick: false,
@@ -97,6 +98,11 @@ const Update = (props: any) => {
     }
   };
 
+  const _cancel = () => {
+    queryClient.removeQueries("editInventory", { exact: true });
+    navigate("/inventory");
+  };
+
   return (
     <>
       <h1 className="font-bold text-primary text-center mt-10 mb-10">
@@ -110,7 +116,11 @@ const Update = (props: any) => {
               <Asterisk />
             </label>
             <input
-              className="pt-1 pb-1 pl-2 rounded-sm mr-2 w-full border-2 border-accent"
+              className={`pt-1 pb-1 pl-2 rounded-sm mr-2 w-full border-2 ${
+                findInputError(formErrors, "type")
+                  ? "border-red"
+                  : "border-accent"
+              }`}
               id="grid-first-name"
               type="text"
               onChange={(e: any) => setType(e.target.value)}
@@ -135,7 +145,11 @@ const Update = (props: any) => {
               <Asterisk />
             </label>
             <input
-              className="pt-1 pb-1 pl-2 rounded-sm mr-2 w-full border-2 border-accent"
+              className={`pt-1 pb-1 pl-2 rounded-sm mr-2 w-full border-2 ${
+                findInputError(formErrors, "stockCode")
+                  ? "border-red"
+                  : "border-accent"
+              }`}
               id="grid-first-name"
               type="text"
               value={stockCode}
@@ -161,7 +175,11 @@ const Update = (props: any) => {
             <Asterisk />
           </label>
           <input
-            className="pt-1 pb-1 pl-2 rounded-sm mr-2 w-full border-2 border-accent"
+            className={`pt-1 pb-1 pl-2 rounded-sm mr-2 w-full border-2 ${
+              findInputError(formErrors, "name")
+                ? "border-red"
+                : "border-accent"
+            }`}
             id="grid-first-name"
             type="text"
             value={name}
@@ -187,12 +205,16 @@ const Update = (props: any) => {
               <Asterisk />
             </label>
             <input
-              className="pt-1 pb-1 pl-2 rounded-sm mr-2 w-full border-2 border-accent"
+              className={`pt-1 pb-1 pl-2 rounded-sm mr-2 w-full border-2 ${
+                findInputError(formErrors, "stock")
+                  ? "border-red"
+                  : "border-accent"
+              }`}
               id="grid-first-name"
               type="number"
               autoComplete="off"
               value={stock}
-              onChange={(e: any) => setStock(e.target.value)}
+              onChange={(e: any) => setStock(parseInt(e.target.value))}
               disabled={true}
             />
             {findInputError(formErrors, "stock") ? (
@@ -209,12 +231,16 @@ const Update = (props: any) => {
               <Asterisk />
             </label>
             <input
-              className="pt-1 pb-1 pl-2 rounded-sm mr-2 w-full border-2 border-accent"
+              className={`pt-1 pb-1 pl-2 rounded-sm mr-2 w-full border-2 ${
+                findInputError(formErrors, "unitCost")
+                  ? "border-red"
+                  : "border-accent"
+              }`}
               id="grid-first-name"
               type="number"
               autoComplete="off"
               value={unitCost}
-              onChange={(e: any) => setUnitCost(e.target.value)}
+              onChange={(e: any) => setUnitCost(parseInt(e.target.value))}
               disabled={
                 isUpdateInventoryLoading ||
                 isInventoryDataLoading ||
@@ -247,7 +273,7 @@ const Update = (props: any) => {
             className="pt-1 pl-5 pb-1 pr-5 rounded-xl bg-white border-2 border-primary text-primary"
             type="button"
             disabled={isUpdateInventoryLoading}
-            onClick={() => navigate("/inventory")}
+            onClick={() => _cancel()}
           >
             Cancel
           </button>
