@@ -46,17 +46,7 @@ router.post("/", async (req, res) => {
     bdYear,
   } = req.body;
 
-  if (
-    firstName &&
-    lastName &&
-    street &&
-    barangayVillage &&
-    cityProvince &&
-    postalZipcode &&
-    contactNumber &&
-    landline &&
-    email
-  ) {
+  if (firstName && lastName && bdMonth && bdDay && contactNumber) {
     const newCustomer = new Customer({
       firstName,
       lastName,
@@ -102,23 +92,34 @@ router.post("/", async (req, res) => {
 // @access  Private
 router.patch("/:id", async (req, res) => {
   const condition = req.body;
-  if (!isEmpty(condition)) {
-    try {
-      const updateCustomer = await Customer.findByIdAndUpdate(
-        req.params.id,
-        {
-          $set: condition,
-          updatedAt: Date.now(),
-        },
-        { new: true }
-      );
-      res.json(updateCustomer);
-    } catch ({ message: errMessage }) {
-      const message = errMessage ? errMessage : UNKNOW_ERROR_OCCURED;
-      res.status(500).json(message);
-    }
+  const { firstName, lastName, bdMonth, bdDay, contactNumber } = condition;
+  if (
+    firstName === "" ||
+    lastName === "" ||
+    bdMonth === "" ||
+    bdDay === "" ||
+    contactNumber === ""
+  ) {
+    res.status(500).json("Required values are empty");
   } else {
-    res.status(500).json("Customer cannot be found");
+    if (!isEmpty(condition)) {
+      try {
+        const updateCustomer = await Customer.findByIdAndUpdate(
+          req.params.id,
+          {
+            $set: condition,
+            updatedAt: Date.now(),
+          },
+          { new: true }
+        );
+        res.json(updateCustomer);
+      } catch ({ message: errMessage }) {
+        const message = errMessage ? errMessage : UNKNOW_ERROR_OCCURED;
+        res.status(500).json(message);
+      }
+    } else {
+      res.status(500).json("Customer cannot be found");
+    }
   }
 });
 

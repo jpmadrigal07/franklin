@@ -8,6 +8,12 @@ const UserRoute = require("./routes/user");
 const StaffRoute = require("./routes/staff");
 const CustomerRoute = require("./routes/customer");
 const InventoryRoute = require("./routes/inventory");
+const WashRoute = require("./routes/wash");
+const AddOnRoute = require("./routes/addOn");
+const LaundryRoute = require("./routes/laundry");
+const DryRoute = require("./routes/dry");
+const DiscountRoute = require("./routes/discount");
+
 const path = require("path");
 const app = express();
 
@@ -39,6 +45,11 @@ app.use("/api/users", UserRoute);
 app.use("/api/staffs", StaffRoute);
 app.use("/api/customers", CustomerRoute);
 app.use("/api/inventory", InventoryRoute);
+app.use("/api/laundry", LaundryRoute);
+app.use("/api/addOn", AddOnRoute);
+app.use("/api/dry", DryRoute);
+app.use("/api/discount", DiscountRoute);
+app.use("/api/wash", WashRoute);
 
 // Serve static assets if in production
 if (process.env.NODE_ENV === "production") {

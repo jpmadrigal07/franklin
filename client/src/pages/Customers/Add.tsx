@@ -1,9 +1,16 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useMutation } from "react-query";
 import { addCustomer } from "../../utils/customer";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import { useNavigate } from "react-router-dom";
+import Asterisk from "../../components/Asterisk";
+import validate from "../../validation/customer";
+import getErrorsFromValidation from "../../utils/getErrorsFromValidation";
+import findInputError from "../../utils/findInputError";
+import clean from "../../utils/cleanObject";
+import { isBirthDateValid } from "../../utils/isDateValid";
+import { isValidPhoneNumber } from "libphonenumber-js";
 
 const Add = () => {
   const MySwal = withReactContent(Swal);
@@ -23,6 +30,8 @@ const Add = () => {
   const [cityProvince, setCityProvince] = useState("");
   const [postalZipcode, setPostalZipcode] = useState("");
   const [notes, setNotes] = useState("");
+
+  const [formErrors, setFormErrors] = useState<any[]>([]);
 
   const { mutate: triggerAddCustomer, isLoading: isAddCustomerLoading } =
     useMutation(async (customer: any) => addCustomer(customer), {
@@ -50,13 +59,13 @@ const Add = () => {
     });
 
   const _addCustomer = () => {
-    triggerAddCustomer({
+    const values = {
       lastName,
       firstName,
       contactNumber,
-      email,
       landline,
       street,
+      email,
       barangayVillage,
       cityProvince,
       postalZipcode,
@@ -64,7 +73,61 @@ const Add = () => {
       bdMonth,
       bdDay,
       bdYear,
-    });
+    };
+    const filteredValues = clean(values);
+    const validatedData: any = validate(filteredValues);
+
+    const isBdateValid = isBirthDateValid(
+      `${bdMonth}/${bdDay}/${bdYear ? bdYear : "1970"}`
+    );
+    const isPhoneNumberValid = contactNumber
+      ? isValidPhoneNumber(contactNumber, "PH")
+      : false;
+    const isLandlineValid = landline
+      ? isValidPhoneNumber(landline, "PH")
+      : false;
+    const errors = validatedData ? getErrorsFromValidation(validatedData) : [];
+    let customErrors: any[] = [];
+    if (!isBdateValid || !isPhoneNumberValid) {
+      if (!isBdateValid) {
+        const bdateError = [
+          {
+            input: "bdMonth",
+            errorMessage: "Invalid birthdate",
+          },
+          {
+            input: "bdDay",
+            errorMessage: "Invalid birthdate",
+          },
+        ];
+        customErrors = [...customErrors, ...bdateError];
+      }
+      if (!isPhoneNumberValid) {
+        customErrors = [
+          ...customErrors,
+          {
+            input: "contactNumber",
+            errorMessage: "Invalid Mobile Number",
+          },
+        ];
+      }
+    }
+    if (landline && !isLandlineValid) {
+      customErrors = [
+        ...customErrors,
+        {
+          input: "landline",
+          errorMessage: "Invalid Landline Number",
+        },
+      ];
+    }
+    const combinedErrors = [...errors, ...customErrors];
+
+    if (combinedErrors && combinedErrors.length === 0) {
+      triggerAddCustomer(filteredValues);
+    } else {
+      setFormErrors(combinedErrors);
+    }
   };
 
   return (
@@ -77,35 +140,67 @@ const Add = () => {
           <div className="basis-1/2 mr-2">
             <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">
               Last Name
+              <Asterisk />
             </label>
             <input
-              className="pt-1 pb-1 pl-2 rounded-sm mr-2 w-full border-2 border-accent"
+              className={`pt-1 pb-1 pl-2 rounded-sm mr-2 w-full border-2 ${
+                findInputError(formErrors, "lastName")
+                  ? "border-red"
+                  : "border-accent"
+              }`}
               id="grid-first-name"
               type="text"
               onChange={(e: any) => setLastName(e.target.value)}
               disabled={isAddCustomerLoading}
             />
+            {findInputError(formErrors, "lastName") ? (
+              <p className="text-[12px] text-red">
+                {findInputError(formErrors, "lastName")}
+              </p>
+            ) : (
+              ""
+            )}
           </div>
           <div className="basis-1/2 mx-1">
             <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">
               Given Name
+              <Asterisk />
             </label>
             <input
-              className="pt-1 pb-1 pl-2 rounded-sm mr-2 w-full border-2 border-accent"
+              className={`pt-1 pb-1 pl-2 rounded-sm mr-2 w-full border-2 ${
+                findInputError(formErrors, "firstName")
+                  ? "border-red"
+                  : "border-accent"
+              }`}
               id="grid-first-name"
               type="text"
               onChange={(e: any) => setFirstName(e.target.value)}
               disabled={isAddCustomerLoading}
             />
+            {findInputError(formErrors, "firstName") ? (
+              <p className="text-[12px] text-red">
+                {findInputError(formErrors, "firstName")}
+              </p>
+            ) : (
+              ""
+            )}
           </div>
           <div className="basis-1/4 ml-2">
             <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">
               Birthdate
+              <Asterisk />{" "}
+              <span className="italic text-dark text-[10px]">
+                (Year is optional)
+              </span>
             </label>
             <div className="flex flex-row">
               <div className="basis-1/4 mr-2">
                 <input
-                  className="pt-1 pb-1 pl-2 rounded-sm mr-2 w-full border-2 border-accent"
+                  className={`pt-1 pb-1 pl-2 rounded-sm mr-2 w-full border-2 ${
+                    findInputError(formErrors, "bdMonth")
+                      ? "border-red"
+                      : "border-accent"
+                  }`}
                   id="grid-first-name"
                   type="text"
                   placeholder="MM"
@@ -115,7 +210,11 @@ const Add = () => {
               </div>
               <div className="basis-1/4 mx-1">
                 <input
-                  className="pt-1 pb-1 pl-2 rounded-sm mr-2 w-full border-2 border-accent"
+                  className={`pt-1 pb-1 pl-2 rounded-sm mr-2 w-full border-2 ${
+                    findInputError(formErrors, "bdDay")
+                      ? "border-red"
+                      : "border-accent"
+                  }`}
                   id="grid-first-name"
                   type="text"
                   placeholder="DD"
@@ -134,44 +233,87 @@ const Add = () => {
                 />
               </div>
             </div>
+            {findInputError(formErrors, "bdMonth") ||
+            findInputError(formErrors, "bdDay") ? (
+              <p className="text-[12px] text-red">
+                {findInputError(formErrors, "bdMonth") ||
+                  findInputError(formErrors, "bdDay")}
+              </p>
+            ) : (
+              ""
+            )}
           </div>
         </div>
         <div className="flex flex-row mt-5">
           <div className="basis-1/3 mr-2">
             <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">
               Mobile No.
+              <Asterisk />
             </label>
             <input
-              className="pt-1 pb-1 pl-2 rounded-sm mr-2 w-full border-2 border-accent"
+              className={`pt-1 pb-1 pl-2 rounded-sm mr-2 w-full border-2 ${
+                findInputError(formErrors, "contactNumber")
+                  ? "border-red"
+                  : "border-accent"
+              }`}
               id="grid-first-name"
               type="text"
               onChange={(e: any) => setContactNumber(e.target.value)}
               disabled={isAddCustomerLoading}
             />
+            {findInputError(formErrors, "contactNumber") ? (
+              <p className="text-[12px] text-red">
+                {findInputError(formErrors, "contactNumber")}
+              </p>
+            ) : (
+              ""
+            )}
           </div>
           <div className="basis-1/3 mx-1">
             <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">
               Email
             </label>
             <input
-              className="pt-1 pb-1 pl-2 rounded-sm mr-2 w-full border-2 border-accent"
+              className={`pt-1 pb-1 pl-2 rounded-sm mr-2 w-full border-2 ${
+                findInputError(formErrors, "email")
+                  ? "border-red"
+                  : "border-accent"
+              }`}
               id="grid-first-name"
-              type="text"
+              type="email"
               onChange={(e: any) => setEmail(e.target.value)}
               disabled={isAddCustomerLoading}
             />
+            {findInputError(formErrors, "email") ? (
+              <p className="text-[12px] text-red">
+                {findInputError(formErrors, "email")}
+              </p>
+            ) : (
+              ""
+            )}
           </div>
           <div className="basis-1/3 ml-2">
             <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">
               Landline
             </label>
             <input
-              className="pt-1 pb-1 pl-2 rounded-sm mr-2 w-full border-2 border-accent"
+              className={`pt-1 pb-1 pl-2 rounded-sm mr-2 w-full border-2 ${
+                findInputError(formErrors, "landline")
+                  ? "border-red"
+                  : "border-accent"
+              }`}
               id="grid-first-name"
               type="text"
               onChange={(e: any) => setLandline(e.target.value)}
               disabled={isAddCustomerLoading}
             />
+            {findInputError(formErrors, "landline") ? (
+              <p className="text-[12px] text-red">
+                {findInputError(formErrors, "landline")}
+              </p>
+            ) : (
+              ""
+            )}
           </div>
         </div>
         <div className="flex flex-row mt-5">
@@ -216,12 +358,23 @@ const Add = () => {
               Zip Code
             </label>
             <input
-              className="pt-1 pb-1 pl-2 rounded-sm mr-2 w-full border-2 border-accent"
+              className={`pt-1 pb-1 pl-2 rounded-sm mr-2 w-full border-2 ${
+                findInputError(formErrors, "postalZipcode")
+                  ? "border-red"
+                  : "border-accent"
+              }`}
               id="grid-first-name"
               type="text"
               onChange={(e: any) => setPostalZipcode(e.target.value)}
               disabled={isAddCustomerLoading}
             />
+            {findInputError(formErrors, "postalZipcode") ? (
+              <p className="text-[12px] text-red">
+                {findInputError(formErrors, "postalZipcode")}
+              </p>
+            ) : (
+              ""
+            )}
           </div>
         </div>
         <div className="mt-5">

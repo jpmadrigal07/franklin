@@ -1,7 +1,7 @@
 import apiCall from "./apiCall";
 
 // includes
-const BASE = "/api/inventory";
+const BASE = "/api/wash";
 const POST_HEADERS = {
   "Content-Type": "application/json",
 };
@@ -10,11 +10,11 @@ const addCondition = (conditions: string) => {
 };
 
 // calls
-export const getAllInventory = (conditions: string = "") =>
+export const getAllWash = (conditions: string = "") =>
   apiCall(`${BASE}${addCondition(conditions)}`);
-export const addInventory = (body: any = null) =>
+export const addWash = (body: any = null) =>
   apiCall(`${BASE}`, POST_HEADERS, "POST", body);
-export const updateInventory = (body: any = null, id: string = "") =>
+export const updateWash = (body: any = null, id: string = "") =>
   apiCall(`${BASE}/${id}`, POST_HEADERS, "PATCH", body);
-export const deleteInventory = (id: string = "") =>
+export const deleteWash = (id: string = "") =>
   apiCall(`${BASE}/${id}`, POST_HEADERS, "DELETE");

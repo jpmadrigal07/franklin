@@ -1,5 +1,50 @@
 # Changelog
 
+## 3.0.1
+
+- Bug fixes for Customer https://drive.google.com/file/d/1ZGnyADEWWACHLVCv6X1JaI8AT8n03elY/view?usp=sharing
+- Bug fixes for Inventory https://drive.google.com/file/d/1lTzOj9FC_6xd8nxN2YLU4_lsjiBGHRRC/view?usp=sharing
+
+## 3.0.0
+
+- Added Services page
+- Added dry endpoint
+- Added wash endpoint
+- Added laundry endpoint
+- Added add on endpoint
+- Added dry endpoint
+- Fix add edit on customer page
+- Fix add edit on inventory page
+
+## 2.0.1
+
+- Added input label error for Customers
+- Added input label error for Inventory
+- Added ajv validation
+- Added ajv errors
+- Added ajv formats
+
+## 2.0.0
+
+- Made Inventory table reusable
+- Added asterisk on required fields on Add and Edit Inventory Table
+- Added Add Stock on Inventory Table
+- Added Delete on Inventory Table
+- Added Delete confirm password of Admin function on Inventory Table
+- Created constrcutTableActions function file for reusability
+- Exclude Edit and Delete function for Staffs on Inventory Table
+
+## 1.0.2
+
+- Made a reusable Table
+- Made Customer table reusable
+- Required Last Name, First Name, Birth Day, Birth month and Mobile number on Customer Edit and Add
+- Change pages margin from 250px to 25px
+
+## 1.0.1
+
+- Added global state set for authenticated user on Navbar
+
 ## 1.0.0
 
 - Added Redux packages

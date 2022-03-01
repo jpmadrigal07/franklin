@@ -35,6 +35,49 @@ export default function Router() {
         { element: <Navigate to="/dashboard" replace /> },
         { path: "dashboard", element: <Dashboard /> },
         { path: "services", element: <Services /> },
+        {
+          path: "services",
+          children: [
+            {
+              path: "add/wash",
+              element: <AddServices category="wash" name="Wash" />,
+            },
+            {
+              path: "add/dry",
+              element: <AddServices category="dry" name="Dry" />,
+            },
+            {
+              path: "add",
+              element: <AddServices category="service" name="Service" />,
+            },
+            {
+              path: "add/discount",
+              element: <AddServices category="discount" name="Discount" />,
+            },
+            {
+              path: "edit/wash/:id",
+              element: <EditServices category="wash" name="Wash" />,
+            },
+            {
+              path: "edit/dry/:id",
+              element: <EditServices category="dry" name="Dry" />,
+            },
+            {
+              path: "edit/:id",
+              element: <EditServices category="service" name="Service" />,
+            },
+            {
+              path: "edit/discount/:id",
+              element: <EditServices category="discount" name="Discount" />,
+            },
+            {
+              path: "edit/dropofffee/:id",
+              element: (
+                <EditServices category="dropofffee" name="Drop Off Fee" />
+              ),
+            },
+          ],
+        },
         { path: "customers", element: <Customers /> },
         {
           path: "customers",
@@ -48,7 +91,10 @@ export default function Router() {
         { path: "inventory", element: <Inventory /> },
         {
           path: "inventory",
-          children: [{ path: "add", element: <AddInventory /> }],
+          children: [
+            { path: "add", element: <AddInventory /> },
+            { path: "edit/:id", element: <EditInventory /> },
+          ],
         },
         { path: "staff", element: <Staff /> },
         { path: "reports", element: <Reports /> },
@@ -62,7 +108,9 @@ export default function Router() {
 
 const Login = Loadable(lazy(() => import("../pages/Login")));
 const Dashboard = Loadable(lazy(() => import("../pages/Dashboard")));
-const Services = Loadable(lazy(() => import("../pages/Services")));
+const Services = Loadable(lazy(() => import("../pages/Services/Table")));
+const AddServices = Loadable(lazy(() => import("../pages/Services/Add")));
+const EditServices = Loadable(lazy(() => import("../pages/Services/Edit")));
 const Customers = Loadable(lazy(() => import("../pages/Customers/Table")));
 const AddCustomer = Loadable(lazy(() => import("../pages/Customers/Add")));
 const EditCustomer = Loadable(lazy(() => import("../pages/Customers/Edit")));
@@ -72,5 +120,6 @@ const ViewCustomer = Loadable(
 const Orders = Loadable(lazy(() => import("../pages/Orders")));
 const Inventory = Loadable(lazy(() => import("../pages/Inventory/Table")));
 const AddInventory = Loadable(lazy(() => import("../pages/Inventory/Add")));
+const EditInventory = Loadable(lazy(() => import("../pages/Inventory/Edit")));
 const Staff = Loadable(lazy(() => import("../pages/Staff")));
 const Reports = Loadable(lazy(() => import("../pages/Reports")));

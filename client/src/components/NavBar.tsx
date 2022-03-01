@@ -27,6 +27,14 @@ const NavBar = (props: any) => {
 
   const { mutate: triggerTokenVerify, isLoading: isTokenVerifyLoading } =
     useMutation(async (tokenVerify: any) => verify(tokenVerify), {
+      onSuccess: async (data) => {
+        const { _id, userType } = data.user;
+        setAuthenticatedUser({
+          id: _id,
+          type: userType,
+          name: data.name,
+        });
+      },
       onError: async () => {
         navigate("/");
       },
@@ -55,7 +63,7 @@ const NavBar = (props: any) => {
   return (
     <>
       <div className="bg-light">
-        <div className="h-[50px] grid grid-cols-8 gap-4 content-center ml-[200px] mr-[200px] text-primary">
+        <div className="h-[50px] grid grid-cols-8 gap-4 content-center ml-[25px] mr-[25px] text-primary">
           <p className="font-bold">{"Franklin's"}</p>
           <p className="col-span-2">
             {moment(time).format(" h:mm:ss A, D MMMM YYYY")}
@@ -74,7 +82,7 @@ const NavBar = (props: any) => {
         </div>
       </div>
       <div className="bg-primary">
-        <div className="h-[50px] grid grid-cols-7 gap-4 content-center ml-[200px] mr-[200px] text-white text-center">
+        <div className="h-[50px] grid grid-cols-7 gap-4 content-center ml-[25px] mr-[25px] text-white text-center">
           {NAVBAR_MENU.map((res: T_MENU, index: number) => {
             return (
               <span
