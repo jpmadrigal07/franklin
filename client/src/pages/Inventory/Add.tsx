@@ -16,8 +16,8 @@ const Add = () => {
   const [type, setType] = useState("");
   const [stockCode, setStockCode] = useState("");
   const [name, setName] = useState("");
-  const [stock, setStock] = useState(0);
-  const [unitCost, setUnitCost] = useState(0);
+  const [stock, setStock] = useState<number | undefined>();
+  const [unitCost, setUnitCost] = useState<number | undefined>();
 
   const [formErrors, setFormErrors] = useState<any[]>([]);
 
@@ -67,7 +67,7 @@ const Add = () => {
   return (
     <>
       <h1 className="font-bold text-primary text-center mt-10 mb-10">
-        Add Invetory
+        Add Inventory
       </h1>
       <form className="w-full">
         <div className="flex flex-row">
@@ -159,7 +159,7 @@ const Add = () => {
               id="grid-first-name"
               type="number"
               autoComplete="off"
-              onChange={(e: any) => setStock(parseInt(e.target.value))}
+              onChange={(e: any) => setStock(parseFloat(e.target.value))}
               disabled={isAddInventoryLoading}
             />
             {findInputError(formErrors, "stock") ? (
@@ -184,7 +184,7 @@ const Add = () => {
               id="grid-first-name"
               type="number"
               autoComplete="off"
-              onChange={(e: any) => setUnitCost(parseInt(e.target.value))}
+              onChange={(e: any) => setUnitCost(parseFloat(e.target.value))}
               disabled={isAddInventoryLoading}
             />
             {findInputError(formErrors, "unitCost") ? (

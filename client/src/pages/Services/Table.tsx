@@ -14,6 +14,7 @@ import { deleteDry, getAllDry } from "../../utils/dry";
 import { deleteAddOn, getAllAddOn } from "../../utils/addOn";
 import { deleteDiscount, getAllDiscount } from "../../utils/discount";
 import { deleteLaundry, getAllLaundry } from "../../utils/laundry";
+import numberWithCommas from "../../utils/numberWithCommas";
 
 type T_Header = {
   header: string;
@@ -219,7 +220,11 @@ const Table = (props: any) => {
               ? filteredActions
               : null;
         } else if (res2.dataName === "price") {
-          value = res[res2.dataName] ? `₱${res[res2.dataName]}` : "";
+          value = res[res2.dataName]
+            ? `₱${numberWithCommas(res[res2.dataName])}`
+            : res[res2.dataName] === 0
+            ? `₱0.00`
+            : "";
         } else {
           value = res[res2.dataName] ? res[res2.dataName] : "";
         }

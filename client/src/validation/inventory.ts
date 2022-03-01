@@ -10,9 +10,9 @@ const schema = {
   properties: {
     type: { type: "string", pattern: "^(?!s*$).+" },
     stockCode: { type: "string", pattern: "^(?!s*$).+" },
-    name: { type: "string" },
-    stock: { type: "number" },
-    unitCost: { type: "number" },
+    name: { type: "string", pattern: "^(?!s*$).+" },
+    stock: { type: "number", minimum: 1 },
+    unitCost: { type: "number", minimum: 1 },
   },
   required: ["type", "stockCode", "name", "stock", "unitCost"],
   errorMessage: {
@@ -21,8 +21,9 @@ const schema = {
     properties: {
       type: "This input cannot be empty",
       stockCode: "This input cannot be empty",
-      stock: "This input cannot be empty",
-      unitCost: "This input cannot be empty",
+      name: "This input cannot be empty",
+      stock: "This needs to be greater than 0",
+      unitCost: "This needs to be greater than 0",
     },
   },
   additionalProperties: false,

@@ -20,7 +20,7 @@ const Add = (props: any) => {
   const MySwal = withReactContent(Swal);
   const navigate = useNavigate();
   const [type, setType] = useState("");
-  const [price, setPrice] = useState<number | null>(null);
+  const [price, setPrice] = useState<number | undefined>();
 
   const [formErrors, setFormErrors] = useState<any[]>([]);
 
@@ -134,7 +134,7 @@ const Add = (props: any) => {
               id="grid-first-name"
               type="number"
               autoComplete="off"
-              onChange={(e: any) => setPrice(parseInt(e.target.value))}
+              onChange={(e: any) => setPrice(parseFloat(e.target.value))}
               disabled={isAddLoading}
             />
             {findInputError(formErrors, "price") ? (

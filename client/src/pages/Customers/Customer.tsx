@@ -65,8 +65,8 @@ const Table = () => {
     if (!bdMonth) {
       return "--- --- ---";
     } else {
-      const dateString = `${bdMonth}/${bdDay}/${bdYear}`;
-      return moment(dateString).format("MMM D, YYYY");
+      const dateString = `${bdMonth}/${bdDay}/${bdYear ? bdYear : "1970"}`;
+      return moment(dateString).format(`${bdYear ? "MMM D, YYYY" : "MMM D"}`);
     }
   };
 
@@ -80,7 +80,11 @@ const Table = () => {
           <div>
             <p className="font-bold">
               <span className="font-bold text-primary">Name:</span>{" "}
-              {isCustomerDataLoading ? "---" : `${firstName} ${lastName}`}
+              {isCustomerDataLoading
+                ? "---"
+                : `${firstName ? firstName : "---"} ${
+                    lastName ? lastName : "---"
+                  }`}
             </p>
           </div>
           <div>
@@ -94,29 +98,37 @@ const Table = () => {
           <div>
             <p className="font-bold">
               <span className="font-bold text-primary">Mobile No.:</span>{" "}
-              {isCustomerDataLoading ? "---" : contactNumber}
+              {isCustomerDataLoading
+                ? "---"
+                : contactNumber
+                ? contactNumber
+                : "---"}
             </p>
           </div>
           <div>
             <p className="font-bold">
               <span className="font-bold text-primary">Landline:</span>{" "}
-              {isCustomerDataLoading ? "---" : landline}
+              {isCustomerDataLoading ? "---" : landline ? landline : "---"}
             </p>
           </div>
         </div>
         <p className="font-bold">
           <span className="font-bold text-primary">Email:</span>{" "}
-          {isCustomerDataLoading ? "---" : email}
+          {isCustomerDataLoading ? "---" : email ? email : "---"}
         </p>
         <p className="font-bold">
           <span className="font-bold text-primary">Address:</span>{" "}
           {isCustomerDataLoading
             ? "---"
-            : `${street}, ${barangayVillage}, ${cityProvince}, ${postalZipcode}`}
+            : `${street ? street : "---"}, ${
+                barangayVillage ? barangayVillage : "---"
+              }, ${cityProvince ? cityProvince : "---"}, ${
+                postalZipcode ? postalZipcode : "---"
+              }`}
         </p>
         <p className="font-bold">
           <span className="font-bold text-primary">Notes:</span>{" "}
-          {isCustomerDataLoading ? "---" : notes}
+          {isCustomerDataLoading ? "---" : notes ? notes : "---"}
         </p>
         <div className="flex justify-end mt-7">
           <button

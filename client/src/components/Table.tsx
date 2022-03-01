@@ -29,7 +29,7 @@ const Table = ({
                             : ""
                         }`}
                       >
-                        {res[res2.dataName]}
+                        {res[res2.dataName] !== "0" ? res[res2.dataName] : "0"}
                       </td>
                     );
                   })}

@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.0.1
+
+- Bug fixes for Customer https://drive.google.com/file/d/1ZGnyADEWWACHLVCv6X1JaI8AT8n03elY/view?usp=sharing
+- Bug fixes for Inventory https://drive.google.com/file/d/1lTzOj9FC_6xd8nxN2YLU4_lsjiBGHRRC/view?usp=sharing
+
 ## 3.0.0
 
 - Added Services page

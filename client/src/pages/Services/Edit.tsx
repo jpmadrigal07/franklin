@@ -22,7 +22,7 @@ const Update = (props: any) => {
   const queryClient = useQueryClient();
   const { id: paramId } = useParams();
   const [type, setType] = useState("");
-  const [price, setPrice] = useState(0);
+  const [price, setPrice] = useState<number | undefined>();
 
   const [formErrors, setFormErrors] = useState<any[]>([]);
 
@@ -178,7 +178,7 @@ const Update = (props: any) => {
               type="number"
               autoComplete="off"
               value={price}
-              onChange={(e: any) => setPrice(parseInt(e.target.value))}
+              onChange={(e: any) => setPrice(parseFloat(e.target.value))}
               disabled={isUpdateLoading || isDataLoading || !data}
             />
             {findInputError(formErrors, "price") ? (

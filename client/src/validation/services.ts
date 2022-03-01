@@ -9,7 +9,7 @@ const schema = {
   type: "object",
   properties: {
     type: { type: "string", pattern: "^(?!s*$).+" },
-    price: { type: "number", pattern: "^(?!s*$).+" },
+    price: { type: "number", minimum: 1 },
   },
   required: ["type", "price"],
   errorMessage: {
@@ -17,7 +17,7 @@ const schema = {
     required: "This input cannot be empty",
     properties: {
       type: "This input cannot be empty",
-      price: "This input cannot be empty",
+      price: "This needs to be greater than 0",
     },
   },
   additionalProperties: false,

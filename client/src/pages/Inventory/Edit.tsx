@@ -20,13 +20,13 @@ const Update = (props: any) => {
   const [type, setType] = useState("");
   const [stockCode, setStockCode] = useState("");
   const [name, setName] = useState("");
-  const [stock, setStock] = useState(0);
-  const [unitCost, setUnitCost] = useState(0);
+  const [stock, setStock] = useState<number | undefined>();
+  const [unitCost, setUnitCost] = useState<number | undefined>();
 
   const [formErrors, setFormErrors] = useState<any[]>([]);
 
   const { data: inventoryData, isLoading: isInventoryDataLoading } = useQuery(
-    "editInvetory",
+    "editInventory",
     () => getAllInventory(`{"_id":"${paramId}"}`)
   );
 
@@ -82,10 +82,20 @@ const Update = (props: any) => {
       };
       const filteredValues = clean(values);
       const validatedData: any = validate(filteredValues);
+
       if (!validatedData) {
         triggerUpdateInventory(filteredValues);
       } else {
-        setFormErrors(getErrorsFromValidation(validatedData));
+        // if the error is 0 stock, let the admin update
+        if (
+          validatedData &&
+          validatedData.length === 1 &&
+          validatedData[0].instancePath === "/stock"
+        ) {
+          triggerUpdateInventory(filteredValues);
+        } else {
+          setFormErrors(getErrorsFromValidation(validatedData));
+        }
       }
     } else {
       MySwal.fire({
@@ -240,7 +250,7 @@ const Update = (props: any) => {
               type="number"
               autoComplete="off"
               value={unitCost}
-              onChange={(e: any) => setUnitCost(parseInt(e.target.value))}
+              onChange={(e: any) => setUnitCost(parseFloat(e.target.value))}
               disabled={
                 isUpdateInventoryLoading ||
                 isInventoryDataLoading ||

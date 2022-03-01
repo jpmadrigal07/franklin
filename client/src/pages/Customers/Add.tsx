@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useMutation } from "react-query";
 import { addCustomer } from "../../utils/customer";
 import Swal from "sweetalert2";
@@ -9,6 +9,8 @@ import validate from "../../validation/customer";
 import getErrorsFromValidation from "../../utils/getErrorsFromValidation";
 import findInputError from "../../utils/findInputError";
 import clean from "../../utils/cleanObject";
+import { isBirthDateValid } from "../../utils/isDateValid";
+import { isValidPhoneNumber } from "libphonenumber-js";
 
 const Add = () => {
   const MySwal = withReactContent(Swal);
@@ -75,10 +77,56 @@ const Add = () => {
     const filteredValues = clean(values);
     const validatedData: any = validate(filteredValues);
 
-    if (!validatedData) {
+    const isBdateValid = isBirthDateValid(
+      `${bdMonth}/${bdDay}/${bdYear ? bdYear : "1970"}`
+    );
+    const isPhoneNumberValid = contactNumber
+      ? isValidPhoneNumber(contactNumber, "PH")
+      : false;
+    const isLandlineValid = landline
+      ? isValidPhoneNumber(landline, "PH")
+      : false;
+    const errors = validatedData ? getErrorsFromValidation(validatedData) : [];
+    let customErrors: any[] = [];
+    if (!isBdateValid || !isPhoneNumberValid) {
+      if (!isBdateValid) {
+        const bdateError = [
+          {
+            input: "bdMonth",
+            errorMessage: "Invalid birthdate",
+          },
+          {
+            input: "bdDay",
+            errorMessage: "Invalid birthdate",
+          },
+        ];
+        customErrors = [...customErrors, ...bdateError];
+      }
+      if (!isPhoneNumberValid) {
+        customErrors = [
+          ...customErrors,
+          {
+            input: "contactNumber",
+            errorMessage: "Invalid Mobile Number",
+          },
+        ];
+      }
+    }
+    if (landline && !isLandlineValid) {
+      customErrors = [
+        ...customErrors,
+        {
+          input: "landline",
+          errorMessage: "Invalid Landline Number",
+        },
+      ];
+    }
+    const combinedErrors = [...errors, ...customErrors];
+
+    if (combinedErrors && combinedErrors.length === 0) {
       triggerAddCustomer(filteredValues);
     } else {
-      setFormErrors(getErrorsFromValidation(validatedData));
+      setFormErrors(combinedErrors);
     }
   };
 
@@ -249,12 +297,23 @@ const Add = () => {
               Landline
             </label>
             <input
-              className="pt-1 pb-1 pl-2 rounded-sm mr-2 w-full border-2 border-accent"
+              className={`pt-1 pb-1 pl-2 rounded-sm mr-2 w-full border-2 ${
+                findInputError(formErrors, "landline")
+                  ? "border-red"
+                  : "border-accent"
+              }`}
               id="grid-first-name"
               type="text"
               onChange={(e: any) => setLandline(e.target.value)}
               disabled={isAddCustomerLoading}
             />
+            {findInputError(formErrors, "landline") ? (
+              <p className="text-[12px] text-red">
+                {findInputError(formErrors, "landline")}
+              </p>
+            ) : (
+              ""
+            )}
           </div>
         </div>
         <div className="flex flex-row mt-5">
@@ -299,12 +358,23 @@ const Add = () => {
               Zip Code
             </label>
             <input
-              className="pt-1 pb-1 pl-2 rounded-sm mr-2 w-full border-2 border-accent"
+              className={`pt-1 pb-1 pl-2 rounded-sm mr-2 w-full border-2 ${
+                findInputError(formErrors, "postalZipcode")
+                  ? "border-red"
+                  : "border-accent"
+              }`}
               id="grid-first-name"
               type="text"
               onChange={(e: any) => setPostalZipcode(e.target.value)}
               disabled={isAddCustomerLoading}
             />
+            {findInputError(formErrors, "postalZipcode") ? (
+              <p className="text-[12px] text-red">
+                {findInputError(formErrors, "postalZipcode")}
+              </p>
+            ) : (
+              ""
+            )}
           </div>
         </div>
         <div className="mt-5">

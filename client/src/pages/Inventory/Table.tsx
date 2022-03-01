@@ -14,6 +14,7 @@ import Modal from "../../components/Modal";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import { verifyPassword } from "../../utils/user";
+import numberWithCommas from "../../utils/numberWithCommas";
 
 type T_Header = {
   header: string;
@@ -138,16 +139,24 @@ const Table = (props: any) => {
   }, [inventoryData]);
 
   const _triggerAddInventoryStock = () => {
-    if (!stock || stock === 0) {
+    const total = selectedInventoryStock + stock;
+    if (total < 0 && loggedInUserType === "Admin") {
       MySwal.fire({
         title: "Ooopssssss!",
-        text: "Stock value needs to be greater than 0",
+        text: "Insuficient stocks",
+        icon: "warning",
+        confirmButtonText: "Okay",
+        confirmButtonColor: "#274c77",
+      });
+    } else if (stock < 0 && loggedInUserType === "Staff") {
+      MySwal.fire({
+        title: "Ooopssssss!",
+        text: "Only Admin can deduct stocks",
         icon: "warning",
         confirmButtonText: "Okay",
         confirmButtonColor: "#274c77",
       });
     } else {
-      const total = selectedInventoryStock + stock;
       triggerAddInventoryStock({ stock: total });
     }
   };
@@ -207,6 +216,18 @@ const Table = (props: any) => {
               );
             }
           });
+        } else if (res2.dataName === "unitCost") {
+          value = res[res2.dataName]
+            ? `₱${numberWithCommas(res[res2.dataName])}`
+            : res[res2.dataName] === 0
+            ? `₱0.00`
+            : "";
+        } else if (res2.dataName === "stock") {
+          value = res[res2.dataName]
+            ? res[res2.dataName]
+            : res[res2.dataName] === 0
+            ? 0
+            : "";
         } else {
           value = res[res2.dataName] ? res[res2.dataName] : "";
         }
@@ -326,7 +347,7 @@ const Table = (props: any) => {
               id="grid-first-name"
               type="number"
               autoComplete="off"
-              onChange={(e: any) => setStock(parseInt(e.target.value))}
+              onChange={(e: any) => setStock(parseFloat(e.target.value))}
               value={stock === 0 ? "" : stock}
               disabled={isAddInventoryStockLoading}
             />

@@ -19,6 +19,7 @@
     "axios": "^0.26.0",
     "http-proxy-middleware": "^2.0.3",
     "js-cookie": "^3.0.1",
+    "libphonenumber-js": "^1.9.49",
     "lodash": "^4.17.21",
     "moment": "^2.29.1",
     "react": "^17.0.2",
