@@ -96,7 +96,15 @@ export default function Router() {
             { path: "edit/:id", element: <EditInventory /> },
           ],
         },
-        { path: "staff", element: <Staff /> },
+        { path: "staffs", element: <Staffs /> },
+        {
+          path: "staffs",
+          children: [
+            { path: ":id", element: <ViewStaff /> },
+            { path: "add", element: <AddStaff /> },
+            { path: "edit/:id", element: <EditStaff /> },
+          ],
+        },
         { path: "reports", element: <Reports /> },
         { path: "adminsettings", element: <AdminSettings /> },
       ],
@@ -125,3 +133,7 @@ const EditInventory = Loadable(lazy(() => import("../pages/Inventory/Edit")));
 const Staff = Loadable(lazy(() => import("../pages/Staff")));
 const Reports = Loadable(lazy(() => import("../pages/Reports")));
 const AdminSettings = Loadable(lazy(() => import("../pages/AdminSettings")));
+const Staffs = Loadable(lazy(() => import("../pages/Staffs/Table")));
+const AddStaff = Loadable(lazy(() => import("../pages/Staffs/Add")));
+const EditStaff = Loadable(lazy(() => import("../pages/Staffs/Edit")));
+const ViewStaff = Loadable(lazy(() => import("../pages/Staffs/Staff")));

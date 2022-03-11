@@ -4,6 +4,6 @@ export const NAVBAR_MENU = [
   { page: "Customers", path: "/customers" },
   { page: "Orders", path: "/orders" },
   { page: "Inventory", path: "/inventory" },
-  { page: "Staff", path: "/staff", isAdmin: true },
+  { page: "Staffs", path: "/staffs", isAdmin: true },
   { page: "Reports", path: "/reports" },
 ];

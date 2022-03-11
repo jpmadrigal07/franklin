@@ -98,7 +98,7 @@ const NavBar = (props: any) => {
       <div className="bg-primary">
         <div
           className={`h-[50px] grid grid-cols-${
-            loggedInUserType === "Admin" ? 7 : 6
+            loggedInUserType === "Admin" ? "7" : "6"
           } gap-4 content-center ml-[25px] mr-[25px] text-white text-center`}
         >
           {!isLogin &&

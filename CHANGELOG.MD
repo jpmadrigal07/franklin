@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.0.4
+
+- Added staff add
+- Added staff edit
+- Added staff delete
+
 ## 3.0.3
 
 - Added cog icon on the header
