@@ -12,6 +12,7 @@ module.exports = {
       "dark-translucent": "#32313080",
       red: "#ff0000",
       "semi-light": "#cfcfcf",
+      black: "#000000",
     },
   },
   plugins: [],

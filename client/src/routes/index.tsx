@@ -98,6 +98,7 @@ export default function Router() {
         },
         { path: "staff", element: <Staff /> },
         { path: "reports", element: <Reports /> },
+        { path: "adminsettings", element: <AdminSettings /> },
       ],
     },
     // { path: '*', element: <Navigate to="/404" replace /> }
@@ -123,3 +124,4 @@ const AddInventory = Loadable(lazy(() => import("../pages/Inventory/Add")));
 const EditInventory = Loadable(lazy(() => import("../pages/Inventory/Edit")));
 const Staff = Loadable(lazy(() => import("../pages/Staff")));
 const Reports = Loadable(lazy(() => import("../pages/Reports")));
+const AdminSettings = Loadable(lazy(() => import("../pages/AdminSettings")));

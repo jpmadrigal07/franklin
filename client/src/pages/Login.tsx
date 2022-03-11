@@ -24,6 +24,7 @@ const Login = (props: any) => {
   const [loggedInUserType, setLoggedInUserType] = useState("");
   const [loggedInName, setLoggedInName] = useState("");
   const [loggedInToken, setLoggedInToken] = useState("");
+  const [loggedInUsername, setLoggedInUsername] = useState("");
 
   const sessionToken = Cookies.get("sessionToken");
 
@@ -48,10 +49,11 @@ const Login = (props: any) => {
     async (user: any) => login(user),
     {
       onSuccess: async (data) => {
-        const { _id, userType } = data.user;
+        const { _id, userType, username } = data.user;
         if (folderData && folderData.length === 0) {
           setLoggedInId(_id);
           setLoggedInUserType(userType);
+          setLoggedInUsername(username);
           setLoggedInToken(data.token);
           setLoggedInName(data.name);
           refetchStaffData();
@@ -62,6 +64,7 @@ const Login = (props: any) => {
             id: _id,
             type: userType,
             name: data.name,
+            username: username,
           });
           navigate("/dashboard");
         }
@@ -93,6 +96,7 @@ const Login = (props: any) => {
             id: loggedInId,
             type: loggedInUserType,
             name: loggedInName,
+            username: loggedInUsername,
           });
           navigate("/dashboard");
         });

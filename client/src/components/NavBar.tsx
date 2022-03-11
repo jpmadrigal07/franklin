@@ -12,6 +12,7 @@ import Cookies from "js-cookie";
 type T_MENU = {
   page: string;
   path: string;
+  isAdmin?: boolean;
 };
 
 const NavBar = (props: any) => {
@@ -20,6 +21,7 @@ const NavBar = (props: any) => {
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState("");
   const [time, setTime] = useState(new Date().getTime());
+  const [loggedInUserType, setLoggedInUserType] = useState("");
 
   const sessionToken = Cookies.get("sessionToken");
 
@@ -28,11 +30,13 @@ const NavBar = (props: any) => {
   const { mutate: triggerTokenVerify, isLoading: isTokenVerifyLoading } =
     useMutation(async (tokenVerify: any) => verify(tokenVerify), {
       onSuccess: async (data) => {
-        const { _id, userType } = data.user;
+        const { _id, userType, username } = data.user;
+        setLoggedInUserType(userType);
         setAuthenticatedUser({
           id: _id,
           type: userType,
           name: data.name,
+          username: username,
         });
       },
       onError: async () => {
@@ -73,9 +77,17 @@ const NavBar = (props: any) => {
               <span className="font-bold">
                 {isTokenVerifyLoading ? "Loading..." : `Hello ${loggedInName}!`}
               </span>
+              {loggedInUserType === "Admin" && (
+                <Icon
+                  icon="bi:gear"
+                  className="inline ml-6 hover:cursor-pointer"
+                  height={24}
+                  onClick={() => navigate("/adminsettings")}
+                />
+              )}
               <Icon
                 icon="bi:box-arrow-in-right"
-                className="inline ml-10 hover:cursor-pointer"
+                className="inline ml-6 hover:cursor-pointer"
                 height={24}
                 onClick={() => _removeSessionToken()}
               />
@@ -84,22 +96,44 @@ const NavBar = (props: any) => {
         </div>
       </div>
       <div className="bg-primary">
-        <div className="h-[50px] grid grid-cols-7 gap-4 content-center ml-[25px] mr-[25px] text-white text-center">
+        <div
+          className={`h-[50px] grid grid-cols-${
+            loggedInUserType === "Admin" ? 7 : 6
+          } gap-4 content-center ml-[25px] mr-[25px] text-white text-center`}
+        >
           {!isLogin &&
             NAVBAR_MENU.map((res: T_MENU, index: number) => {
-              return (
-                <span
-                  key={index}
-                  onClick={() => navigate(res.path)}
-                  className={`hover:cursor-pointer ${
-                    currentPage.includes(res.path)
-                      ? "border-2 border-white"
-                      : ""
-                  }`}
-                >
-                  {res.page}
-                </span>
-              );
+              if (res.isAdmin && loggedInUserType === "Admin") {
+                return (
+                  <span
+                    key={index}
+                    onClick={() => navigate(res.path)}
+                    className={`hover:cursor-pointer ${
+                      currentPage.includes(res.path)
+                        ? "border-2 border-white"
+                        : ""
+                    }`}
+                  >
+                    {res.page}
+                  </span>
+                );
+              }
+
+              if (!res.isAdmin) {
+                return (
+                  <span
+                    key={index}
+                    onClick={() => navigate(res.path)}
+                    className={`hover:cursor-pointer ${
+                      currentPage.includes(res.path)
+                        ? "border-2 border-white"
+                        : ""
+                    }`}
+                  >
+                    {res.page}
+                  </span>
+                );
+              }
             })}
         </div>
       </div>

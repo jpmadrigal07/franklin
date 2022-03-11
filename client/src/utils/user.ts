@@ -7,5 +7,7 @@ const POST_HEADERS = {
 };
 
 // calls
+export const changePassword = (body: any = null, id: string = "") =>
+  apiCall(`${BASE}/change-password`, POST_HEADERS, "POST", body);
 export const verifyPassword = (body: any = null) =>
   apiCall(`${BASE}/verify-password`, POST_HEADERS, "POST", body);

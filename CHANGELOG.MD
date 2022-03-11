@@ -1,5 +1,12 @@
 # Changelog
 
+## 3.0.3
+
+- Added cog icon on the header
+- Added admin settings page
+- Added change admin password function
+- Remove Staff page for staff user
+
 ## 3.0.2
 
 - Added folder modal pop up when logging in if there is no current folder of the day
