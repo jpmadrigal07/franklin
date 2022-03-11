@@ -1,5 +1,14 @@
 # Changelog
 
+## 3.0.2
+
+- Added folder modal pop up when logging in if there is no current folder of the day
+- Added header to login page
+- Change login form design
+- Added add function on folder modal
+- Change auth expiry from 1 day to every 12 am
+- Change logout to navigate to window.location
+
 ## 3.0.1
 
 - Bug fixes for Customer https://drive.google.com/file/d/1ZGnyADEWWACHLVCv6X1JaI8AT8n03elY/view?usp=sharing

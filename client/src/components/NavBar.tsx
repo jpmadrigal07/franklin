@@ -15,7 +15,7 @@ type T_MENU = {
 };
 
 const NavBar = (props: any) => {
-  const { setAuthenticatedUser, name } = props;
+  const { setAuthenticatedUser, name, isLogin } = props;
   const router = useLocation();
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState("");
@@ -56,7 +56,7 @@ const NavBar = (props: any) => {
     if (sessionToken) {
       Cookies.remove("sessionToken");
       setAuthenticatedUser({});
-      navigate("/");
+      window.location.href = "/";
     }
   };
 
@@ -68,34 +68,39 @@ const NavBar = (props: any) => {
           <p className="col-span-2">
             {moment(time).format(" h:mm:ss A, D MMMM YYYY")}
           </p>
-          <div className="col-span-5 text-right">
-            <span className="font-bold">
-              {isTokenVerifyLoading ? "Loading..." : `Hello ${loggedInName}!`}
-            </span>
-            <Icon
-              icon="bi:box-arrow-in-right"
-              className="inline ml-10 hover:cursor-pointer"
-              height={24}
-              onClick={() => _removeSessionToken()}
-            />
-          </div>
+          {!isLogin && (
+            <div className="col-span-5 text-right">
+              <span className="font-bold">
+                {isTokenVerifyLoading ? "Loading..." : `Hello ${loggedInName}!`}
+              </span>
+              <Icon
+                icon="bi:box-arrow-in-right"
+                className="inline ml-10 hover:cursor-pointer"
+                height={24}
+                onClick={() => _removeSessionToken()}
+              />
+            </div>
+          )}
         </div>
       </div>
       <div className="bg-primary">
         <div className="h-[50px] grid grid-cols-7 gap-4 content-center ml-[25px] mr-[25px] text-white text-center">
-          {NAVBAR_MENU.map((res: T_MENU, index: number) => {
-            return (
-              <span
-                key={index}
-                onClick={() => navigate(res.path)}
-                className={`hover:cursor-pointer ${
-                  currentPage.includes(res.path) ? "border-2 border-white" : ""
-                }`}
-              >
-                {res.page}
-              </span>
-            );
-          })}
+          {!isLogin &&
+            NAVBAR_MENU.map((res: T_MENU, index: number) => {
+              return (
+                <span
+                  key={index}
+                  onClick={() => navigate(res.path)}
+                  className={`hover:cursor-pointer ${
+                    currentPage.includes(res.path)
+                      ? "border-2 border-white"
+                      : ""
+                  }`}
+                >
+                  {res.page}
+                </span>
+              );
+            })}
         </div>
       </div>
     </>

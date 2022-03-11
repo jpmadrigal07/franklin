@@ -13,6 +13,7 @@ const AddOnRoute = require("./routes/addOn");
 const LaundryRoute = require("./routes/laundry");
 const DryRoute = require("./routes/dry");
 const DiscountRoute = require("./routes/discount");
+const FolderRoute = require("./routes/folder");
 
 const path = require("path");
 const app = express();
@@ -50,6 +51,7 @@ app.use("/api/addOn", AddOnRoute);
 app.use("/api/dry", DryRoute);
 app.use("/api/discount", DiscountRoute);
 app.use("/api/wash", WashRoute);
+app.use("/api/folder", FolderRoute);
 
 // Serve static assets if in production
 if (process.env.NODE_ENV === "production") {
