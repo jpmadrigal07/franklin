@@ -97,9 +97,7 @@ const NavBar = (props: any) => {
       </div>
       <div className="bg-primary">
         <div
-          className={`h-[50px] grid grid-cols-${
-            loggedInUserType === "Admin" ? "7" : "6"
-          } gap-4 content-center ml-[25px] mr-[25px] text-white text-center`}
+          className={`h-[50px] flex flex-row content-center ml-[25px] mr-[25px] text-white text-center`}
         >
           {!isLogin &&
             NAVBAR_MENU.map((res: T_MENU, index: number) => {
@@ -108,7 +106,7 @@ const NavBar = (props: any) => {
                   <span
                     key={index}
                     onClick={() => navigate(res.path)}
-                    className={`hover:cursor-pointer ${
+                    className={`hover:cursor-pointer basis-1/4 pt-[3px] my-2 ${
                       currentPage.includes(res.path)
                         ? "border-2 border-white"
                         : ""
@@ -124,7 +122,7 @@ const NavBar = (props: any) => {
                   <span
                     key={index}
                     onClick={() => navigate(res.path)}
-                    className={`hover:cursor-pointer ${
+                    className={`hover:cursor-pointer basis-1/4 pt-[3px] my-2 ${
                       currentPage.includes(res.path)
                         ? "border-2 border-white"
                         : ""

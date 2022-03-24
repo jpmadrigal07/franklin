@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.0.5
+
+- Fix main page menu ui problem
+
 ## 3.0.4
 
 - Added staff add
