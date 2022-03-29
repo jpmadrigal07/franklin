@@ -7,6 +7,7 @@
 - Added View function on Staff table
 - Added change password/staff profile for staff
 - Remove view customer header sub text
+- Remove package-lock.json files
 
 ## 3.0.6
 
