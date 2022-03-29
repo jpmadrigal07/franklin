@@ -6,6 +6,7 @@
 - Added lastLoggedIn and lastLoggedOut in staff table
 - Added View function on Staff table
 - Added change password/staff profile for staff
+- Remove view customer header sub text
 
 ## 3.0.6
 

@@ -186,11 +186,6 @@ const Table = (props: any) => {
       <h1 className="font-bold text-primary text-center mt-10 mb-10">
         View Customers
       </h1>
-      <p className="text-center">
-        Staff users can add and edit customers but cannot delete. Staff can also
-        view specific customer to see more details such as notes and past
-        orders.
-      </p>
       <div className="flex justify-between mt-11">
         <div>
           <button
