@@ -156,6 +156,14 @@ const Table = (props: any) => {
         confirmButtonText: "Okay",
         confirmButtonColor: "#274c77",
       });
+    } else if (!Number.isInteger(total)) {
+      MySwal.fire({
+        title: "Ooopssssss!",
+        text: "Stock value needs to be a whole number",
+        icon: "warning",
+        confirmButtonText: "Okay",
+        confirmButtonColor: "#274c77",
+      });
     } else {
       triggerAddInventoryStock({ stock: total });
     }
@@ -325,7 +333,10 @@ const Table = (props: any) => {
             </button>
             <button
               className="pt-1 pl-5 pb-1 pr-5 rounded-xl bg-white border-2 border-primary text-primary"
-              onClick={() => setIsAdminPasswordModal(!isAdminPasswordModalOpen)}
+              onClick={() => {
+                setIsAdminPasswordModal(!isAdminPasswordModalOpen);
+                setAdminPassword("");
+              }}
               disabled={isVerifyPasswordLoading || isDeleteInventoryLoading}
             >
               Cancel

@@ -42,7 +42,6 @@ const AdminSettings = (props: any) => {
     });
   const _changePassword = (e: any) => {
     e.preventDefault();
-    console.log("asdasd", loggedInUserType);
     if (loggedInUserType !== "Admin") {
       MySwal.fire({
         title: "Ooops!",

@@ -89,7 +89,12 @@ const Add = () => {
     const errors = validatedData ? getErrorsFromValidation(validatedData) : [];
     let customErrors: any[] = [];
     if (!isBdateValid || !isPhoneNumberValid) {
-      if (!isBdateValid) {
+      if (
+        !isBdateValid ||
+        typeof bdMonth === "string" ||
+        typeof bdDay === "string" ||
+        typeof bdYear === "string"
+      ) {
         const bdateError = [
           {
             input: "bdMonth",

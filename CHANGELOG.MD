@@ -1,5 +1,15 @@
 # Changelog
 
+## 3.0.6
+
+- Fix add customer same firstname and lastname
+- Fix customer birtday and birthmonth string
+- Fix customer update empty input
+- Fix delete item admin password persisting
+- Added seed for drop off fee
+- Fix add inventory stock accepting float
+- Fix table add stock accepting float
+
 ## 3.0.5
 
 - Fix main page menu ui problem

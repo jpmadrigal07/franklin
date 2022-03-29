@@ -390,7 +390,10 @@ const Table = (props: any) => {
             </button>
             <button
               className="pt-1 pl-5 pb-1 pr-5 rounded-xl bg-white border-2 border-primary text-primary"
-              onClick={() => setIsAdminPasswordModal(!isAdminPasswordModalOpen)}
+              onClick={() => {
+                setIsAdminPasswordModal(!isAdminPasswordModalOpen);
+                setAdminPassword("");
+              }}
               disabled={isVerifyPasswordLoading || isDeleteServicesLoading}
             >
               Cancel

@@ -14,6 +14,7 @@ const LaundryRoute = require("./routes/laundry");
 const DryRoute = require("./routes/dry");
 const DiscountRoute = require("./routes/discount");
 const FolderRoute = require("./routes/folder");
+require("./seed");
 
 const path = require("path");
 const app = express();
