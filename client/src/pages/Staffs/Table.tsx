@@ -135,8 +135,8 @@ const Table = (props: any) => {
             if (res3 === "View") {
               return _constructTableActions(
                 res3,
-                () => _addStaffStock(res._id, res.name, res.stock),
-                false
+                () => navigate(`/staffs/${res._id}`),
+                loggedInUserType !== "Admin"
               );
             } else if (res3 === "Edit" && loggedInUserType === "Admin") {
               return _constructTableActions(
@@ -156,8 +156,8 @@ const Table = (props: any) => {
           res2.dataName === "lastLoggedIn" ||
           res2.dataName === "lastLoggedOut"
         ) {
-          value = res[res2.dataName]
-            ? moment(res[res2.dataName]).format("DD/MM/YYYY h:mm A")
+          value = res["userId"][res2.dataName]
+            ? moment(res["userId"][res2.dataName]).format("DD/MM/YYYY h:mm A")
             : "";
         } else {
           value = res[res2.dataName] ? res[res2.dataName] : "";

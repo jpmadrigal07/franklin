@@ -1,5 +1,12 @@
 # Changelog
 
+## 3.0.7
+
+- Added lastLoggedIn and lastLoggedOut functionality
+- Added lastLoggedIn and lastLoggedOut in staff table
+- Added View function on Staff table
+- Added change password/staff profile for staff
+
 ## 3.0.6
 
 - Fix add customer same firstname and lastname

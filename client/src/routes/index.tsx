@@ -107,6 +107,7 @@ export default function Router() {
         },
         { path: "reports", element: <Reports /> },
         { path: "adminsettings", element: <AdminSettings /> },
+        { path: "staffsettings", element: <StaffSettings /> },
       ],
     },
     // { path: '*', element: <Navigate to="/404" replace /> }
@@ -133,6 +134,7 @@ const EditInventory = Loadable(lazy(() => import("../pages/Inventory/Edit")));
 const Staff = Loadable(lazy(() => import("../pages/Staff")));
 const Reports = Loadable(lazy(() => import("../pages/Reports")));
 const AdminSettings = Loadable(lazy(() => import("../pages/AdminSettings")));
+const StaffSettings = Loadable(lazy(() => import("../pages/StaffSettings")));
 const Staffs = Loadable(lazy(() => import("../pages/Staffs/Table")));
 const AddStaff = Loadable(lazy(() => import("../pages/Staffs/Add")));
 const EditStaff = Loadable(lazy(() => import("../pages/Staffs/Edit")));

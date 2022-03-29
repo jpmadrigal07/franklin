@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { connect } from "react-redux";
 import { useMutation, useQuery } from "react-query";
 import { login } from "../utils/auth";
@@ -10,7 +10,9 @@ import Cookies from "js-cookie";
 import NavBar from "../components/NavBar";
 import { getAllFolder, addFolder } from "../utils/folder";
 import { getAllStaff } from "../utils/staff";
+import { updateUser } from "../utils/user";
 import Modal from "../components/Modal";
+import moment from "moment";
 
 const Login = (props: any) => {
   const { setAuthenticatedUser } = props;
@@ -60,12 +62,50 @@ const Login = (props: any) => {
           setIsFolderModalOpen(true);
         } else {
           Cookies.set("sessionToken", data.token);
+          setLoggedInId(_id);
           setAuthenticatedUser({
             id: _id,
             type: userType,
             name: data.name,
             username: username,
           });
+          triggerLastLogin({ lastLoggedIn: moment() });
+        }
+      },
+      onError: async (err: any) => {
+        MySwal.fire({
+          title: "Ooops!",
+          text: err,
+          icon: "error",
+          confirmButtonText: "Okay",
+          confirmButtonColor: "#274c77",
+        });
+      },
+    }
+  );
+  const { mutate: triggerLastLogin } = useMutation(
+    async (user: any) => updateUser(user, loggedInId),
+    {
+      onSuccess: async () => {
+        if (isFolderModalOpen) {
+          MySwal.fire({
+            title: "Folder of the day has been set!",
+            text: "You are now authenticated",
+            icon: "success",
+            allowOutsideClick: false,
+            showConfirmButton: false,
+            timer: 3000,
+          }).then(() => {
+            Cookies.set("sessionToken", loggedInToken);
+            setAuthenticatedUser({
+              id: loggedInId,
+              type: loggedInUserType,
+              name: loggedInName,
+              username: loggedInUsername,
+            });
+            navigate("/dashboard");
+          });
+        } else {
           navigate("/dashboard");
         }
       },
@@ -83,23 +123,7 @@ const Login = (props: any) => {
   const { mutate: triggerAddFolder, isLoading: isAddFolderLoading } =
     useMutation(async (folder: any) => addFolder(folder), {
       onSuccess: async () => {
-        MySwal.fire({
-          title: "Folder of the day has been set!",
-          text: "You are now authenticated",
-          icon: "success",
-          allowOutsideClick: false,
-          showConfirmButton: false,
-          timer: 3000,
-        }).then(() => {
-          Cookies.set("sessionToken", loggedInToken);
-          setAuthenticatedUser({
-            id: loggedInId,
-            type: loggedInUserType,
-            name: loggedInName,
-            username: loggedInUsername,
-          });
-          navigate("/dashboard");
-        });
+        triggerLastLogin({ lastLoggedIn: moment() });
       },
       onError: async (err: any) => {
         MySwal.fire({

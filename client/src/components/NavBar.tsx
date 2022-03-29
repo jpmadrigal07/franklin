@@ -8,6 +8,9 @@ import { verify } from "../utils/auth";
 import { useLocation, useNavigate } from "react-router-dom";
 import { setAuthenticatedUser } from "../actions/authenticatedUserActions";
 import Cookies from "js-cookie";
+import { updateUser } from "../utils/user";
+import Swal from "sweetalert2";
+import withReactContent from "sweetalert2-react-content";
 
 type T_MENU = {
   page: string;
@@ -16,7 +19,8 @@ type T_MENU = {
 };
 
 const NavBar = (props: any) => {
-  const { setAuthenticatedUser, name, isLogin } = props;
+  const { setAuthenticatedUser, loggedInName, loggedInId, isLogin } = props;
+  const MySwal = withReactContent(Swal);
   const router = useLocation();
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState("");
@@ -25,7 +29,7 @@ const NavBar = (props: any) => {
 
   const sessionToken = Cookies.get("sessionToken");
 
-  const loggedInName = name ? name : "Admin";
+  const updatedName = loggedInName ? loggedInName : "Admin";
 
   const { mutate: triggerTokenVerify, isLoading: isTokenVerifyLoading } =
     useMutation(async (tokenVerify: any) => verify(tokenVerify), {
@@ -52,6 +56,28 @@ const NavBar = (props: any) => {
   //   setTime(new Date().getTime());
   // }, 1000);
 
+  const { mutate: triggerLastLogin } = useMutation(
+    async (user: any) => updateUser(user, loggedInId),
+    {
+      onSuccess: async () => {
+        window.location.href = "/";
+      },
+      onError: async (err: any) => {
+        MySwal.fire({
+          title: "Ooops!",
+          text: err,
+          icon: "error",
+          confirmButtonColor: "#274c77",
+          allowOutsideClick: false,
+          showConfirmButton: false,
+          timer: 3000,
+        }).then(() => {
+          window.location.href = "/";
+        });
+      },
+    }
+  );
+
   useEffect(() => {
     setCurrentPage(router.pathname);
   }, [router.pathname]);
@@ -60,7 +86,7 @@ const NavBar = (props: any) => {
     if (sessionToken) {
       Cookies.remove("sessionToken");
       setAuthenticatedUser({});
-      window.location.href = "/";
+      triggerLastLogin({ lastLoggedOut: moment() });
     }
   };
 
@@ -75,16 +101,16 @@ const NavBar = (props: any) => {
           {!isLogin && (
             <div className="col-span-5 text-right">
               <span className="font-bold">
-                {isTokenVerifyLoading ? "Loading..." : `Hello ${loggedInName}!`}
+                {isTokenVerifyLoading ? "Loading..." : `Hello ${updatedName}!`}
               </span>
-              {loggedInUserType === "Admin" && (
-                <Icon
-                  icon="bi:gear"
-                  className="inline ml-6 hover:cursor-pointer"
-                  height={24}
-                  onClick={() => navigate("/adminsettings")}
-                />
-              )}
+              <Icon
+                icon="bi:gear"
+                className="inline ml-6 hover:cursor-pointer"
+                height={24}
+                onClick={() =>
+                  navigate(`/${loggedInUserType.toLowerCase()}settings`)
+                }
+              />
               <Icon
                 icon="bi:box-arrow-in-right"
                 className="inline ml-6 hover:cursor-pointer"
@@ -140,7 +166,8 @@ const NavBar = (props: any) => {
 };
 
 const mapStateToProps = (global: any) => ({
-  name: global.authenticatedUser.user.name,
+  loggedInName: global.authenticatedUser.user.name,
+  loggedInId: global.authenticatedUser.user.id,
 });
 
 export default connect(mapStateToProps, { setAuthenticatedUser })(NavBar);

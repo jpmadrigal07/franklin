@@ -84,7 +84,7 @@ const Edit = (props: any) => {
   useEffect(() => {
     if (staffData && staffData.length > 0) {
       const { userId, name } = staffData[0];
-      setUserId(userId);
+      setUserId(userId._id);
       setName(name);
     }
   }, [staffData]);
@@ -148,7 +148,7 @@ const Edit = (props: any) => {
   return (
     <>
       <h1 className="font-bold text-primary text-center mt-10 mb-10">
-        Add Staff
+        Edit Staff
       </h1>
       <form className="w-full">
         <div className="mb-3">
