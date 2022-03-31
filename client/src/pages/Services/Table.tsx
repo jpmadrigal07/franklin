@@ -365,7 +365,10 @@ const Table = (props: any) => {
       />
       <Modal
         state={isAdminPasswordModalOpen}
-        toggle={() => setIsAdminPasswordModal(!isAdminPasswordModalOpen)}
+        toggle={() => {
+          setIsAdminPasswordModal(!isAdminPasswordModalOpen);
+          setAdminPassword("");
+        }}
         title={<h3>Enter Password</h3>}
         content={
           <input

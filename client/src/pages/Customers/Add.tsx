@@ -11,6 +11,8 @@ import findInputError from "../../utils/findInputError";
 import clean from "../../utils/cleanObject";
 import { isBirthDateValid } from "../../utils/isDateValid";
 import { isValidPhoneNumber } from "libphonenumber-js";
+import validateEmail from "../../utils/validateEmail";
+import validateZipcode from "../../utils/validateZipcode";
 
 const Add = () => {
   const MySwal = withReactContent(Swal);
@@ -80,6 +82,8 @@ const Add = () => {
     const isBdateValid = isBirthDateValid(
       `${bdMonth}/${bdDay}/${bdYear ? bdYear : "1970"}`
     );
+    const isZipcodeValid = validateZipcode(postalZipcode);
+    const isEmailValid = validateEmail(email);
     const isPhoneNumberValid = contactNumber
       ? isValidPhoneNumber(contactNumber, "PH")
       : false;
@@ -88,7 +92,12 @@ const Add = () => {
       : false;
     const errors = validatedData ? getErrorsFromValidation(validatedData) : [];
     let customErrors: any[] = [];
-    if (!isBdateValid || !isPhoneNumberValid) {
+    if (
+      !isBdateValid ||
+      !isPhoneNumberValid ||
+      !isZipcodeValid ||
+      !isEmailValid
+    ) {
       if (
         !isBdateValid ||
         typeof bdMonth === "string" ||
@@ -113,6 +122,24 @@ const Add = () => {
           {
             input: "contactNumber",
             errorMessage: "Invalid Mobile Number",
+          },
+        ];
+      }
+      if (postalZipcode && !isZipcodeValid) {
+        customErrors = [
+          ...customErrors,
+          {
+            input: "postalZipcode",
+            errorMessage: "Invalid zipcode",
+          },
+        ];
+      }
+      if (email && !isEmailValid) {
+        customErrors = [
+          ...customErrors,
+          {
+            input: "email",
+            errorMessage: "Invalid email",
           },
         ];
       }

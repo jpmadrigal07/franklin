@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.0.8
+
+- Fix modal click x persist password for admin
+- Fix email and zipcode required add customer
+
 ## 3.0.7
 
 - Added lastLoggedIn and lastLoggedOut functionality
