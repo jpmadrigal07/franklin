@@ -1,6 +1,6 @@
 {
   "name": "franklin",
-  "version": "3.0.8",
+  "version": "3.0.9",
   "description": "Develop by John Madrigal for Franklin's Dry and Wash Fold. To contact the developer, you can message him through Messenger.",
   "main": "server.js",
   "scripts": {

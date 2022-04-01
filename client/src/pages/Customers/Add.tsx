@@ -98,12 +98,7 @@ const Add = () => {
       !isZipcodeValid ||
       !isEmailValid
     ) {
-      if (
-        !isBdateValid ||
-        typeof bdMonth === "string" ||
-        typeof bdDay === "string" ||
-        typeof bdYear === "string"
-      ) {
+      if (!isBdateValid) {
         const bdateError = [
           {
             input: "bdMonth",

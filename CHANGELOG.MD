@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.0.9
+
+- Fix birthdate does not accepting any value
+
 ## 3.0.8
 
 - Fix modal click x persist password for admin
