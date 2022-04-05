@@ -3,7 +3,8 @@ import { connect } from "react-redux";
 import { Icon } from "@iconify/react";
 import moment from "moment";
 import { NAVBAR_MENU } from "../constants";
-import { useMutation } from "react-query";
+import { useMutation, useQuery } from "react-query";
+import { getAllFolder } from "../utils/api/folder";
 import { verify } from "../utils/auth";
 import { useLocation, useNavigate } from "react-router-dom";
 import { setAuthenticatedUser } from "../actions/authenticatedUserActions";
@@ -47,6 +48,16 @@ const NavBar = (props: any) => {
         navigate("/");
       },
     });
+
+  const start = new Date().setHours(0, 0, 0, 0);
+  const end = new Date().setHours(23, 59, 59, 999);
+
+  const foldersCondition = `{ "createdAt": { "$gte": "${start}", "$lt": "${end}" }, "timeOut": { "$exists": false } }`;
+
+  const { data: folderData, isLoading: isFolderDataLoading } = useQuery(
+    "folders",
+    () => getAllFolder(foldersCondition)
+  );
 
   useEffect(() => {
     triggerTokenVerify({ token: sessionToken });
@@ -101,6 +112,13 @@ const NavBar = (props: any) => {
           {!isLogin && (
             <div className="col-span-5 text-right">
               <span className="font-bold">
+                {isFolderDataLoading
+                  ? "Loading..."
+                  : `(Folder: ${
+                      folderData[0] ? folderData[0]?.staffId?.name : "---"
+                    })`}
+              </span>
+              <span className="font-bold ml-6">
                 {isTokenVerifyLoading ? "Loading..." : `Hello ${updatedName}!`}
               </span>
               <Icon

@@ -60,12 +60,12 @@ router.post("/", async (req, res) => {
 // @desc    Add A User
 // @access  Private
 router.post("/verify-password", async (req, res) => {
-  const { password } = req.body;
-  if (password) {
+  const { username, password } = req.body;
+  if ((username, password)) {
     try {
       const getUser = await User.find({
+        username,
         password,
-        userType: "Admin",
         deletedAt: {
           $exists: false,
         },

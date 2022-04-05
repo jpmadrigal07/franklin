@@ -87,7 +87,23 @@ export default function Router() {
             { path: "edit/:id", element: <EditCustomer /> },
           ],
         },
-        { path: "orders", element: <Orders /> },
+        { path: "orders", element: <OrdersDropOff /> },
+        {
+          path: "orders",
+          children: [
+            { path: "dropoff", element: <OrdersDropOff /> },
+            {
+              path: "dropoff",
+              children: [{ path: "add", element: <OrdersAddDropOff /> }],
+            },
+            { path: "diy", element: <OrdersDiy /> },
+            {
+              path: "diy",
+              children: [{ path: "add", element: <OrdersAddDiy /> }],
+            },
+            { path: ":id", element: <ViewOrder /> },
+          ],
+        },
         { path: "inventory", element: <Inventory /> },
         {
           path: "inventory",
@@ -127,11 +143,18 @@ const EditCustomer = Loadable(lazy(() => import("../pages/Customers/Edit")));
 const ViewCustomer = Loadable(
   lazy(() => import("../pages/Customers/Customer"))
 );
-const Orders = Loadable(lazy(() => import("../pages/Orders")));
+const ViewOrder = Loadable(lazy(() => import("../pages/Orders/Order")));
+const OrdersDiy = Loadable(lazy(() => import("../pages/Orders/TableDiy")));
+const OrdersDropOff = Loadable(
+  lazy(() => import("../pages/Orders/TableDropOff"))
+);
+const OrdersAddDiy = Loadable(lazy(() => import("../pages/Orders/AddDiy")));
+const OrdersAddDropOff = Loadable(
+  lazy(() => import("../pages/Orders/AddDropOff"))
+);
 const Inventory = Loadable(lazy(() => import("../pages/Inventory/Table")));
 const AddInventory = Loadable(lazy(() => import("../pages/Inventory/Add")));
 const EditInventory = Loadable(lazy(() => import("../pages/Inventory/Edit")));
-const Staff = Loadable(lazy(() => import("../pages/Staff")));
 const Reports = Loadable(lazy(() => import("../pages/Reports")));
 const AdminSettings = Loadable(lazy(() => import("../pages/AdminSettings")));
 const StaffSettings = Loadable(lazy(() => import("../pages/StaffSettings")));

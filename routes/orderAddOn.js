@@ -1,12 +1,11 @@
 const express = require("express");
 const router = express.Router();
-const Folder = require("../models/folder");
+const OrderAddOn = require("../models/orderAddOn");
 const isEmpty = require("lodash/isEmpty");
 const { UNKNOW_ERROR_OCCURED } = require("../constants");
-const moment = require("moment");
 
-// @route   GET api/folder
-// @desc    Get All Folder
+// @route   GET api/orderAddOn
+// @desc    Get All OrderAddOn
 // @access  Public
 router.get("/", async (req, res) => {
   const condition = req.query.condition ? JSON.parse(req.query.condition) : {};
@@ -16,45 +15,45 @@ router.get("/", async (req, res) => {
     };
   }
   try {
-    const getAllFolder = await Folder.find(condition).populate("staffId").sort({
-      createdAt: -1,
-    });
-    res.json(getAllFolder);
+    const getAllOrderAddOn = await OrderAddOn.find(condition)
+      .populate("addOnId")
+      .sort({
+        createdAt: -1,
+      });
+    res.json(getAllOrderAddOn);
   } catch ({ message: errMessage }) {
     const message = errMessage ? errMessage : UNKNOW_ERROR_OCCURED;
     res.status(500).json(message);
   }
 });
 
-// @route   POST api/folder/add
-// @desc    Add A Folder
+// @route   POST api/orderAddOn/add
+// @desc    Add A OrderAddOn
 // @access  Private
 router.post("/", async (req, res) => {
-  const { staffId } = req.body;
+  const { jobOrderNumber, addOnId, machineNumber, qty, total } = req.body;
 
-  if (staffId) {
-    const newFolder = new Folder({
-      staffId,
-      timeIn: moment().toString(),
+  if (jobOrderNumber && addOnId && machineNumber && qty && total) {
+    const newOrderAddOn = new OrderAddOn({
+      jobOrderNumber,
+      addOnId,
+      machineNumber,
+      qty,
+      total,
     });
     try {
-      const getFolder = await Folder.find({
-        timeIn: {
-          $gte: new Date(moment().startOf("day").toString()),
-          $lt: new Date(moment().endOf("day").toString()),
-        },
-        timeOut: {
-          $exists: false,
-        },
+      const getOrderAddOn = await OrderAddOn.find({
+        jobOrderNumber,
+        addOnId,
         deletedAt: {
           $exists: false,
         },
       });
-      if (getFolder.length === 0) {
-        const createFolder = await newFolder.save();
-        res.json(createFolder);
+      if (getOrderAddOn.length === 0) {
+        const createOrderAddOn = await newOrderAddOn.save();
+        res.json(createOrderAddOn);
       } else {
-        throw new Error("There is an active folder today");
+        throw new Error("Add on already exist on the job order");
       }
     } catch ({ message: errMessage }) {
       const message = errMessage ? errMessage : UNKNOW_ERROR_OCCURED;
@@ -65,14 +64,14 @@ router.post("/", async (req, res) => {
   }
 });
 
-// @route   PATCH api/folder/:id
-// @desc    Update A Folder
+// @route   PATCH api/orderAddOn/:id
+// @desc    Update A OrderAddOn
 // @access  Private
 router.patch("/:id", async (req, res) => {
   const condition = req.body;
   if (!isEmpty(condition)) {
     try {
-      const updateFolder = await Folder.findByIdAndUpdate(
+      const updateOrderAddOn = await OrderAddOn.findByIdAndUpdate(
         req.params.id,
         {
           $set: condition,
@@ -80,36 +79,39 @@ router.patch("/:id", async (req, res) => {
         },
         { new: true }
       );
-      res.json(updateFolder);
+      res.json(updateOrderAddOn);
     } catch ({ message: errMessage }) {
       const message = errMessage ? errMessage : UNKNOW_ERROR_OCCURED;
       res.status(500).json(message);
     }
   } else {
-    res.status(500).json("Folder cannot be found");
+    res.status(500).json("Add on cannot be found");
   }
 });
 
-// @route   DELETE api/folder/:id
-// @desc    Delete A Folder
+// @route   DELETE api/orderAddOn/:id
+// @desc    Delete A OrderAddOn
 // @access  Private
 router.delete("/:id", async (req, res) => {
   try {
-    const getFolder = await Folder.find({
+    const getOrderAddOn = await OrderAddOn.find({
       _id: req.params.id,
       deletedAt: {
         $exists: false,
       },
     });
-    if (getFolder.length > 0) {
-      const deleteFolder = await Folder.findByIdAndUpdate(req.params.id, {
-        $set: {
-          deletedAt: Date.now(),
-        },
-      });
-      res.json(deleteFolder);
+    if (getOrderAddOn.length > 0) {
+      const deleteOrderAddOn = await OrderAddOn.findByIdAndUpdate(
+        req.params.id,
+        {
+          $set: {
+            deletedAt: Date.now(),
+          },
+        }
+      );
+      res.json(deleteOrderAddOn);
     } else {
-      throw new Error("Folder is already deleted");
+      throw new Error("Add on is already deleted");
     }
   } catch ({ message: errMessage }) {
     const message = errMessage ? errMessage : UNKNOW_ERROR_OCCURED;

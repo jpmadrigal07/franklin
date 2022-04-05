@@ -22,7 +22,7 @@ type T_Header = {
 };
 
 const Table = (props: any) => {
-  const { loggedInUserType } = props;
+  const { loggedInUserType, loggedInUserUsername } = props;
   const navigate = useNavigate();
   const MySwal = withReactContent(Swal);
   const [wash, setWash] = useState([]);
@@ -386,7 +386,12 @@ const Table = (props: any) => {
           <>
             <button
               className="bg-primary text-white pt-1 pl-5 pb-1 pr-5 rounded-xl mr-3"
-              onClick={() => triggerVerifyPassword({ password: adminPassword })}
+              onClick={() =>
+                triggerVerifyPassword({
+                  username: loggedInUserUsername,
+                  password: adminPassword,
+                })
+              }
               disabled={isVerifyPasswordLoading || isDeleteServicesLoading}
             >
               Confirm
@@ -411,6 +416,7 @@ const Table = (props: any) => {
 
 const mapStateToProps = (global: any) => ({
   loggedInUserType: global.authenticatedUser.user.type,
+  loggedInUserUsername: global.authenticatedUser.user.username,
 });
 
 export default connect(mapStateToProps)(Table);

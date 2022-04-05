@@ -2,6 +2,10 @@ const mongoose = require("mongoose");
 const { Schema } = mongoose;
 
 const inventory = new Schema({
+  orderItemId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "_id",
+  },
   type: String,
   stockCode: String,
   name: String,

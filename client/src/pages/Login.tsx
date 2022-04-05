@@ -8,7 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { setAuthenticatedUser } from "../actions/authenticatedUserActions";
 import Cookies from "js-cookie";
 import NavBar from "../components/NavBar";
-import { getAllFolder, addFolder } from "../utils/folder";
+import { getAllFolder, addFolder } from "../utils/api/folder";
 import { getAllStaff } from "../utils/staff";
 import { updateUser } from "../utils/user";
 import Modal from "../components/Modal";

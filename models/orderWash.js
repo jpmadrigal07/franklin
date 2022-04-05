@@ -2,9 +2,13 @@ const mongoose = require("mongoose");
 const { Schema } = mongoose;
 
 const orderWash = new Schema({
-  jobOrder: {
+  jobOrderNumber: {
+    type: mongoose.Schema.Types.String,
+    ref: "Order",
+  },
+  washId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "jobOrder",
+    ref: "Wash",
   },
   machineNumber: Number,
   qty: Number,

@@ -1,12 +1,11 @@
 const express = require("express");
 const router = express.Router();
-const Folder = require("../models/folder");
+const OrderWash = require("../models/orderWash");
 const isEmpty = require("lodash/isEmpty");
 const { UNKNOW_ERROR_OCCURED } = require("../constants");
-const moment = require("moment");
 
-// @route   GET api/folder
-// @desc    Get All Folder
+// @route   GET api/orderWash
+// @desc    Get All OrderWash
 // @access  Public
 router.get("/", async (req, res) => {
   const condition = req.query.condition ? JSON.parse(req.query.condition) : {};
@@ -16,45 +15,45 @@ router.get("/", async (req, res) => {
     };
   }
   try {
-    const getAllFolder = await Folder.find(condition).populate("staffId").sort({
-      createdAt: -1,
-    });
-    res.json(getAllFolder);
+    const getAllOrderWash = await OrderWash.find(condition)
+      .populate("washId")
+      .sort({
+        createdAt: -1,
+      });
+    res.json(getAllOrderWash);
   } catch ({ message: errMessage }) {
     const message = errMessage ? errMessage : UNKNOW_ERROR_OCCURED;
     res.status(500).json(message);
   }
 });
 
-// @route   POST api/folder/add
-// @desc    Add A Folder
+// @route   POST api/orderWash/add
+// @desc    Add A OrderWash
 // @access  Private
 router.post("/", async (req, res) => {
-  const { staffId } = req.body;
+  const { jobOrderNumber, addOnId, machineNumber, qty, total } = req.body;
 
-  if (staffId) {
-    const newFolder = new Folder({
-      staffId,
-      timeIn: moment().toString(),
+  if (jobOrderNumber && addOnId && machineNumber && qty && total) {
+    const newOrderWash = new OrderWash({
+      jobOrderNumber,
+      addOnId,
+      machineNumber,
+      qty,
+      total,
     });
     try {
-      const getFolder = await Folder.find({
-        timeIn: {
-          $gte: new Date(moment().startOf("day").toString()),
-          $lt: new Date(moment().endOf("day").toString()),
-        },
-        timeOut: {
-          $exists: false,
-        },
+      const getOrderWash = await OrderWash.find({
+        jobOrderNumber,
+        addOnId,
         deletedAt: {
           $exists: false,
         },
       });
-      if (getFolder.length === 0) {
-        const createFolder = await newFolder.save();
-        res.json(createFolder);
+      if (getOrderWash.length === 0) {
+        const createOrderWash = await newOrderWash.save();
+        res.json(createOrderWash);
       } else {
-        throw new Error("There is an active folder today");
+        throw new Error("Wash already exist on the job order");
       }
     } catch ({ message: errMessage }) {
       const message = errMessage ? errMessage : UNKNOW_ERROR_OCCURED;
@@ -65,14 +64,14 @@ router.post("/", async (req, res) => {
   }
 });
 
-// @route   PATCH api/folder/:id
-// @desc    Update A Folder
+// @route   PATCH api/orderWash/:id
+// @desc    Update A OrderWash
 // @access  Private
 router.patch("/:id", async (req, res) => {
   const condition = req.body;
   if (!isEmpty(condition)) {
     try {
-      const updateFolder = await Folder.findByIdAndUpdate(
+      const updateOrderWash = await OrderWash.findByIdAndUpdate(
         req.params.id,
         {
           $set: condition,
@@ -80,36 +79,36 @@ router.patch("/:id", async (req, res) => {
         },
         { new: true }
       );
-      res.json(updateFolder);
+      res.json(updateOrderWash);
     } catch ({ message: errMessage }) {
       const message = errMessage ? errMessage : UNKNOW_ERROR_OCCURED;
       res.status(500).json(message);
     }
   } else {
-    res.status(500).json("Folder cannot be found");
+    res.status(500).json("Wash cannot be found");
   }
 });
 
-// @route   DELETE api/folder/:id
-// @desc    Delete A Folder
+// @route   DELETE api/orderWash/:id
+// @desc    Delete A OrderWash
 // @access  Private
 router.delete("/:id", async (req, res) => {
   try {
-    const getFolder = await Folder.find({
+    const getOrderWash = await OrderWash.find({
       _id: req.params.id,
       deletedAt: {
         $exists: false,
       },
     });
-    if (getFolder.length > 0) {
-      const deleteFolder = await Folder.findByIdAndUpdate(req.params.id, {
+    if (getOrderWash.length > 0) {
+      const deleteOrderWash = await OrderWash.findByIdAndUpdate(req.params.id, {
         $set: {
           deletedAt: Date.now(),
         },
       });
-      res.json(deleteFolder);
+      res.json(deleteOrderWash);
     } else {
-      throw new Error("Folder is already deleted");
+      throw new Error("Wash is already deleted");
     }
   } catch ({ message: errMessage }) {
     const message = errMessage ? errMessage : UNKNOW_ERROR_OCCURED;

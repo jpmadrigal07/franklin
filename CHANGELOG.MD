@@ -1,5 +1,17 @@
 # Changelog
 
+## 3.0.10
+
+- Added Order DropOff Page
+- Added Order DIY Page
+- Added Order DropOff View Order Page
+- Added Order DIY Page View Order Page
+- Added current folder on NavBar
+- Change password confirm to base on current loggedin user username
+- Added Folder table on Settings for admin and staff account
+- Added the ability of all user type to change the current folder of the day
+- Added password confirm on change current folder of the day
+
 ## 3.0.9
 
 - Fix birthdate does not accepting any value
