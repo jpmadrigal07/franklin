@@ -1,5 +1,17 @@
 # Changelog
 
+## 3.0.11
+
+- Added Order DIY Table page
+- Added Order Drop Off Table page
+- Added seed data for zonrox, fabcon, detergent
+- Added cancel function for orders table
+- Added order view data page
+- Added dashboard buttons
+- Added customer orders table on customer view
+- Added Add DIY and Add Drop off navigate function
+- Added deduction on inventory when creating an order
+
 ## 3.0.10
 
 - Added Order DropOff Page

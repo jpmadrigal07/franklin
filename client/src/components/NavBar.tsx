@@ -115,7 +115,9 @@ const NavBar = (props: any) => {
                 {isFolderDataLoading
                   ? "Loading..."
                   : `(Folder: ${
-                      folderData[0] ? folderData[0]?.staffId?.name : "---"
+                      folderData.length > 0
+                        ? folderData[0]?.staffId?.name
+                        : "---"
                     })`}
               </span>
               <span className="font-bold ml-6">

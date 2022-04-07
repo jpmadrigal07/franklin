@@ -31,35 +31,41 @@ router.get("/", async (req, res) => {
 // @desc    Add A OrderDiscount
 // @access  Private
 router.post("/", async (req, res) => {
-  const { jobOrderNumber, addOnId, qty, total } = req.body;
+  const { jobOrderNumber, discountId, qty, total } = req.body;
 
-  if (jobOrderNumber && addOnId && machineNumber && qty && total) {
+  if (jobOrderNumber && discountId && qty && total) {
     const newOrderDiscount = new OrderDiscount({
       jobOrderNumber,
-      addOnId,
+      discountId,
       qty,
       total,
     });
     try {
-      const getOrderDiscount = await OrderDiscount.find({
-        jobOrderNumber,
-        addOnId,
-        deletedAt: {
-          $exists: false,
-        },
-      });
-      if (getOrderDiscount.length === 0) {
-        const createOrderDiscount = await newOrderDiscount.save();
-        res.json(createOrderDiscount);
-      } else {
-        throw new Error("Discount already exist on the job order");
-      }
+      const createOrderDiscount = await newOrderDiscount.save();
+      res.json(createOrderDiscount);
     } catch ({ message: errMessage }) {
       const message = errMessage ? errMessage : UNKNOW_ERROR_OCCURED;
       res.status(500).json(message);
     }
   } else {
     res.status(500).json("Required values are empty");
+  }
+});
+
+// @route   POST api/orderAddOn/add
+// @desc    Add A OrderAddOn
+// @access  Private
+router.post("/bulk", async (req, res) => {
+  const { bulk } = req.body;
+
+  try {
+    const buldOrderDiscount = await OrderDiscount.insertMany(bulk, {
+      ordered: false,
+    });
+    res.json(buldOrderDiscount);
+  } catch ({ message: errMessage }) {
+    const message = errMessage ? errMessage : UNKNOW_ERROR_OCCURED;
+    res.status(500).json(message);
   }
 });
 

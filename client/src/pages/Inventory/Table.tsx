@@ -39,7 +39,7 @@ const Table = (props: any) => {
     data: inventoryData,
     isLoading: isInventoryDataLoading,
     refetch: refetchInventoryData,
-  } = useQuery("inventories", () => getAllInventory());
+  } = useQuery("inventory", () => getAllInventory());
 
   const {
     mutate: triggerDeleteInventory,

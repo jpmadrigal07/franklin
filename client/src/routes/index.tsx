@@ -94,14 +94,21 @@ export default function Router() {
             { path: "dropoff", element: <OrdersDropOff /> },
             {
               path: "dropoff",
-              children: [{ path: "add", element: <OrdersAddDropOff /> }],
+              children: [
+                { path: "add", element: <OrdersAddDropOff /> },
+                { path: "add/:id", element: <OrdersAddDropOff /> },
+              ],
             },
             { path: "diy", element: <OrdersDiy /> },
             {
               path: "diy",
-              children: [{ path: "add", element: <OrdersAddDiy /> }],
+              children: [
+                { path: "add", element: <OrdersAddDiy /> },
+                { path: "add/:id", element: <OrdersAddDiy /> },
+              ],
             },
             { path: ":id", element: <ViewOrder /> },
+            { path: "print/:id", element: <h1>Print page</h1> },
           ],
         },
         { path: "inventory", element: <Inventory /> },

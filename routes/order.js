@@ -32,16 +32,45 @@ router.get("/", async (req, res) => {
 // @desc    Add A Order
 // @access  Private
 router.post("/", async (req, res) => {
-  const { type, price } = req.body;
+  const {
+    staffId,
+    laundryId,
+    customerId,
+    jobOrderNumber,
+    weight,
+    amountDue,
+    orderReceived,
+    washCompleted,
+    dryCompleted,
+    foldCompleted,
+    payment,
+    release,
+    paidStatus,
+    orderStatus,
+    claimStatus,
+  } = req.body;
 
-  if (type && price) {
+  if (staffId && customerId && jobOrderNumber && weight) {
     const newOrder = new Order({
-      type,
-      price,
+      staffId,
+      customerId,
+      jobOrderNumber,
+      laundryId,
+      weight,
+      amountDue,
+      orderReceived,
+      washCompleted,
+      dryCompleted,
+      foldCompleted,
+      payment,
+      release,
+      paidStatus,
+      orderStatus,
+      claimStatus,
     });
     try {
       const getOrder = await Order.find({
-        type,
+        jobOrderNumber,
         deletedAt: {
           $exists: false,
         },
@@ -50,7 +79,7 @@ router.post("/", async (req, res) => {
         const createOrder = await newOrder.save();
         res.json(createOrder);
       } else {
-        throw new Error("Name must be unique");
+        throw new Error("Order must be unique");
       }
     } catch ({ message: errMessage }) {
       const message = errMessage ? errMessage : UNKNOW_ERROR_OCCURED;

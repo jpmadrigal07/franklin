@@ -31,12 +31,12 @@ router.get("/", async (req, res) => {
 // @desc    Add A OrderWash
 // @access  Private
 router.post("/", async (req, res) => {
-  const { jobOrderNumber, addOnId, machineNumber, qty, total } = req.body;
+  const { jobOrderNumber, washId, machineNumber, qty, total } = req.body;
 
-  if (jobOrderNumber && addOnId && machineNumber && qty && total) {
+  if (jobOrderNumber && washId && machineNumber && qty && total) {
     const newOrderWash = new OrderWash({
       jobOrderNumber,
-      addOnId,
+      washId,
       machineNumber,
       qty,
       total,
@@ -44,7 +44,7 @@ router.post("/", async (req, res) => {
     try {
       const getOrderWash = await OrderWash.find({
         jobOrderNumber,
-        addOnId,
+        washId,
         deletedAt: {
           $exists: false,
         },

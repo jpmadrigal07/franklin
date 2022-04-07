@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { connect } from "react-redux";
-import { getAllOrder } from "../../utils/order";
+import { getAllOrder, updateOrder } from "../../utils/order";
 import { Icon } from "@iconify/react";
 import { useNavigate } from "react-router-dom";
 import { useMutation, useQuery } from "react-query";
@@ -24,6 +24,9 @@ const TableDropOff = (props: any) => {
   const MySwal = withReactContent(Swal);
   const [order, setOrder] = useState([]);
   const [searchPhrase, setSearchPhrase] = useState("");
+  const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
+  const [selectedJobOrderNumber, setSelectedJobOrderNumber] = useState("");
+  const [selectedOrderId, setSelectedOrderId] = useState("");
 
   const {
     data: orderData,
@@ -32,6 +35,32 @@ const TableDropOff = (props: any) => {
   } = useQuery("ordersDiy", () =>
     getAllOrder(`{"laundryId": { "$exists": false}}`)
   );
+
+  const { mutate: triggerUpdateOrder, isLoading: isUpdateOrderLoading } =
+    useMutation(async (order: any) => updateOrder(order, selectedOrderId), {
+      onSuccess: async () => {
+        setSelectedJobOrderNumber("");
+        setSelectedOrderId("");
+        setIsCancelModalOpen(false);
+        refetchOrderData();
+        MySwal.fire({
+          title: "Update success!",
+          text: "Order has been updated",
+          icon: "success",
+          timer: 2500,
+          showConfirmButton: false,
+        });
+      },
+      onError: async (err: any) => {
+        MySwal.fire({
+          title: "Ooops!",
+          text: err,
+          icon: "warning",
+          confirmButtonText: "Okay",
+          confirmButtonColor: "#274c77",
+        });
+      },
+    });
 
   const tableHeader = useMemo(
     () => [
@@ -59,14 +88,16 @@ const TableDropOff = (props: any) => {
               if (res3 === "Cancel") {
                 return _constructTableActions(
                   res3,
-                  () => navigate(`/order/edit/${res._id}`),
-                  false
+                  () => _cancelOrder(res.jobOrderNumber, res._id),
+                  false,
+                  res.orderStatus === "Canceled"
                 );
               } else if (res3 === "Print") {
                 return _constructTableActions(
                   res3,
-                  () => console.log("click"),
-                  true
+                  () => window.open(`/orders/print/${res._id}`, "_blank"),
+                  true,
+                  res.orderStatus === "Canceled"
                 );
               }
             });
@@ -122,7 +153,9 @@ const TableDropOff = (props: any) => {
     } else {
       if (orderData && orderData.length > 0) {
         const filteredorderData = orderData.filter((res: any) =>
-          res.name.toLowerCase().includes(searchPhrase.toLowerCase())
+          res.customerId.firstName
+            .toLowerCase()
+            .includes(searchPhrase.toLowerCase())
         );
         setOrder(_remappedData(filteredorderData));
       }
@@ -134,6 +167,12 @@ const TableDropOff = (props: any) => {
       setOrder(_remappedData(orderData));
     }
   }, [orderData, _remappedData]);
+
+  const _cancelOrder = (jobOrderNumber: string, orderId: string) => {
+    setSelectedJobOrderNumber(jobOrderNumber);
+    setSelectedOrderId(orderId);
+    setIsCancelModalOpen(true);
+  };
 
   return (
     <>
@@ -169,6 +208,33 @@ const TableDropOff = (props: any) => {
         header={tableHeader}
         isLoading={isorderDataLoading}
         data={order}
+      />
+      <Modal
+        state={isCancelModalOpen}
+        toggle={() => setIsCancelModalOpen(!isCancelModalOpen)}
+        title={<h3>Cancel Order</h3>}
+        content={
+          <h5>{`Are you sure you want to cancel ${selectedJobOrderNumber}?`}</h5>
+        }
+        footer={
+          <>
+            <button
+              className="bg-primary text-white pt-1 pl-5 pb-1 pr-5 rounded-xl mr-3"
+              onClick={() => triggerUpdateOrder({ orderStatus: "Canceled" })}
+              disabled={isUpdateOrderLoading}
+            >
+              Yes
+            </button>
+            <button
+              className="pt-1 pl-5 pb-1 pr-5 rounded-xl bg-white border-2 border-primary text-primary"
+              onClick={() => setIsCancelModalOpen(!isCancelModalOpen)}
+              disabled={isUpdateOrderLoading}
+            >
+              No
+            </button>
+          </>
+        }
+        size="sm"
       />
     </>
   );

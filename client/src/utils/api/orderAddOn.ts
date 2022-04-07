@@ -14,5 +14,7 @@ export const getAllOrderAddOn = (conditions: string = "") =>
   apiCall(`${BASE}${addCondition(conditions)}`);
 export const addOrderAddOn = (body: any = null) =>
   apiCall(`${BASE}`, POST_HEADERS, "POST", body);
+export const bulkAddOrderAddOn = (body: any = null) =>
+  apiCall(`${BASE}/bulk`, POST_HEADERS, "POST", body);
 export const updateOrderAddOn = (body: any = null, id: string = "") =>
   apiCall(`${BASE}/${id}`, POST_HEADERS, "PATCH", body);

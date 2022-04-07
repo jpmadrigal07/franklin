@@ -1,5 +1,5 @@
 import { useNavigate, useParams } from "react-router-dom";
-import { useQuery } from "react-query";
+import { useQuery, useQueryClient } from "react-query";
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { getAllOrder } from "../../utils/order";
 import { getAllOrderDiscount } from "../../utils/api/orderDiscount";
@@ -10,6 +10,7 @@ import { getAllOrderAddOn } from "../../utils/api/orderAddOn";
 import { dateSlashWithTime } from "../../utils/formatDate";
 import numberWithCommas from "../../utils/numberWithCommas";
 import DataTable from "../../components/Table";
+import { getAllOrderItem } from "../../utils/api/orderItem";
 
 type T_Header = {
   header: string;
@@ -19,12 +20,14 @@ type T_Header = {
 const Order = () => {
   const { id: paramId } = useParams();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [orderDataObj, setOrderDataObj] = useState<any>({});
   const [orderWashDataRemapped, setOrderWashDataRemapped] = useState<any>([]);
   const [orderDryDataRemapped, setOrderDryDataRemapped] = useState<any>([]);
   const [orderAddOnDataRemapped, setOrderAddOnDataRemapped] = useState<any>([]);
   const [orderDiscountDataRemapped, setOrderDiscountDataRemapped] =
     useState<any>([]);
+  const [orderItemDataRemapped, setOrderItemDataRemapped] = useState<any>([]);
   const [dropOffFee, setDropOffFee] = useState<any>({});
   const [payment, setPayment] = useState<any>({});
 
@@ -37,7 +40,7 @@ const Order = () => {
     data: laundryData,
     isLoading: isLaundryLoading,
     refetch: refetchLaundryData,
-  } = useQuery("laundry", () => getAllLaundry(`{"type":"Drop Off Fee"}`), {
+  } = useQuery("dropOffFee", () => getAllLaundry(`{"type":"Drop Off Fee"}`), {
     enabled: false,
   });
 
@@ -61,11 +64,19 @@ const Order = () => {
       getAllOrderDiscount(`{"jobOrderNumber":"${paramId}"}`)
     );
 
+  const { data: orderItemData, isLoading: isOrderItemLoading } = useQuery(
+    "orderItem",
+    () => getAllOrderItem(`{"jobOrderNumber":"${paramId}"}`)
+  );
+
   useEffect(() => {
     if (orderDataObj.laundryId) {
       refetchLaundryData();
     }
-  }, [orderDataObj, refetchLaundryData]);
+    return () => {
+      queryClient.removeQueries("dropOffFee");
+    };
+  }, [orderDataObj, refetchLaundryData, queryClient]);
 
   useEffect(() => {
     if (laundryData && laundryData.length > 0) {
@@ -79,19 +90,26 @@ const Order = () => {
           : "",
       });
     }
+    return () => {
+      setDropOffFee({});
+    };
   }, [laundryData]);
-
-  useEffect(() => {
-    if (orderData && orderData.length > 0) {
-      setOrderDataObj(orderData[0]);
-    }
-  }, [orderData]);
 
   const tableHeader = useMemo(
     () => [
       { header: "Qty", dataName: "qty" },
       { header: "Service", dataName: "type" },
       { header: "Machine", dataName: "machineNumber" },
+      { header: "Subtotal", dataName: "total" },
+    ],
+    []
+  );
+
+  const tableHeaderItems = useMemo(
+    () => [
+      { header: "Qty", dataName: "qty" },
+      { header: "Type", dataName: "type" },
+      { header: "Name", dataName: "name" },
       { header: "Subtotal", dataName: "total" },
     ],
     []
@@ -117,6 +135,7 @@ const Order = () => {
   const tableHeaderPayment = useMemo(
     () => [
       { header: "Services Total", dataName: "services" },
+      { header: "Items Total", dataName: "items" },
       { header: "Add Ons Total", dataName: "addOns" },
       { header: "Discounts Total", dataName: "discounts" },
       { header: "Grand Total", dataName: "grandTotal" },
@@ -124,68 +143,101 @@ const Order = () => {
     []
   );
 
-  const _remappedData = useCallback(
-    (data: any, type: string) => {
-      const newData = data.map((res: any) => {
-        const mainData = tableHeader.map((res2: any) => {
-          let value;
-          if (res2.dataName === "total") {
-            value = res[res2.dataName]
-              ? `₱${numberWithCommas(res[res2.dataName])}`
-              : res[res2.dataName] === 0
-              ? `₱0.00`
-              : "";
-          } else if (res2.dataName === "type" && res[type]) {
-            value = res[type][res2.dataName] ? res[type][res2.dataName] : "";
-          } else {
-            value = res[res2.dataName] ? res[res2.dataName] : "";
-          }
-          return value;
-        });
-        const obj: any = {};
-        tableHeader.forEach((element: T_Header, index: number) => {
-          obj[element.dataName] = mainData[index];
-        });
-
-        return obj;
+  const _remappedData = useCallback((data: any, header: any, type: string) => {
+    const newData = data.map((res: any) => {
+      const mainData = header.map((res2: any) => {
+        let value;
+        if (res2.dataName === "total") {
+          value = res[res2.dataName]
+            ? `₱${numberWithCommas(
+                type === "inventoryId" ? res[res2.dataName] : res[res2.dataName]
+              )}`
+            : res[res2.dataName] === 0
+            ? `₱0.00`
+            : "";
+        } else if (res2.dataName === "type" && res[type]) {
+          value = res[type][res2.dataName] ? res[type][res2.dataName] : "";
+        } else if (res2.dataName === "name" && res[type]) {
+          value = res[type][res2.dataName] ? res[type][res2.dataName] : "";
+        } else {
+          value = res[res2.dataName] ? res[res2.dataName] : "";
+        }
+        return value;
+      });
+      const obj: any = {};
+      header.forEach((element: T_Header, index: number) => {
+        obj[element.dataName] = mainData[index];
       });
 
-      return newData;
-    },
-    [tableHeader]
-  );
+      return obj;
+    });
+
+    return newData;
+  }, []);
 
   useEffect(() => {
     if (orderData && orderData.length > 0) {
       setOrderDataObj(orderData[0]);
     }
+    return () => {
+      setOrderDataObj({});
+    };
   }, [orderData, _remappedData]);
 
   useEffect(() => {
     if (orderWashData && orderWashData.length > 0) {
-      setOrderWashDataRemapped(_remappedData(orderWashData, "washId"));
+      setOrderWashDataRemapped(
+        _remappedData(orderWashData, tableHeader, "washId")
+      );
     }
-  }, [orderWashData, _remappedData]);
+    return () => {
+      setOrderWashDataRemapped([]);
+    };
+  }, [orderWashData, tableHeader, _remappedData]);
 
   useEffect(() => {
     if (orderDryData && orderDryData.length > 0) {
-      setOrderDryDataRemapped(_remappedData(orderDryData, "dryId"));
+      setOrderDryDataRemapped(
+        _remappedData(orderDryData, tableHeader, "dryId")
+      );
     }
-  }, [orderDryData, _remappedData]);
+    return () => {
+      setOrderDryDataRemapped([]);
+    };
+  }, [orderDryData, tableHeader, _remappedData]);
 
   useEffect(() => {
     if (orderDiscountData && orderDiscountData.length > 0) {
       setOrderDiscountDataRemapped(
-        _remappedData(orderDiscountData, "discountId")
+        _remappedData(orderDiscountData, tableHeaderDiscounts, "discountId")
       );
     }
-  }, [orderDiscountData, _remappedData]);
+    return () => {
+      setOrderDiscountDataRemapped([]);
+    };
+  }, [orderDiscountData, tableHeaderDiscounts, _remappedData]);
+
+  useEffect(() => {
+    if (orderItemData && orderItemData.length > 0) {
+      setOrderItemDataRemapped(
+        _remappedData(orderItemData, tableHeaderItems, "inventoryId")
+      );
+    }
+    return () => {
+      setOrderItemDataRemapped([]);
+    };
+  }, [orderItemData, tableHeaderItems, _remappedData]);
 
   useEffect(() => {
     if (orderAddOnData && orderAddOnData.length > 0) {
-      setOrderAddOnDataRemapped(_remappedData(orderAddOnData, "addOnId"));
+      setOrderAddOnDataRemapped(
+        _remappedData(orderAddOnData, tableHeaderAddOn, "addOnId")
+      );
     }
-  }, [orderAddOnData, _remappedData]);
+    return () => {
+      setOrderAddOnDataRemapped([]);
+    };
+  }, [orderAddOnData, tableHeaderAddOn, _remappedData]);
 
   const services = useMemo(
     () => [...orderDryDataRemapped, ...orderWashDataRemapped],
@@ -202,31 +254,50 @@ const Order = () => {
 
   useEffect(() => {
     const servicesTotal =
-      services.length > 0 &&
-      services.reduce(function (a: any, b: any) {
-        return a + parseFloat(b.total ? b.total.substring(1) : 0);
-      }, 0);
+      services.length > 0
+        ? services.reduce(function (a: any, b: any) {
+            const total = b.total
+              ? b.total.replace("₱", "").replace(",", "")
+              : "0";
+            return a + parseFloat(total);
+          }, 0)
+        : 0;
+    const itemsTotal =
+      orderItemDataRemapped.length > 0
+        ? orderItemDataRemapped.reduce(function (a: any, b: any) {
+            const total = b.total
+              ? b.total.replace("₱", "").replace(",", "")
+              : "0";
+            return a + parseFloat(total);
+          }, 0)
+        : 0;
     const addOnsTotal =
-      addOns.length > 0 &&
-      addOns.reduce(function (a: any, b: any) {
-        return a + parseFloat(b.total ? b.total.substring(1) : 0);
-      }, 0);
+      addOns.length > 0
+        ? addOns.reduce(function (a: any, b: any) {
+            const total = b.total
+              ? b.total.replace("₱", "").replace(",", "")
+              : "0";
+            return a + parseFloat(total);
+          }, 0)
+        : 0;
     const discountTotal =
-      orderDiscountDataRemapped.length > 0 &&
-      orderDiscountDataRemapped.reduce(function (a: any, b: any) {
-        return a + parseFloat(b.total ? b.total.substring(1) : 0);
-      }, 0);
+      orderDiscountDataRemapped.length > 0
+        ? orderDiscountDataRemapped.reduce(function (a: any, b: any) {
+            const total = b.total
+              ? b.total.replace("₱", "").replace(",", "")
+              : "0";
+            return a + parseFloat(total);
+          }, 0)
+        : 0;
+    const pay = servicesTotal + itemsTotal + addOnsTotal - discountTotal;
     setPayment({
       services: `₱${servicesTotal ? numberWithCommas(servicesTotal) : "0.00"}`,
+      items: `₱${itemsTotal ? numberWithCommas(itemsTotal) : "0.00"}`,
       addOns: `₱${addOnsTotal ? numberWithCommas(addOnsTotal) : "0.00"}`,
       discounts: `₱${discountTotal ? numberWithCommas(discountTotal) : "0.00"}`,
-      grandTotal: `₱${
-        servicesTotal + addOnsTotal - discountTotal
-          ? numberWithCommas(servicesTotal + addOnsTotal - discountTotal)
-          : "0.00"
-      }`,
+      grandTotal: `₱${pay > 0 ? numberWithCommas(pay) : "0.00"}`,
     });
-  }, [orderDiscountDataRemapped, services, addOns]);
+  }, [orderDiscountDataRemapped, orderItemDataRemapped, services, addOns]);
 
   return (
     <>
@@ -307,7 +378,11 @@ const Order = () => {
           <div>
             <p className="font-bold">
               <span className="font-bold text-primary">Cashier:</span>{" "}
-              {!isOrderLoading ? orderDataObj?.staffId?.name : "..."}
+              {!isOrderLoading
+                ? orderDataObj?.staffId
+                  ? orderDataObj?.staffId?.name
+                  : "Admin"
+                : "..."}
             </p>
           </div>
           <div>
@@ -324,7 +399,7 @@ const Order = () => {
         <div className="flex justify-between mb-10">
           <div>
             <p className="font-bold">
-              <span className="font-bold text-primary">Staff:</span> Wala pa
+              <span className="font-bold text-primary">Staff:</span> ---
             </p>
           </div>
           <div>
@@ -343,6 +418,12 @@ const Order = () => {
           header={tableHeader}
           isLoading={isOrderLoading || isOrderDryLoading || isOrderWashLoading}
           data={services}
+        />
+        <h4 className="font-bold text-primary mt-10">Items</h4>
+        <DataTable
+          header={tableHeaderItems}
+          isLoading={isOrderLoading || isOrderItemLoading}
+          data={orderItemDataRemapped}
         />
         <h4 className="font-bold text-primary mt-10">Add-ons</h4>
         <DataTable

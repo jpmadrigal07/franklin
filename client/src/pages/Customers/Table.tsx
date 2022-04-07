@@ -138,9 +138,17 @@ const Table = (props: any) => {
         } else if (res2.dataName === "frontActions") {
           value = tableFrontActions.map((res3: any) => {
             if (res3 === "New DIY") {
-              return _constructTableActions(res3, null, false);
+              return _constructTableActions(
+                res3,
+                () => navigate(`/orders/diy/add/${res._id}`),
+                false
+              );
             } else if (res3 === "New DO") {
-              return _constructTableActions(res3, null, true);
+              return _constructTableActions(
+                res3,
+                () => navigate(`/orders/dropoff/add/${res._id}`),
+                true
+              );
             }
           });
         } else if (res2.dataName === "endActions") {

@@ -59,7 +59,7 @@ const Table = (props: any) => {
     data: discountsData,
     isLoading: isDiscountsDataLoading,
     refetch: refetchDiscountsData,
-  } = useQuery("discounts", () => getAllDiscount());
+  } = useQuery("discount", () => getAllDiscount());
 
   const { data: laundryData, isLoading: isLaundryDataLoading } = useQuery(
     "laundry",

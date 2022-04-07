@@ -1,11 +1,12 @@
 const express = require("express");
 const router = express.Router();
-const OrderAddOn = require("../models/orderAddOn");
+const OrderItem = require("../models/orderItem");
+const Inventory = require("../models/inventory");
 const isEmpty = require("lodash/isEmpty");
 const { UNKNOW_ERROR_OCCURED } = require("../constants");
 
-// @route   GET api/orderAddOn
-// @desc    Get All OrderAddOn
+// @route   GET api/orderItem
+// @desc    Get All OrderItem
 // @access  Public
 router.get("/", async (req, res) => {
   const condition = req.query.condition ? JSON.parse(req.query.condition) : {};
@@ -15,35 +16,53 @@ router.get("/", async (req, res) => {
     };
   }
   try {
-    const getAllOrderAddOn = await OrderAddOn.find(condition)
-      .populate("addOnId")
+    const getAllOrderItem = await OrderItem.find(condition)
+      .populate("inventoryId")
       .sort({
         createdAt: -1,
       });
-    res.json(getAllOrderAddOn);
+    res.json(getAllOrderItem);
   } catch ({ message: errMessage }) {
     const message = errMessage ? errMessage : UNKNOW_ERROR_OCCURED;
     res.status(500).json(message);
   }
 });
 
-// @route   POST api/orderAddOn/add
-// @desc    Add A OrderAddOn
+// @route   POST api/orderItem/add
+// @desc    Add A OrderItem
 // @access  Private
 router.post("/", async (req, res) => {
-  const { jobOrderNumber, addOnId, machineNumber, qty, total } = req.body;
+  const { jobOrderNumber, inventoryId, qty, total } = req.body;
 
-  if (jobOrderNumber && addOnId && machineNumber && qty && total) {
-    const newOrderAddOn = new OrderAddOn({
+  if (jobOrderNumber && inventoryId && qty && total) {
+    const newOrderItem = new OrderItem({
       jobOrderNumber,
-      addOnId,
-      machineNumber,
+      inventoryId,
       qty,
       total,
     });
     try {
-      const createOrderAddOn = await newOrderAddOn.save();
-      res.json(createOrderAddOn);
+      const getOrderItem = await OrderItem.find({
+        jobOrderNumber,
+        inventoryId,
+        qty,
+        total,
+        deletedAt: {
+          $exists: false,
+        },
+      });
+      if (getOrderItem.length === 0) {
+        const createOrderItem = await newOrderItem.save();
+        if (createOrderItem) {
+          await Inventory.updateOne(
+            { _id: inventoryId },
+            { $inc: { stock: -Math.abs(qty) } }
+          );
+        }
+        res.json(createOrderItem);
+      } else {
+        throw new Error("Inventory already exist on the job order");
+      }
     } catch ({ message: errMessage }) {
       const message = errMessage ? errMessage : UNKNOW_ERROR_OCCURED;
       res.status(500).json(message);
@@ -53,31 +72,14 @@ router.post("/", async (req, res) => {
   }
 });
 
-// @route   POST api/orderAddOn/add
-// @desc    Add A OrderAddOn
-// @access  Private
-router.post("/bulk", async (req, res) => {
-  const { bulk } = req.body;
-
-  try {
-    const bulkOrderAddOn = await OrderAddOn.insertMany(bulk, {
-      ordered: false,
-    });
-    res.json(bulkOrderAddOn);
-  } catch ({ message: errMessage }) {
-    const message = errMessage ? errMessage : UNKNOW_ERROR_OCCURED;
-    res.status(500).json(message);
-  }
-});
-
-// @route   PATCH api/orderAddOn/:id
-// @desc    Update A OrderAddOn
+// @route   PATCH api/orderItem/:id
+// @desc    Update A OrderItem
 // @access  Private
 router.patch("/:id", async (req, res) => {
   const condition = req.body;
   if (!isEmpty(condition)) {
     try {
-      const updateOrderAddOn = await OrderAddOn.findByIdAndUpdate(
+      const updateOrderItem = await OrderItem.findByIdAndUpdate(
         req.params.id,
         {
           $set: condition,
@@ -85,39 +87,36 @@ router.patch("/:id", async (req, res) => {
         },
         { new: true }
       );
-      res.json(updateOrderAddOn);
+      res.json(updateOrderItem);
     } catch ({ message: errMessage }) {
       const message = errMessage ? errMessage : UNKNOW_ERROR_OCCURED;
       res.status(500).json(message);
     }
   } else {
-    res.status(500).json("Add on cannot be found");
+    res.status(500).json("Item cannot be found");
   }
 });
 
-// @route   DELETE api/orderAddOn/:id
-// @desc    Delete A OrderAddOn
+// @route   DELETE api/orderItem/:id
+// @desc    Delete A OrderItem
 // @access  Private
 router.delete("/:id", async (req, res) => {
   try {
-    const getOrderAddOn = await OrderAddOn.find({
+    const getOrderItem = await OrderItem.find({
       _id: req.params.id,
       deletedAt: {
         $exists: false,
       },
     });
-    if (getOrderAddOn.length > 0) {
-      const deleteOrderAddOn = await OrderAddOn.findByIdAndUpdate(
-        req.params.id,
-        {
-          $set: {
-            deletedAt: Date.now(),
-          },
-        }
-      );
-      res.json(deleteOrderAddOn);
+    if (getOrderItem.length > 0) {
+      const deleteOrderItem = await OrderItem.findByIdAndUpdate(req.params.id, {
+        $set: {
+          deletedAt: Date.now(),
+        },
+      });
+      res.json(deleteOrderItem);
     } else {
-      throw new Error("Add on is already deleted");
+      throw new Error("Item is already deleted");
     }
   } catch ({ message: errMessage }) {
     const message = errMessage ? errMessage : UNKNOW_ERROR_OCCURED;

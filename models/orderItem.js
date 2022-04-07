@@ -6,6 +6,10 @@ const orderItem = new Schema({
     type: mongoose.Schema.Types.String,
     ref: "Order",
   },
+  inventoryId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Inventory",
+  },
   qty: Number,
   total: Number,
   createdAt: {

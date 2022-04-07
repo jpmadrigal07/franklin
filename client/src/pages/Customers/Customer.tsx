@@ -1,8 +1,18 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useQuery } from "react-query";
 import { useNavigate, useParams } from "react-router-dom";
 import { getAllCustomer } from "../../utils/customer";
 import moment from "moment";
+import _constructTableActions from "../../utils/constructTableActions";
+import DataTable from "../../components/Table";
+import { getAllOrder } from "../../utils/order";
+import { dateSlash } from "../../utils/formatDate";
+import numberWithCommas from "../../utils/numberWithCommas";
+
+type T_Header = {
+  header: string;
+  dataName: string;
+};
 
 const Table = () => {
   const navigate = useNavigate();
@@ -22,10 +32,16 @@ const Table = () => {
   const [cityProvince, setCityProvince] = useState("");
   const [postalZipcode, setPostalZipcode] = useState("");
   const [notes, setNotes] = useState("");
+  const [order, setOrder] = useState([]);
 
   const { data: customerData, isLoading: isCustomerDataLoading } = useQuery(
     "customer",
     () => getAllCustomer(`{"_id":"${paramId}"}`)
+  );
+
+  const { data: orderData, isLoading: isorderDataLoading } = useQuery(
+    "orders",
+    () => getAllOrder(`{"customerId": "${paramId}" }`)
   );
 
   useEffect(() => {
@@ -69,6 +85,68 @@ const Table = () => {
       return moment(dateString).format(`${bdYear ? "MMM D, YYYY" : "MMM D"}`);
     }
   };
+
+  const tableHeader = useMemo(
+    () => [
+      { header: "JO Number", dataName: "jobOrderNumber" },
+      { header: "Date", dataName: "createdAt" },
+      { header: "Service Type", dataName: "serviceType" },
+      { header: "Total", dataName: "amountDue" },
+      { header: "Action", dataName: "endActions" },
+    ],
+    []
+  );
+
+  const tableEndActions = useMemo(() => ["View"], []);
+
+  const _remappedData = useCallback(
+    (data: any) => {
+      const newData = data.map((res: any) => {
+        const mainData = tableHeader.map((res2: any) => {
+          let value;
+          if (res2.dataName === "serviceType") {
+            value = res.laundryId ? "Drop Off" : "DIY";
+          } else if (res2.dataName === "createdAt") {
+            value = dateSlash(res.createdAt);
+          } else if (res2.dataName === "amountDue") {
+            value = res[res2.dataName]
+              ? `₱${numberWithCommas(res[res2.dataName])}`
+              : res[res2.dataName] === 0
+              ? `₱0.00`
+              : "";
+          } else if (res2.dataName === "endActions") {
+            value = tableEndActions.map((res3: any) => {
+              if (res3 === "View") {
+                return _constructTableActions(
+                  res3,
+                  () => navigate(`/orders/${res.jobOrderNumber}`),
+                  true
+                );
+              }
+            });
+          } else {
+            value = res[res2.dataName] ? res[res2.dataName] : "";
+          }
+          return value;
+        });
+        const obj: any = {};
+        tableHeader.forEach((element: T_Header, index: number) => {
+          obj[element.dataName] = mainData[index];
+        });
+
+        return obj;
+      });
+
+      return newData;
+    },
+    [navigate, tableEndActions, tableHeader]
+  );
+
+  useEffect(() => {
+    if (orderData && orderData.length > 0) {
+      setOrder(_remappedData(orderData));
+    }
+  }, [orderData, _remappedData]);
 
   return (
     <>
@@ -139,116 +217,26 @@ const Table = () => {
             Back
           </button>
         </div>
-        <div className="flex flex-col mt-7">
-          <div className="overflow-x-auto sm:-mx-6 lg:-mx-8">
-            <div className="py-2 inline-block min-w-full sm:px-6 lg:px-8">
-              <div className="overflow-hidden">
-                <table className="min-w-full">
-                  <thead className="border-b-2">
-                    <tr>
-                      <th
-                        scope="col"
-                        className="text-sm font-bold text-gray-900 px-6 py-2 text-left"
-                      >
-                        JO Number
-                      </th>
-                      <th
-                        scope="col"
-                        className="text-sm font-bold text-gray-900 px-6 py-2 text-left"
-                      >
-                        Date
-                      </th>
-                      <th
-                        scope="col"
-                        className="text-sm font-bold text-gray-900 px-6 py-2 text-left"
-                      >
-                        Service Type
-                      </th>
-                      <th
-                        scope="col"
-                        className="text-sm font-bold text-gray-900 px-6 py-2 text-left"
-                      >
-                        Total
-                      </th>
-                      <th
-                        scope="col"
-                        className="text-sm font-bold text-gray-900 px-6 py-2 text-left"
-                      >
-                        Action
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr className="border-b border-accent">
-                      <td className="text-sm text-gray-900 px-6 py-2 whitespace-nowrap">
-                        Mark
-                      </td>
-                      <td className="text-sm text-gray-900 px-6 py-2 whitespace-nowrap">
-                        Otto
-                      </td>
-                      <td className="text-sm text-gray-900 px-6 py-2 whitespace-nowrap">
-                        @mdo
-                      </td>
-                      <td className="text-sm text-gray-900 px-6 py-2 whitespace-nowrap">
-                        @mdo
-                      </td>
-                      <td className="text-sm text-gray-900 px-6 py-2 whitespace-nowrap">
-                        View
-                      </td>
-                    </tr>
-                    <tr className="bg-accent border-b border-accent">
-                      <td className="text-sm text-gray-900 px-6 py-2 whitespace-nowrap">
-                        Mark
-                      </td>
-                      <td className="text-sm text-gray-900 px-6 py-2 whitespace-nowrap">
-                        Otto
-                      </td>
-                      <td className="text-sm text-gray-900 px-6 py-2 whitespace-nowrap">
-                        @mdo
-                      </td>
-                      <td className="text-sm text-gray-900 px-6 py-2 whitespace-nowrap">
-                        @mdo
-                      </td>
-                      <td className="text-sm text-gray-900 px-6 py-2 whitespace-nowrap">
-                        View
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="text-sm text-gray-900 px-6 py-2 whitespace-nowrap">
-                        Mark
-                      </td>
-                      <td className="text-sm text-gray-900 px-6 py-2 whitespace-nowrap">
-                        Otto
-                      </td>
-                      <td className="text-sm text-gray-900 px-6 py-2 whitespace-nowrap">
-                        @mdo
-                      </td>
-                      <td className="text-sm text-gray-900 px-6 py-2 whitespace-nowrap">
-                        @mdo
-                      </td>
-                      <td className="text-sm text-gray-900 px-6 py-2 whitespace-nowrap">
-                        View
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-          <div className="flex justify-end mt-5">
-            <button
-              className="bg-primary text-white pt-1 pl-5 pb-1 pr-5 rounded-xl mr-4"
-              type="button"
-            >
-              Add DIY
-            </button>
-            <button
-              className="bg-primary text-white pt-1 pl-5 pb-1 pr-5 rounded-xl"
-              type="button"
-            >
-              Add DO
-            </button>
-          </div>
+        <DataTable
+          header={tableHeader}
+          isLoading={isCustomerDataLoading}
+          data={order}
+        />
+        <div className="flex justify-end mt-5">
+          <button
+            className="bg-primary text-white pt-1 pl-5 pb-1 pr-5 rounded-xl mr-4"
+            type="button"
+            onClick={() => navigate(`/orders/diy/add/${paramId}`)}
+          >
+            Add DIY
+          </button>
+          <button
+            className="bg-primary text-white pt-1 pl-5 pb-1 pr-5 rounded-xl"
+            type="button"
+            onClick={() => navigate(`/orders/dropoff/add/${paramId}`)}
+          >
+            Add DO
+          </button>
         </div>
       </div>
     </>

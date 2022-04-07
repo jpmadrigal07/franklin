@@ -20,6 +20,7 @@ const OrderDryRoute = require("./routes/orderDry");
 const OrderDiscountRoute = require("./routes/orderDiscount");
 const OrderWashRoute = require("./routes/orderWash");
 const OrderAddOnRoute = require("./routes/orderAddOn");
+const OrderItemRoute = require("./routes/orderItem");
 
 require("./seed");
 
@@ -66,6 +67,7 @@ app.use("/api/orderAddOn", OrderAddOnRoute);
 app.use("/api/orderDry", OrderDryRoute);
 app.use("/api/orderDiscount", OrderDiscountRoute);
 app.use("/api/orderWash", OrderWashRoute);
+app.use("/api/orderItem", OrderItemRoute);
 
 // Serve static assets if in production
 if (process.env.NODE_ENV === "production") {

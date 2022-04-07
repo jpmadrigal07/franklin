@@ -31,12 +31,12 @@ router.get("/", async (req, res) => {
 // @desc    Add A OrderDry
 // @access  Private
 router.post("/", async (req, res) => {
-  const { jobOrderNumber, addOnId, machineNumber, qty, total } = req.body;
+  const { jobOrderNumber, dryId, machineNumber, qty, total } = req.body;
 
-  if (jobOrderNumber && addOnId && machineNumber && qty && total) {
+  if (jobOrderNumber && dryId && machineNumber && qty && total) {
     const newOrderDry = new OrderDry({
       jobOrderNumber,
-      addOnId,
+      dryId,
       machineNumber,
       qty,
       total,
@@ -44,7 +44,7 @@ router.post("/", async (req, res) => {
     try {
       const getOrderDry = await OrderDry.find({
         jobOrderNumber,
-        addOnId,
+        dryId,
         deletedAt: {
           $exists: false,
         },
