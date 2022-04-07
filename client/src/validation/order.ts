@@ -11,6 +11,7 @@ const schema = {
     staffId: { type: "string" },
     laundryId: { type: "string" },
     jobOrderNumber: { type: "string" },
+    folderId: { type: "string" },
     customerId: { type: "string", pattern: "^(?!s*$).+" },
     washId: { type: "string" },
     dryId: { type: "string" },

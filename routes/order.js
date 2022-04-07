@@ -18,6 +18,13 @@ router.get("/", async (req, res) => {
     const getAllOrder = await Order.find(condition)
       .populate("customerId")
       .populate("staffId")
+      .populate("folderId")
+      .populate({
+        path: "folderId",
+        populate: {
+          path: "staffId",
+        },
+      })
       .sort({
         createdAt: -1,
       });
@@ -36,6 +43,7 @@ router.post("/", async (req, res) => {
     staffId,
     laundryId,
     customerId,
+    folderId,
     jobOrderNumber,
     weight,
     amountDue,
@@ -56,6 +64,7 @@ router.post("/", async (req, res) => {
       customerId,
       jobOrderNumber,
       laundryId,
+      folderId,
       weight,
       amountDue,
       orderReceived,

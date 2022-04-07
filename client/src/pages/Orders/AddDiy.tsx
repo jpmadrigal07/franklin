@@ -27,6 +27,7 @@ import {
   bulkAddOrderDiscounts,
 } from "../../utils/api/orderDiscount";
 import { getAllStaff } from "../../utils/staff";
+import { getAllFolder } from "../../utils/api/folder";
 
 const AddDiy = (props: any) => {
   const { loggedInUserId, loggedInUserType } = props;
@@ -63,6 +64,15 @@ const AddDiy = (props: any) => {
     useState<any>([]);
 
   const [formErrors, setFormErrors] = useState<any[]>([]);
+
+  const start = new Date().setHours(0, 0, 0, 0);
+  const end = new Date().setHours(23, 59, 59, 999);
+
+  const foldersCondition = `{ "createdAt": { "$gte": "${start}", "$lt": "${end}" } }`;
+
+  const { data: folderData } = useQuery("folders", () =>
+    getAllFolder(encodeURI(foldersCondition))
+  );
 
   const { data: staffData, refetch: refetchStaffData } = useQuery(
     "loggedInStaff",
@@ -505,6 +515,7 @@ const AddDiy = (props: any) => {
       );
     const zonroxQtyFinal = zonroxQty ? zonroxQty : 0;
     const zonroxTotal = zonrox ? zonrox.unitCost * zonroxQtyFinal : 0;
+    const zonroxStockQty = zonrox ? zonrox.stock : 0;
     const customAddOnServicesTotal =
       selectedAddOnServices.length > 0
         ? selectedAddOnServices.reduce(function (a: any, b: any) {
@@ -538,8 +549,12 @@ const AddDiy = (props: any) => {
 
     const detergentTypeId =
       selectedDetergentType && JSON.parse(selectedDetergentType)._id;
+    const detergentTypeQty =
+      selectedDetergentType && JSON.parse(selectedDetergentType).stock;
     const fabConTypeId =
       selectedFabConType && JSON.parse(selectedFabConType)._id;
+    const fabConTypeQty =
+      selectedFabConType && JSON.parse(selectedFabConType).stock;
 
     const orderToFilter = {
       staffId:
@@ -553,6 +568,7 @@ const AddDiy = (props: any) => {
           orderData[0] ? orderData[0].jobOrderNumber : "000000Y",
           "Y"
         ),
+      folderId: folderData && folderData[0]._id,
       weight,
       paidStatus: "Unpaid",
       orderStatus: "Unclaimed",
@@ -581,6 +597,7 @@ const AddDiy = (props: any) => {
           orderData[0] ? orderData[0].jobOrderNumber : "000000Y",
           "Y"
         ),
+      folderId: folderData && folderData[0]._id,
       weight,
       amountDue,
       paidStatus: "Unpaid",
@@ -641,6 +658,36 @@ const AddDiy = (props: any) => {
         {
           input: "fabConQty",
           errorMessage: "This needs to be greater than 0",
+        },
+      ];
+      customErrors = [...customErrors, ...newError];
+    }
+
+    if (detergentQtyFinal > detergentTypeQty) {
+      const newError = [
+        {
+          input: "detergentQty",
+          errorMessage: `Remaining stocks is ${detergentTypeQty}`,
+        },
+      ];
+      customErrors = [...customErrors, ...newError];
+    }
+
+    if (fabConQtyFinal > fabConTypeQty) {
+      const newError = [
+        {
+          input: "fabConQty",
+          errorMessage: `Remaining stocks is ${fabConTypeQty}`,
+        },
+      ];
+      customErrors = [...customErrors, ...newError];
+    }
+
+    if (zonroxQtyFinal > zonroxStockQty) {
+      const newError = [
+        {
+          input: "zonrox",
+          errorMessage: `Remaining stocks is ${zonroxStockQty}`,
         },
       ];
       customErrors = [...customErrors, ...newError];

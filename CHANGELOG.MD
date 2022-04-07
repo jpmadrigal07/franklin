@@ -11,6 +11,7 @@
 - Added customer orders table on customer view
 - Added Add DIY and Add Drop off navigate function
 - Added deduction on inventory when creating an order
+- Added folder value for view order
 
 ## 3.0.10
 

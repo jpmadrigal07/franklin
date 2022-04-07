@@ -14,6 +14,10 @@ const order = new Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "Customer",
   },
+  folderId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Folder",
+  },
   jobOrderNumber: String,
   weight: Number,
   amountDue: Number,

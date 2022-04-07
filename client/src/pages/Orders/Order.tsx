@@ -399,7 +399,14 @@ const Order = () => {
         <div className="flex justify-between mb-10">
           <div>
             <p className="font-bold">
-              <span className="font-bold text-primary">Staff:</span> ---
+              <span className="font-bold text-primary">Staff:</span>{" "}
+              {!isOrderLoading
+                ? `${
+                    orderDataObj?.folderId?.staffId?.name
+                      ? orderDataObj?.folderId?.staffId?.name
+                      : "---"
+                  }`
+                : "..."}
             </p>
           </div>
           <div>

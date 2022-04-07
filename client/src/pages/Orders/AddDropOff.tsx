@@ -28,6 +28,7 @@ import {
   bulkAddOrderDiscounts,
 } from "../../utils/api/orderDiscount";
 import { getAllStaff } from "../../utils/staff";
+import { getAllFolder } from "../../utils/api/folder";
 
 const AddDropOff = (props: any) => {
   const { loggedInUserId, loggedInUserType } = props;
@@ -63,6 +64,15 @@ const AddDropOff = (props: any) => {
     useState<any>([]);
 
   const [formErrors, setFormErrors] = useState<any[]>([]);
+
+  const start = new Date().setHours(0, 0, 0, 0);
+  const end = new Date().setHours(23, 59, 59, 999);
+
+  const foldersCondition = `{ "createdAt": { "$gte": "${start}", "$lt": "${end}" } }`;
+
+  const { data: folderData } = useQuery("folders", () =>
+    getAllFolder(encodeURI(foldersCondition))
+  );
 
   const { data: laundryData } = useQuery("dropOffFee", () =>
     getAllLaundry(`{"type":"Drop Off Fee"}`)
@@ -565,6 +575,7 @@ const AddDropOff = (props: any) => {
           orderData[0] ? orderData[0].jobOrderNumber : "000000F",
           "F"
         ),
+      folderId: folderData && folderData[0]._id,
       weight,
       paidStatus: "Unpaid",
       orderStatus: "Unclaimed",
@@ -594,6 +605,7 @@ const AddDropOff = (props: any) => {
           orderData[0] ? orderData[0].jobOrderNumber : "000000F",
           "F"
         ),
+      folderId: folderData && folderData[0]._id,
       weight,
       amountDue,
       paidStatus: "Unpaid",
