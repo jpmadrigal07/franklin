@@ -76,10 +76,7 @@ const AddDiy = (props: any) => {
 
   const { data: staffData, refetch: refetchStaffData } = useQuery(
     "loggedInStaff",
-    () => getAllStaff(`{"userId":"${loggedInUserId}"}`),
-    {
-      enabled: false,
-    }
+    () => getAllStaff(`{"userId":"${loggedInUserId}"}`)
   );
 
   const { data: orderData, isLoading: isOrderDataLoading } = useQuery(
@@ -143,7 +140,6 @@ const AddDiy = (props: any) => {
                 "Y"
               ),
             washId: selectedWash && JSON.parse(selectedWash)._id,
-            machineNumber: 1,
             qty: 1,
             total: selectedWash ? JSON.parse(selectedWash)?.price : 0,
           });
@@ -156,7 +152,6 @@ const AddDiy = (props: any) => {
                 "Y"
               ),
             dryId: selectedDry && JSON.parse(selectedDry)._id,
-            machineNumber: 1,
             qty: 1,
             total: selectedDry ? JSON.parse(selectedDry)?.price : 0,
           });
@@ -188,7 +183,6 @@ const AddDiy = (props: any) => {
                 "Y"
               ),
             dryId: selectedDry && JSON.parse(selectedDry)._id,
-            machineNumber: 1,
             qty: 1,
             total: selectedDry ? JSON.parse(selectedDry)?.price : 0,
           });
@@ -275,7 +269,6 @@ const AddDiy = (props: any) => {
             "Y"
           ),
         addOnId: selectedAddOnService && JSON.parse(selectedAddOnService)._id,
-        machineNumber: 1,
         qty: 1,
         total: selectedAddOnService
           ? JSON.parse(selectedAddOnService)?.price
@@ -463,7 +456,6 @@ const AddDiy = (props: any) => {
             "Y"
           ),
         addOnId: data.id,
-        machineNumber: 1,
         qty: 1,
         total: data.price,
       };
@@ -482,7 +474,6 @@ const AddDiy = (props: any) => {
             "Y"
           ),
         discountId: data.id,
-        machineNumber: 1,
         qty: 1,
         total: data.price,
       };
@@ -575,6 +566,7 @@ const AddDiy = (props: any) => {
       claimStatus: "In",
       washId: washId,
       dryId: dryId,
+      plasticBag: pbQty,
       detergentTypeId: detergentTypeId,
       detergentQty: detergentQty,
       fabConTypeId: fabConTypeId,
@@ -599,6 +591,7 @@ const AddDiy = (props: any) => {
         ),
       folderId: folderData && folderData[0]._id,
       weight,
+      plasticBag: pbQty,
       amountDue,
       paidStatus: "Unpaid",
       orderStatus: "Unclaimed",
@@ -802,12 +795,6 @@ const AddDiy = (props: any) => {
     setSelectedDiscounts([...customDiscount, ""]);
     setCustomDiscount(discount);
   };
-
-  useEffect(() => {
-    if (staffData && staffData.length > 0) {
-      refetchStaffData();
-    }
-  }, [staffData, refetchStaffData]);
 
   return (
     <>
@@ -1181,7 +1168,6 @@ const AddDiy = (props: any) => {
           <div>
             <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">
               PB
-              <Asterisk />
             </label>
             <input
               className={`pt-1 pb-1 pl-2 rounded-sm mr-2 w-full border-2 ${

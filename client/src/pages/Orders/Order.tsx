@@ -182,7 +182,7 @@ const Order = () => {
     return () => {
       setOrderDataObj({});
     };
-  }, [orderData, _remappedData]);
+  }, [orderData, _remappedData, orderDataObj]);
 
   useEffect(() => {
     if (orderWashData && orderWashData.length > 0) {
@@ -413,8 +413,8 @@ const Order = () => {
             <p className="font-bold">
               <span className="font-bold text-primary">Order Completed:</span>{" "}
               {!isOrderLoading
-                ? orderDataObj?.orderCompleted
-                  ? dateSlashWithTime(orderDataObj?.orderCompleted)
+                ? orderDataObj?.updatedAt
+                  ? dateSlashWithTime(orderDataObj?.updatedAt)
                   : "---"
                 : "..."}
             </p>

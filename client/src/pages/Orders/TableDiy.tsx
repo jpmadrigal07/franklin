@@ -69,7 +69,6 @@ const TableDropOff = (props: any) => {
       { header: "Customer", dataName: "customer" },
       { header: "Total", dataName: "amountDue" },
       { header: "Paid Status", dataName: "paidStatus" },
-      { header: "Claim Status", dataName: "claimStatus" },
       { header: "Order Status", dataName: "orderStatus" },
       { header: "Action", dataName: "endActions" },
     ],

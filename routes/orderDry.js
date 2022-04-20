@@ -89,6 +89,24 @@ router.patch("/:id", async (req, res) => {
   }
 });
 
+// @route   PATCH api/order/:id
+// @desc    Update A Order
+// @access  Private
+router.patch("/bulk/dashboard", async (req, res) => {
+  const { bulk } = req.body;
+  if (bulk && bulk.length > 0) {
+    try {
+      const updateDry = await OrderDry.bulkWrite(bulk);
+      res.json(updateDry);
+    } catch ({ message: errMessage }) {
+      const message = errMessage ? errMessage : UNKNOW_ERROR_OCCURED;
+      res.status(500).json(message);
+    }
+  } else {
+    res.status(500).json("Dry is empty");
+  }
+});
+
 // @route   DELETE api/orderDry/:id
 // @desc    Delete A OrderDry
 // @access  Private

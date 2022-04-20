@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.0.12
+
+- Added Dashboard Drop off table
+- Added Dashboard DIY table
+- Added multiple update function
+
 ## 3.0.11
 
 - Added Order DIY Table page

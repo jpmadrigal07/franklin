@@ -33,7 +33,14 @@ export default function Router() {
       element: <MainLayout />,
       children: [
         { element: <Navigate to="/dashboard" replace /> },
-        { path: "dashboard", element: <Dashboard /> },
+        { path: "dashboard", element: <DashboardDropOff /> },
+        {
+          path: "dashboard",
+          children: [
+            { path: "dropoff", element: <DashboardDropOff /> },
+            { path: "diy", element: <DashboardDiy /> },
+          ],
+        },
         { path: "services", element: <Services /> },
         {
           path: "services",
@@ -140,7 +147,12 @@ export default function Router() {
 // IMPORT COMPONENTS
 
 const Login = Loadable(lazy(() => import("../pages/Login")));
-const Dashboard = Loadable(lazy(() => import("../pages/Dashboard")));
+const DashboardDiy = Loadable(
+  lazy(() => import("../pages/Dashboard/TableDiy"))
+);
+const DashboardDropOff = Loadable(
+  lazy(() => import("../pages/Dashboard/TableDropOff"))
+);
 const Services = Loadable(lazy(() => import("../pages/Services/Table")));
 const AddServices = Loadable(lazy(() => import("../pages/Services/Add")));
 const EditServices = Loadable(lazy(() => import("../pages/Services/Edit")));

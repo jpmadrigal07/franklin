@@ -21,7 +21,11 @@ const order = new Schema({
   jobOrderNumber: String,
   weight: Number,
   amountDue: Number,
-  orderReceived: Date,
+  plasticBag: Number,
+  orderReceived: {
+    type: Date,
+    default: Date.now,
+  },
   washCompleted: Date,
   dryCompleted: Date,
   foldCompleted: Date,

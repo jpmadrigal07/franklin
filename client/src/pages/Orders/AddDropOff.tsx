@@ -147,7 +147,6 @@ const AddDropOff = (props: any) => {
                 "F"
               ),
             washId: selectedWash && JSON.parse(selectedWash)._id,
-            machineNumber: 1,
             qty: 1,
             total: selectedWash ? JSON.parse(selectedWash)?.price : 0,
           });
@@ -160,7 +159,6 @@ const AddDropOff = (props: any) => {
                 "F"
               ),
             dryId: selectedDry && JSON.parse(selectedDry)._id,
-            machineNumber: 1,
             qty: 1,
             total: selectedDry ? JSON.parse(selectedDry)?.price : 0,
           });
@@ -192,7 +190,6 @@ const AddDropOff = (props: any) => {
                 "F"
               ),
             dryId: selectedDry && JSON.parse(selectedDry)._id,
-            machineNumber: 1,
             qty: 1,
             total: selectedDry ? JSON.parse(selectedDry)?.price : 0,
           });
@@ -279,7 +276,6 @@ const AddDropOff = (props: any) => {
             "F"
           ),
         addOnId: selectedAddOnService && JSON.parse(selectedAddOnService)._id,
-        machineNumber: 1,
         qty: 1,
         total: selectedAddOnService
           ? JSON.parse(selectedAddOnService)?.price
@@ -467,7 +463,6 @@ const AddDropOff = (props: any) => {
             "F"
           ),
         addOnId: data.id,
-        machineNumber: 1,
         qty: 1,
         total: data.price,
       };
@@ -486,7 +481,6 @@ const AddDropOff = (props: any) => {
             "F"
           ),
         discountId: data.id,
-        machineNumber: 1,
         qty: 1,
         total: data.price,
       };

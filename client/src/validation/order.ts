@@ -15,6 +15,7 @@ const schema = {
     customerId: { type: "string", pattern: "^(?!s*$).+" },
     washId: { type: "string" },
     dryId: { type: "string" },
+    plasticBag: { type: "number" },
     detergentTypeId: { type: "string" },
     detergentQty: { type: "number" },
     fabConTypeId: { type: "string" },
