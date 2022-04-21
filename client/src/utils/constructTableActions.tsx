@@ -1,13 +1,18 @@
 const _constructTableActions = (
   actions: any,
   callback: any,
-  isLast: boolean
+  isLast: boolean,
+  disabled: boolean = false
 ) => {
   return (
     <>
       <span
-        onClick={() => callback()}
-        className="hover:cursor-pointer text-primary hover:underline font-bold"
+        onClick={() => (!disabled ? callback() : null)}
+        className={`${
+          !disabled
+            ? "hover:cursor-pointer text-primary hover:underline"
+            : "text-dark hover:cursor-no-drop"
+        } font-bold`}
       >
         {actions}
       </span>

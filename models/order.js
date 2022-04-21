@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const { Schema } = mongoose;
 
-const jobOrder = new Schema({
+const order = new Schema({
   staffId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Staff",
@@ -14,15 +14,24 @@ const jobOrder = new Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "Customer",
   },
+  folderId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Folder",
+  },
+  jobOrderNumber: String,
   weight: Number,
   amountDue: Number,
-  orderReceived: Date,
+  plasticBag: Number,
+  orderReceived: {
+    type: Date,
+    default: Date.now,
+  },
   washCompleted: Date,
   dryCompleted: Date,
   foldCompleted: Date,
   payment: Date,
   release: Date,
-  orderStatus: String,
+  paidStatus: String,
   orderStatus: String,
   claimStatus: String,
   createdAt: {
@@ -33,4 +42,4 @@ const jobOrder = new Schema({
   deletedAt: Date,
 });
 
-module.exports = mongoose.model("JobOrder", jobOrder);
+module.exports = mongoose.model("Order", order);

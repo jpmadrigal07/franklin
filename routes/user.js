@@ -60,12 +60,12 @@ router.post("/", async (req, res) => {
 // @desc    Add A User
 // @access  Private
 router.post("/verify-password", async (req, res) => {
-  const { password } = req.body;
-  if (password) {
+  const { username, password } = req.body;
+  if ((username, password)) {
     try {
       const getUser = await User.find({
+        username,
         password,
-        userType: "Admin",
         deletedAt: {
           $exists: false,
         },
@@ -74,6 +74,44 @@ router.post("/verify-password", async (req, res) => {
         res.json("Password was verified");
       } else {
         throw new Error("Wrong password");
+      }
+    } catch ({ message: errMessage }) {
+      const message = errMessage ? errMessage : UNKNOW_ERROR_OCCURED;
+      res.status(500).json(message);
+    }
+  } else {
+    res.status(500).json("Required values are either invalid or empty");
+  }
+});
+
+// @route   POST api/user/add
+// @desc    Add A User
+// @access  Private
+router.post("/change-password", async (req, res) => {
+  const { id, currentPassword, newPassword } = req.body;
+  if ((id, currentPassword, newPassword)) {
+    try {
+      const getUser = await User.find({
+        _id: id,
+        password: currentPassword,
+        deletedAt: {
+          $exists: false,
+        },
+      });
+      if (getUser.length > 0) {
+        const updateUser = await User.findByIdAndUpdate(
+          id,
+          {
+            $set: {
+              password: newPassword,
+            },
+            updatedAt: Date.now(),
+          },
+          { new: true }
+        );
+        res.json(updateUser);
+      } else {
+        throw new Error("Current password is wrong");
       }
     } catch ({ message: errMessage }) {
       const message = errMessage ? errMessage : UNKNOW_ERROR_OCCURED;

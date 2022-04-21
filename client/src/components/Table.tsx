@@ -2,8 +2,7 @@ const Table = ({
   header = [],
   isLoading = false,
   data = [],
-  customTextColor = "",
-  columnWithCustomText = "",
+  customColumnTextColor = [],
   hideColumn = "",
 }: any) => {
   const _renderData = () => {
@@ -20,12 +19,18 @@ const Table = ({
                 {header
                   .filter((res3: any) => res3.dataName !== hideColumn)
                   .map((res2: any) => {
-                    const textColor = `text-${customTextColor}`;
+                    const custom = customColumnTextColor.find(
+                      (a: any) => a.column === res2.dataName
+                    );
+                    const textColor = custom?.color
+                      ? `text-${custom?.color}`
+                      : "";
+                    const bold = `${custom?.bold && "font-bold"}`;
                     return (
                       <td
                         className={`text-sm text-gray-900 px-6 py-2 whitespace-nowrap ${
-                          res2.dataName === columnWithCustomText
-                            ? textColor
+                          res2.dataName === custom?.column
+                            ? `${textColor} ${bold}`
                             : ""
                         }`}
                       >

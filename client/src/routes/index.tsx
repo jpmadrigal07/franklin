@@ -33,7 +33,14 @@ export default function Router() {
       element: <MainLayout />,
       children: [
         { element: <Navigate to="/dashboard" replace /> },
-        { path: "dashboard", element: <Dashboard /> },
+        { path: "dashboard", element: <DashboardDropOff /> },
+        {
+          path: "dashboard",
+          children: [
+            { path: "dropoff", element: <DashboardDropOff /> },
+            { path: "diy", element: <DashboardDiy /> },
+          ],
+        },
         { path: "services", element: <Services /> },
         {
           path: "services",
@@ -87,7 +94,30 @@ export default function Router() {
             { path: "edit/:id", element: <EditCustomer /> },
           ],
         },
-        { path: "orders", element: <Orders /> },
+        { path: "orders", element: <OrdersDropOff /> },
+        {
+          path: "orders",
+          children: [
+            { path: "dropoff", element: <OrdersDropOff /> },
+            {
+              path: "dropoff",
+              children: [
+                { path: "add", element: <OrdersAddDropOff /> },
+                { path: "add/:id", element: <OrdersAddDropOff /> },
+              ],
+            },
+            { path: "diy", element: <OrdersDiy /> },
+            {
+              path: "diy",
+              children: [
+                { path: "add", element: <OrdersAddDiy /> },
+                { path: "add/:id", element: <OrdersAddDiy /> },
+              ],
+            },
+            { path: ":id", element: <ViewOrder /> },
+            { path: "print/:id", element: <h1>Print page</h1> },
+          ],
+        },
         { path: "inventory", element: <Inventory /> },
         {
           path: "inventory",
@@ -96,8 +126,18 @@ export default function Router() {
             { path: "edit/:id", element: <EditInventory /> },
           ],
         },
-        { path: "staff", element: <Staff /> },
+        { path: "staffs", element: <Staffs /> },
+        {
+          path: "staffs",
+          children: [
+            { path: ":id", element: <ViewStaff /> },
+            { path: "add", element: <AddStaff /> },
+            { path: "edit/:id", element: <EditStaff /> },
+          ],
+        },
         { path: "reports", element: <Reports /> },
+        { path: "adminsettings", element: <AdminSettings /> },
+        { path: "staffsettings", element: <StaffSettings /> },
       ],
     },
     // { path: '*', element: <Navigate to="/404" replace /> }
@@ -107,7 +147,12 @@ export default function Router() {
 // IMPORT COMPONENTS
 
 const Login = Loadable(lazy(() => import("../pages/Login")));
-const Dashboard = Loadable(lazy(() => import("../pages/Dashboard")));
+const DashboardDiy = Loadable(
+  lazy(() => import("../pages/Dashboard/TableDiy"))
+);
+const DashboardDropOff = Loadable(
+  lazy(() => import("../pages/Dashboard/TableDropOff"))
+);
 const Services = Loadable(lazy(() => import("../pages/Services/Table")));
 const AddServices = Loadable(lazy(() => import("../pages/Services/Add")));
 const EditServices = Loadable(lazy(() => import("../pages/Services/Edit")));
@@ -117,9 +162,22 @@ const EditCustomer = Loadable(lazy(() => import("../pages/Customers/Edit")));
 const ViewCustomer = Loadable(
   lazy(() => import("../pages/Customers/Customer"))
 );
-const Orders = Loadable(lazy(() => import("../pages/Orders")));
+const ViewOrder = Loadable(lazy(() => import("../pages/Orders/Order")));
+const OrdersDiy = Loadable(lazy(() => import("../pages/Orders/TableDiy")));
+const OrdersDropOff = Loadable(
+  lazy(() => import("../pages/Orders/TableDropOff"))
+);
+const OrdersAddDiy = Loadable(lazy(() => import("../pages/Orders/AddDiy")));
+const OrdersAddDropOff = Loadable(
+  lazy(() => import("../pages/Orders/AddDropOff"))
+);
 const Inventory = Loadable(lazy(() => import("../pages/Inventory/Table")));
 const AddInventory = Loadable(lazy(() => import("../pages/Inventory/Add")));
 const EditInventory = Loadable(lazy(() => import("../pages/Inventory/Edit")));
-const Staff = Loadable(lazy(() => import("../pages/Staff")));
 const Reports = Loadable(lazy(() => import("../pages/Reports")));
+const AdminSettings = Loadable(lazy(() => import("../pages/AdminSettings")));
+const StaffSettings = Loadable(lazy(() => import("../pages/StaffSettings")));
+const Staffs = Loadable(lazy(() => import("../pages/Staffs/Table")));
+const AddStaff = Loadable(lazy(() => import("../pages/Staffs/Add")));
+const EditStaff = Loadable(lazy(() => import("../pages/Staffs/Edit")));
+const ViewStaff = Loadable(lazy(() => import("../pages/Staffs/Staff")));

@@ -5,6 +5,7 @@ const User = require("../models/user");
 const Staff = require("../models/staff");
 const keys = require("../config/keys");
 const { UNKNOW_ERROR_OCCURED } = require("../constants");
+const moment = require("moment");
 
 router.post("/", async (req, res) => {
   const { username, password } = req.body;
@@ -50,9 +51,9 @@ router.post("/verify", async (req, res) => {
       throw new Error("No user with that username");
     }
     // Check if token is not expired
-    const elapsedTimeInSeconds = Math.floor(parseInt(exp) - Date.now() / 1000);
-    const elapsedSeconds = elapsedTimeInSeconds % 60;
-    if (Math.sign(elapsedSeconds) === -1) {
+    const expDate = moment.unix(parseInt(exp)).format("MM/DD/YYYY");
+    const nowDate = moment().format("MM/DD/YYYY");
+    if (expDate === nowDate) {
       throw new Error("Token is expired");
     }
     const staff = await Staff.findOne({ userId: user.id });

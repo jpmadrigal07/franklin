@@ -18,7 +18,7 @@ type T_Header = {
 };
 
 const Table = (props: any) => {
-  const { loggedInUserType } = props;
+  const { loggedInUserType, loggedInUserUsername } = props;
   const navigate = useNavigate();
   const MySwal = withReactContent(Swal);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -138,9 +138,17 @@ const Table = (props: any) => {
         } else if (res2.dataName === "frontActions") {
           value = tableFrontActions.map((res3: any) => {
             if (res3 === "New DIY") {
-              return _constructTableActions(res3, null, false);
+              return _constructTableActions(
+                res3,
+                () => navigate(`/orders/diy/add/${res._id}`),
+                false
+              );
             } else if (res3 === "New DO") {
-              return _constructTableActions(res3, null, true);
+              return _constructTableActions(
+                res3,
+                () => navigate(`/orders/dropoff/add/${res._id}`),
+                true
+              );
             }
           });
         } else if (res2.dataName === "endActions") {
@@ -186,11 +194,6 @@ const Table = (props: any) => {
       <h1 className="font-bold text-primary text-center mt-10 mb-10">
         View Customers
       </h1>
-      <p className="text-center">
-        Staff users can add and edit customers but cannot delete. Staff can also
-        view specific customer to see more details such as notes and past
-        orders.
-      </p>
       <div className="flex justify-between mt-11">
         <div>
           <button
@@ -242,7 +245,10 @@ const Table = (props: any) => {
       />
       <Modal
         state={isAdminPasswordModalOpen}
-        toggle={() => setIsAdminPasswordModal(!isAdminPasswordModalOpen)}
+        toggle={() => {
+          setIsAdminPasswordModal(!isAdminPasswordModalOpen);
+          setAdminPassword("");
+        }}
         title={<h3>Enter Password</h3>}
         content={
           <input
@@ -260,14 +266,22 @@ const Table = (props: any) => {
           <>
             <button
               className="bg-primary text-white pt-1 pl-5 pb-1 pr-5 rounded-xl mr-3"
-              onClick={() => triggerVerifyPassword({ password: adminPassword })}
+              onClick={() =>
+                triggerVerifyPassword({
+                  username: loggedInUserUsername,
+                  password: adminPassword,
+                })
+              }
               disabled={isVerifyPasswordLoading || isDeleteCustomerLoading}
             >
               Confirm
             </button>
             <button
               className="pt-1 pl-5 pb-1 pr-5 rounded-xl bg-white border-2 border-primary text-primary"
-              onClick={() => setIsAdminPasswordModal(!isAdminPasswordModalOpen)}
+              onClick={() => {
+                setIsAdminPasswordModal(!isAdminPasswordModalOpen);
+                setAdminPassword("");
+              }}
               disabled={isVerifyPasswordLoading || isDeleteCustomerLoading}
             >
               Cancel
@@ -282,6 +296,7 @@ const Table = (props: any) => {
 
 const mapStateToProps = (global: any) => ({
   loggedInUserType: global.authenticatedUser.user.type,
+  loggedInUserUsername: global.authenticatedUser.user.username,
 });
 
 export default connect(mapStateToProps)(Table);

@@ -22,7 +22,7 @@ type T_Header = {
 };
 
 const Table = (props: any) => {
-  const { loggedInUserType } = props;
+  const { loggedInUserType, loggedInUserUsername } = props;
   const navigate = useNavigate();
   const MySwal = withReactContent(Swal);
   const [wash, setWash] = useState([]);
@@ -59,7 +59,7 @@ const Table = (props: any) => {
     data: discountsData,
     isLoading: isDiscountsDataLoading,
     refetch: refetchDiscountsData,
-  } = useQuery("discounts", () => getAllDiscount());
+  } = useQuery("discount", () => getAllDiscount());
 
   const { data: laundryData, isLoading: isLaundryDataLoading } = useQuery(
     "laundry",
@@ -365,7 +365,10 @@ const Table = (props: any) => {
       />
       <Modal
         state={isAdminPasswordModalOpen}
-        toggle={() => setIsAdminPasswordModal(!isAdminPasswordModalOpen)}
+        toggle={() => {
+          setIsAdminPasswordModal(!isAdminPasswordModalOpen);
+          setAdminPassword("");
+        }}
         title={<h3>Enter Password</h3>}
         content={
           <input
@@ -383,14 +386,22 @@ const Table = (props: any) => {
           <>
             <button
               className="bg-primary text-white pt-1 pl-5 pb-1 pr-5 rounded-xl mr-3"
-              onClick={() => triggerVerifyPassword({ password: adminPassword })}
+              onClick={() =>
+                triggerVerifyPassword({
+                  username: loggedInUserUsername,
+                  password: adminPassword,
+                })
+              }
               disabled={isVerifyPasswordLoading || isDeleteServicesLoading}
             >
               Confirm
             </button>
             <button
               className="pt-1 pl-5 pb-1 pr-5 rounded-xl bg-white border-2 border-primary text-primary"
-              onClick={() => setIsAdminPasswordModal(!isAdminPasswordModalOpen)}
+              onClick={() => {
+                setIsAdminPasswordModal(!isAdminPasswordModalOpen);
+                setAdminPassword("");
+              }}
               disabled={isVerifyPasswordLoading || isDeleteServicesLoading}
             >
               Cancel
@@ -405,6 +416,7 @@ const Table = (props: any) => {
 
 const mapStateToProps = (global: any) => ({
   loggedInUserType: global.authenticatedUser.user.type,
+  loggedInUserUsername: global.authenticatedUser.user.username,
 });
 
 export default connect(mapStateToProps)(Table);

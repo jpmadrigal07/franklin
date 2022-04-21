@@ -65,8 +65,7 @@ router.post("/", async (req, res) => {
     });
     try {
       const getCustomer = await Customer.find({
-        firstName,
-        lastName,
+        contactNumber,
         email,
         deletedAt: {
           $exists: false,

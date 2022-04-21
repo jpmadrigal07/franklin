@@ -13,6 +13,16 @@ const AddOnRoute = require("./routes/addOn");
 const LaundryRoute = require("./routes/laundry");
 const DryRoute = require("./routes/dry");
 const DiscountRoute = require("./routes/discount");
+const FolderRoute = require("./routes/folder");
+const OrderRoute = require("./routes/order");
+
+const OrderDryRoute = require("./routes/orderDry");
+const OrderDiscountRoute = require("./routes/orderDiscount");
+const OrderWashRoute = require("./routes/orderWash");
+const OrderAddOnRoute = require("./routes/orderAddOn");
+const OrderItemRoute = require("./routes/orderItem");
+
+require("./seed");
 
 const path = require("path");
 const app = express();
@@ -50,6 +60,14 @@ app.use("/api/addOn", AddOnRoute);
 app.use("/api/dry", DryRoute);
 app.use("/api/discount", DiscountRoute);
 app.use("/api/wash", WashRoute);
+app.use("/api/folder", FolderRoute);
+app.use("/api/order", OrderRoute);
+
+app.use("/api/orderAddOn", OrderAddOnRoute);
+app.use("/api/orderDry", OrderDryRoute);
+app.use("/api/orderDiscount", OrderDiscountRoute);
+app.use("/api/orderWash", OrderWashRoute);
+app.use("/api/orderItem", OrderItemRoute);
 
 // Serve static assets if in production
 if (process.env.NODE_ENV === "production") {

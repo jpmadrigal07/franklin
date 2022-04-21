@@ -15,7 +15,7 @@ router.get("/", async (req, res) => {
     };
   }
   try {
-    const getAllStaff = await Staff.find(condition);
+    const getAllStaff = await Staff.find(condition).populate("userId");
     res.json(getAllStaff);
   } catch ({ message: errMessage }) {
     const message = errMessage ? errMessage : UNKNOW_ERROR_OCCURED;

@@ -1,5 +1,91 @@
 # Changelog
 
+## 3.0.12
+
+- Added Dashboard Drop off table
+- Added Dashboard DIY table
+- Added multiple update function
+- Added function to update Amount Due on Dashboard update
+
+## 3.0.11
+
+- Added Order DIY Table page
+- Added Order Drop Off Table page
+- Added seed data for zonrox, fabcon, detergent
+- Added cancel function for orders table
+- Added order view data page
+- Added dashboard buttons
+- Added customer orders table on customer view
+- Added Add DIY and Add Drop off navigate function
+- Added deduction on inventory when creating an order
+- Added folder value for view order
+
+## 3.0.10
+
+- Added Order DropOff Page
+- Added Order DIY Page
+- Added Order DropOff View Order Page
+- Added Order DIY Page View Order Page
+- Added current folder on NavBar
+- Change password confirm to base on current loggedin user username
+- Added Folder table on Settings for admin and staff account
+- Added the ability of all user type to change the current folder of the day
+- Added password confirm on change current folder of the day
+
+## 3.0.9
+
+- Fix birthdate does not accepting any value
+
+## 3.0.8
+
+- Fix modal click x persist password for admin
+- Fix email and zipcode required add customer
+
+## 3.0.7
+
+- Added lastLoggedIn and lastLoggedOut functionality
+- Added lastLoggedIn and lastLoggedOut in staff table
+- Added View function on Staff table
+- Added change password/staff profile for staff
+- Remove view customer header sub text
+- Remove package-lock.json files
+
+## 3.0.6
+
+- Fix add customer same firstname and lastname
+- Fix customer birtday and birthmonth string
+- Fix customer update empty input
+- Fix delete item admin password persisting
+- Added seed for drop off fee
+- Fix add inventory stock accepting float
+- Fix table add stock accepting float
+
+## 3.0.5
+
+- Fix main page menu ui problem
+
+## 3.0.4
+
+- Added staff add
+- Added staff edit
+- Added staff delete
+
+## 3.0.3
+
+- Added cog icon on the header
+- Added admin settings page
+- Added change admin password function
+- Remove Staff page for staff user
+
+## 3.0.2
+
+- Added folder modal pop up when logging in if there is no current folder of the day
+- Added header to login page
+- Change login form design
+- Added add function on folder modal
+- Change auth expiry from 1 day to every 12 am
+- Change logout to navigate to window.location
+
 ## 3.0.1
 
 - Bug fixes for Customer https://drive.google.com/file/d/1ZGnyADEWWACHLVCv6X1JaI8AT8n03elY/view?usp=sharing

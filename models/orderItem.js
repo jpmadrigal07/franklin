@@ -2,9 +2,13 @@ const mongoose = require("mongoose");
 const { Schema } = mongoose;
 
 const orderItem = new Schema({
-  jobOrder: {
+  jobOrderNumber: {
+    type: mongoose.Schema.Types.String,
+    ref: "Order",
+  },
+  inventoryId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "jobOrder",
+    ref: "Inventory",
   },
   qty: Number,
   total: Number,
