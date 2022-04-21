@@ -5,6 +5,7 @@
 - Added Dashboard Drop off table
 - Added Dashboard DIY table
 - Added multiple update function
+- Added function to update Amount Due on Dashboard update
 
 ## 3.0.11
 

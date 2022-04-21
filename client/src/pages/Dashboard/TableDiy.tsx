@@ -21,6 +21,7 @@ import { getAllInventory } from "../../utils/inventory";
 import { bulkUpdateItem } from "../../utils/api/orderItem";
 import e from "express";
 import TotalModal from "./TotalModal";
+import ComputeTotalLoading from "./ComputeTotalLoading";
 
 type T_Header = {
   header: string;
@@ -50,6 +51,7 @@ const TableDiy = (props: any) => {
   const [adminPassword, setAdminPassword] = useState("");
   const [selectedData, setSelectedData] = useState<any>({});
   const [selectedIndex, setSelectedIndex] = useState<any>(null);
+  const [toUpdateGrandTotalId, setToUpdateGrandTotalId] = useState("");
 
   const { mutate: triggerVerifyPassword, isLoading: isVerifyPasswordLoading } =
     useMutation(async (password: any) => verifyPassword(password), {
@@ -129,6 +131,7 @@ const TableDiy = (props: any) => {
       setMultiOrderToUpdate([]);
       setOpenClaimedOrderModal(false);
       refetchOrderData();
+      setToUpdateGrandTotalId(selectedData?._id);
       if (!MySwal.isVisible()) {
         MySwal.fire({
           title: "Update success!",
@@ -155,6 +158,7 @@ const TableDiy = (props: any) => {
       onSuccess: async () => {
         setWashToUpdate([]);
         refetchOrderData();
+        setToUpdateGrandTotalId(selectedData?._id);
         if (!MySwal.isVisible()) {
           MySwal.fire({
             title: "Update success!",
@@ -181,6 +185,7 @@ const TableDiy = (props: any) => {
       onSuccess: async () => {
         setDryToUpdate([]);
         refetchOrderData();
+        setToUpdateGrandTotalId(selectedData?._id);
         if (!MySwal.isVisible()) {
           MySwal.fire({
             title: "Update success!",
@@ -207,6 +212,7 @@ const TableDiy = (props: any) => {
       onSuccess: async () => {
         setItemToUpdate([]);
         refetchOrderData();
+        setToUpdateGrandTotalId(selectedData?._id);
         if (!MySwal.isVisible()) {
           MySwal.fire({
             title: "Update success!",
@@ -689,6 +695,7 @@ const TableDiy = (props: any) => {
                     setWashToUpdate([]);
                     setDryToUpdate([]);
                     setItemToUpdate([]);
+                    setSelectedData({});
                     _updateRowEditActive(index);
                   },
                   true,
@@ -701,7 +708,10 @@ const TableDiy = (props: any) => {
               ) {
                 return _constructTableActions(
                   res3,
-                  () => _updateRowEditActive(index),
+                  () => {
+                    _updateRowEditActive(index);
+                    setSelectedData(res);
+                  },
                   false,
                   isBulkUpdateOrderLoading || res.orderStatus === "Canceled"
                 );
@@ -1364,6 +1374,7 @@ const TableDiy = (props: any) => {
         isModalOpen={isTotalModalOpen}
         setIsModalOpen={() => setIsTotalModalOpen(!isTotalModalOpen)}
       />
+      <ComputeTotalLoading orderId={toUpdateGrandTotalId} />
     </>
   );
 };

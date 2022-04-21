@@ -18,6 +18,9 @@ router.get("/", async (req, res) => {
   if (condition.customerId) {
     condition.customerId = ObjectId(condition.customerId);
   }
+  if (condition._id) {
+    condition._id = ObjectId(condition._id);
+  }
   try {
     const getAllOrder = await Order.aggregate([
       { $match: condition },
@@ -32,6 +35,20 @@ router.get("/", async (req, res) => {
       {
         $unwind: {
           path: "$staffId",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $lookup: {
+          from: "laundries",
+          localField: "laundryId",
+          foreignField: "_id",
+          as: "laundryId",
+        },
+      },
+      {
+        $unwind: {
+          path: "$laundryId",
           preserveNullAndEmptyArrays: true,
         },
       },
@@ -202,8 +219,8 @@ router.get("/", async (req, res) => {
           orderWash: { $first: "$orderWash" },
           orderDry: { $first: "$orderDry" },
           orderItem: { $push: "$orderItem" },
-          orderDiscount: { $push: "$orderDiscount" },
-          orderAddOn: { $push: "$orderAddOn" },
+          orderDiscount: { $first: "$orderDiscount" },
+          orderAddOn: { $first: "$orderAddOn" },
         },
       },
       { $sort: { createdAt: -1 } },

@@ -33,7 +33,7 @@ router.get("/", async (req, res) => {
 router.post("/", async (req, res) => {
   const { jobOrderNumber, addOnId, machineNumber, qty, total } = req.body;
 
-  if (jobOrderNumber && addOnId && machineNumber && qty && total) {
+  if (jobOrderNumber && addOnId && qty && total) {
     const newOrderAddOn = new OrderAddOn({
       jobOrderNumber,
       addOnId,

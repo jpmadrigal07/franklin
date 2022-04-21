@@ -33,7 +33,7 @@ router.get("/", async (req, res) => {
 router.post("/", async (req, res) => {
   const { jobOrderNumber, dryId, machineNumber, qty, total } = req.body;
 
-  if (jobOrderNumber && dryId && machineNumber && qty && total) {
+  if (jobOrderNumber && dryId && qty && total) {
     const newOrderDry = new OrderDry({
       jobOrderNumber,
       dryId,
