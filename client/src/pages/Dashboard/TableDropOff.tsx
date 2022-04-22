@@ -16,7 +16,7 @@ import { bulkUpdateWash } from "../../utils/api/orderWash";
 import { bulkUpdateDry } from "../../utils/api/orderDry";
 import { getAllWash } from "../../utils/wash";
 import { getAllDry } from "../../utils/dry";
-import { getAllInventory } from "../../utils/inventory";
+import { bulkUpdateInventory, getAllInventory } from "../../utils/inventory";
 import { bulkUpdateItem } from "../../utils/api/orderItem";
 import TotalModal from "./TotalModal";
 import ComputeTotalLoading from "./ComputeTotalLoading";
@@ -50,6 +50,8 @@ const TableDiy = (props: any) => {
   const [multiOrderToUpdate, setMultiOrderToUpdate] = useState<any>([]);
   const [adminPassword, setAdminPassword] = useState("");
   const [toUpdateGrandTotalId, setToUpdateGrandTotalId] = useState("");
+  const [inventoryStockToUpdate, setInventoryStockToUpdate] = useState<any>([]);
+  const [selectedInventory, setSelectedInventory] = useState<any>([]);
 
   const { mutate: triggerVerifyPassword, isLoading: isVerifyPasswordLoading } =
     useMutation(async (password: any) => verifyPassword(password), {
@@ -230,6 +232,32 @@ const TableDiy = (props: any) => {
         });
       },
     });
+
+  const {
+    mutate: triggerBulkUpdateInventoryStock,
+    isLoading: isBulkUpdateInventoryStockLoading,
+  } = useMutation(async (order: any) => bulkUpdateInventory(order), {
+    onSuccess: async () => {
+      if (!MySwal.isVisible()) {
+        MySwal.fire({
+          title: "Update success!",
+          text: "Order has been updated",
+          icon: "success",
+          timer: 2500,
+          showConfirmButton: false,
+        });
+      }
+    },
+    onError: async (err: any) => {
+      MySwal.fire({
+        title: "Ooops!",
+        text: err,
+        icon: "warning",
+        confirmButtonText: "Okay",
+        confirmButtonColor: "#274c77",
+      });
+    },
+  });
 
   const tableHeader = useMemo(
     () => [
@@ -480,6 +508,51 @@ const TableDiy = (props: any) => {
     [itemToUpdate, inventoryData]
   );
 
+  const _inventoryStockToUpdate = useCallback(
+    (id: string, newValue: number, oldValue: number) => {
+      const newVal = newValue ? newValue : 0;
+      const oldVal = oldValue ? oldValue : 0;
+      let newInventoryToUpdate = inventoryStockToUpdate;
+      const exist = newInventoryToUpdate.find((res: any) => res.id === id);
+      const value = newVal > oldVal ? -(newVal - oldVal) : newVal - oldVal;
+      if (!exist) {
+        let toUpdateObj: any = {};
+        toUpdateObj["id"] = id;
+        toUpdateObj["stock"] = value;
+        setInventoryStockToUpdate([...newInventoryToUpdate, toUpdateObj]);
+      } else {
+        const index = newInventoryToUpdate.findIndex(
+          (res: any) => res.id === id
+        );
+        newInventoryToUpdate[index]["stock"] = value;
+        setInventoryStockToUpdate([...newInventoryToUpdate]);
+      }
+    },
+    [inventoryStockToUpdate]
+  );
+
+  const _selectedInventory = useCallback(
+    (data: string, index: number, type: string) => {
+      let newSelectedInventory = selectedInventory;
+      const exist = newSelectedInventory.find(
+        (res: any) => res.index === index
+      );
+      if (!exist) {
+        let toUpdateObj: any = {};
+        toUpdateObj["index"] = index;
+        toUpdateObj[type] = data;
+        setSelectedInventory([...newSelectedInventory, toUpdateObj]);
+      } else {
+        const indexs = newSelectedInventory.findIndex(
+          (res: any) => res.index === index
+        );
+        newSelectedInventory[indexs][type] = data;
+        setSelectedInventory([...newSelectedInventory]);
+      }
+    },
+    [selectedInventory]
+  );
+
   const _updateWash = useCallback(
     (index: number, id?: string) => {
       if (washToUpdate.length > 0) {
@@ -512,6 +585,36 @@ const TableDiy = (props: any) => {
       }
     },
     [washToUpdate, triggerBulkUpdateWash, _updateRowEditActive]
+  );
+
+  const _updateInventoryStock = useCallback(
+    (index: number, id?: string) => {
+      if (inventoryStockToUpdate.length > 0) {
+        const toUpdate = id
+          ? [inventoryStockToUpdate.find((res: any) => res.id === id)]
+          : inventoryStockToUpdate;
+        const ops =
+          toUpdate &&
+          toUpdate.map((item: any) => {
+            return {
+              updateOne: {
+                filter: { _id: item.id },
+                update: { $inc: { stock: item.stock } },
+                upsert: false,
+              },
+            };
+          });
+        if (ops && ops.length > 0) {
+          _updateRowEditActive(index, false);
+          triggerBulkUpdateInventoryStock({ bulk: ops });
+        }
+      }
+    },
+    [
+      inventoryStockToUpdate,
+      triggerBulkUpdateInventoryStock,
+      _updateRowEditActive,
+    ]
   );
 
   const _updateDry = useCallback(
@@ -592,6 +695,7 @@ const TableDiy = (props: any) => {
       _updateWash(index, data?.orderWash._id);
       _updateDry(index, data?.orderDry._id);
       _updateItem(index, data?.orderItem._id);
+      _updateInventoryStock(index);
       if (orderToUpdate.length > 0) {
         const toUpdate = id
           ? [orderToUpdate.find((res: any) => res.id === id)]
@@ -620,6 +724,7 @@ const TableDiy = (props: any) => {
       _updateWash,
       _updateDry,
       _updateItem,
+      _updateInventoryStock,
     ]
   );
 
@@ -891,6 +996,9 @@ const TableDiy = (props: any) => {
             const items =
               inventoryData &&
               inventoryData.filter((res: any) => res.type === "Detergent");
+            const inventory = selectedInventory.find(
+              (res: any) => res.index === index && res.Detergent
+            );
             value = isEditActive ? (
               <>
                 {selected?.inventoryId?._id ? (
@@ -904,6 +1012,7 @@ const TableDiy = (props: any) => {
                         inventoryData.find(
                           (res: any) => res._id === e.target.value
                         );
+                      _selectedInventory(item, index, "Detergent");
                       _itemToUpdate(
                         index,
                         selected?._id,
@@ -937,7 +1046,8 @@ const TableDiy = (props: any) => {
                     className="pt-1 pb-1 pl-2 rounded-sm mr-2 w-[45px] border-2 border-semi-light"
                     type="number"
                     defaultValue={selected?.qty}
-                    onChange={(e: any) =>
+                    disabled={!inventory || inventory?.Detergent?.stock < 0}
+                    onChange={(e: any) => {
                       _itemToUpdate(
                         index,
                         selected?._id,
@@ -945,8 +1055,13 @@ const TableDiy = (props: any) => {
                         "qty",
                         parseInt(e.target.value),
                         "DET"
-                      )
-                    }
+                      );
+                      _inventoryStockToUpdate(
+                        inventory?.Detergent?._id,
+                        parseInt(e.target.value),
+                        inventory?.Detergent?.qty
+                      );
+                    }}
                   />
                 )}
               </>
@@ -964,6 +1079,9 @@ const TableDiy = (props: any) => {
             const items =
               inventoryData &&
               inventoryData.filter((res: any) => res.type === "FabCon");
+            const inventory = selectedInventory.find(
+              (res: any) => res.index === index && res.FabCon
+            );
             value = isEditActive ? (
               <>
                 {selected?.inventoryId?.stockCode ? (
@@ -977,6 +1095,7 @@ const TableDiy = (props: any) => {
                         inventoryData.find(
                           (res: any) => res._id === e.target.value
                         );
+                      _selectedInventory(item, index, "FabCon");
                       _itemToUpdate(
                         index,
                         selected?._id,
@@ -1010,7 +1129,8 @@ const TableDiy = (props: any) => {
                     className="pt-1 pb-1 pl-2 rounded-sm mr-2 w-[45px] border-2 border-semi-light"
                     type="number"
                     defaultValue={selected?.qty}
-                    onChange={(e: any) =>
+                    disabled={!inventory || inventory?.FabCon?.stock < 1}
+                    onChange={(e: any) => {
                       _itemToUpdate(
                         index,
                         selected?._id,
@@ -1018,8 +1138,13 @@ const TableDiy = (props: any) => {
                         "qty",
                         parseInt(e.target.value),
                         "FAB"
-                      )
-                    }
+                      );
+                      _inventoryStockToUpdate(
+                        inventory?.FabCon?._id,
+                        parseInt(e.target.value),
+                        inventory?.FabCon?.qty
+                      );
+                    }}
                   />
                 )}
               </>
@@ -1042,8 +1167,9 @@ const TableDiy = (props: any) => {
                 <input
                   className="pt-1 pb-1 pl-2 rounded-sm mr-2 w-[45px] border-2 border-semi-light"
                   type="number"
+                  disabled={!zxItem || zxItem?.stock < 1}
                   defaultValue={zonrox?.qty}
-                  onChange={(e: any) =>
+                  onChange={(e: any) => {
                     _itemToUpdate(
                       index,
                       zonrox?._id,
@@ -1052,8 +1178,13 @@ const TableDiy = (props: any) => {
                       parseInt(e.target.value),
                       "ZX",
                       zxItem?.unitCost
-                    )
-                  }
+                    );
+                    _inventoryStockToUpdate(
+                      zxItem?._id,
+                      parseInt(e.target.value),
+                      zonrox?.qty
+                    );
+                  }}
                 />
               ) : zonrox ? (
                 zonrox?.qty
@@ -1136,6 +1267,9 @@ const TableDiy = (props: any) => {
       currentTableHeader,
       _multiOrderToUpdate,
       _openClaimedOrderModal,
+      _inventoryStockToUpdate,
+      _selectedInventory,
+      selectedInventory,
     ]
   );
 

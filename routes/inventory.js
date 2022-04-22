@@ -87,6 +87,24 @@ router.patch("/:id", async (req, res) => {
   }
 });
 
+// @route   PATCH api/order/:id
+// @desc    Update A Order
+// @access  Private
+router.patch("/bulk/dashboard", async (req, res) => {
+  const { bulk } = req.body;
+  if (bulk && bulk.length > 0) {
+    try {
+      const updateInventory = await Inventory.bulkWrite(bulk);
+      res.json(updateInventory);
+    } catch ({ message: errMessage }) {
+      const message = errMessage ? errMessage : UNKNOW_ERROR_OCCURED;
+      res.status(500).json(message);
+    }
+  } else {
+    res.status(500).json("Order is empty");
+  }
+});
+
 // @route   DELETE api/inventory/:id
 // @desc    Delete A Inventory
 // @access  Private

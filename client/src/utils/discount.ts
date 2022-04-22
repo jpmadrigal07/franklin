@@ -9,6 +9,8 @@ const addCondition = (conditions: string) => {
   return conditions !== "" ? `?condition=${conditions}` : "";
 };
 
+// HINDI BINABAWASAN ANG INVENTORY STOCK PAG NAG UUPDATE SA DASHBOARD
+
 // calls
 export const getAllDiscount = (conditions: string = "") =>
   apiCall(`${BASE}${addCondition(conditions)}`);

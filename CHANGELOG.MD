@@ -6,6 +6,7 @@
 - Added Dashboard DIY table
 - Added multiple update function
 - Added function to update Amount Due on Dashboard update
+- Added minus function for adding item on dashboard
 
 ## 3.0.11
 
