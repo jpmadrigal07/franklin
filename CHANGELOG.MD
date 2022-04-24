@@ -7,6 +7,8 @@
 - Added multiple update function
 - Added function to update Amount Due on Dashboard update
 - Added minus function for adding item on dashboard
+- Fixed diy and do process
+- Add function for add notes on top right
 
 ## 3.0.11
 

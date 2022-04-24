@@ -20,6 +20,7 @@ import { bulkUpdateInventory, getAllInventory } from "../../utils/inventory";
 import { bulkUpdateItem } from "../../utils/api/orderItem";
 import TotalModal from "./TotalModal";
 import ComputeTotalLoading from "./ComputeTotalLoading";
+import SmallLoading from "../../components/SmallLoading";
 
 type T_Header = {
   header: string;
@@ -103,13 +104,6 @@ const TableDiy = (props: any) => {
         setIsCancelModalOpen(false);
         setOpenClaimedOrderModal(false);
         refetchOrderData();
-        MySwal.fire({
-          title: "Update success!",
-          text: "Order has been updated",
-          icon: "success",
-          timer: 2500,
-          showConfirmButton: false,
-        });
       },
       onError: async (err: any) => {
         MySwal.fire({
@@ -131,15 +125,6 @@ const TableDiy = (props: any) => {
       setMultiOrderToUpdate([]);
       setOpenClaimedOrderModal(false);
       refetchOrderData();
-      if (!MySwal.isVisible()) {
-        MySwal.fire({
-          title: "Update success!",
-          text: "Order has been updated",
-          icon: "success",
-          timer: 2500,
-          showConfirmButton: false,
-        });
-      }
     },
     onError: async (err: any) => {
       MySwal.fire({
@@ -158,15 +143,6 @@ const TableDiy = (props: any) => {
         setWashToUpdate([]);
         refetchOrderData();
         setToUpdateGrandTotalId(selectedData?._id);
-        if (!MySwal.isVisible()) {
-          MySwal.fire({
-            title: "Update success!",
-            text: "Order has been updated",
-            icon: "success",
-            timer: 2500,
-            showConfirmButton: false,
-          });
-        }
       },
       onError: async (err: any) => {
         MySwal.fire({
@@ -185,15 +161,6 @@ const TableDiy = (props: any) => {
         setDryToUpdate([]);
         refetchOrderData();
         setToUpdateGrandTotalId(selectedData?._id);
-        if (!MySwal.isVisible()) {
-          MySwal.fire({
-            title: "Update success!",
-            text: "Order has been updated",
-            icon: "success",
-            timer: 2500,
-            showConfirmButton: false,
-          });
-        }
       },
       onError: async (err: any) => {
         MySwal.fire({
@@ -212,15 +179,6 @@ const TableDiy = (props: any) => {
         setItemToUpdate([]);
         refetchOrderData();
         setToUpdateGrandTotalId(selectedData?._id);
-        if (!MySwal.isVisible()) {
-          MySwal.fire({
-            title: "Update success!",
-            text: "Order has been updated",
-            icon: "success",
-            timer: 2500,
-            showConfirmButton: false,
-          });
-        }
       },
       onError: async (err: any) => {
         MySwal.fire({
@@ -237,17 +195,6 @@ const TableDiy = (props: any) => {
     mutate: triggerBulkUpdateInventoryStock,
     isLoading: isBulkUpdateInventoryStockLoading,
   } = useMutation(async (order: any) => bulkUpdateInventory(order), {
-    onSuccess: async () => {
-      if (!MySwal.isVisible()) {
-        MySwal.fire({
-          title: "Update success!",
-          text: "Order has been updated",
-          icon: "success",
-          timer: 2500,
-          showConfirmButton: false,
-        });
-      }
-    },
     onError: async (err: any) => {
       MySwal.fire({
         title: "Ooops!",
@@ -311,7 +258,7 @@ const TableDiy = (props: any) => {
       if (!exist) {
         let toUpdateObj: any = {};
         toUpdateObj["id"] = id;
-        if (key === "claimStatus" && value === "Claimed") {
+        if (key === "paidStatus" && value === "Paid") {
           toUpdateObj["orderStatus"] = "Closed";
           toUpdateObj["updatedAt"] = moment().format();
         }
@@ -579,12 +526,11 @@ const TableDiy = (props: any) => {
             }
           });
         if (ops && ops.length > 0) {
-          _updateRowEditActive(index, false);
           triggerBulkUpdateWash({ bulk: ops });
         }
       }
     },
-    [washToUpdate, triggerBulkUpdateWash, _updateRowEditActive]
+    [washToUpdate, triggerBulkUpdateWash]
   );
 
   const _updateInventoryStock = useCallback(
@@ -605,16 +551,11 @@ const TableDiy = (props: any) => {
             };
           });
         if (ops && ops.length > 0) {
-          _updateRowEditActive(index, false);
           triggerBulkUpdateInventoryStock({ bulk: ops });
         }
       }
     },
-    [
-      inventoryStockToUpdate,
-      triggerBulkUpdateInventoryStock,
-      _updateRowEditActive,
-    ]
+    [inventoryStockToUpdate, triggerBulkUpdateInventoryStock]
   );
 
   const _updateDry = useCallback(
@@ -643,12 +584,11 @@ const TableDiy = (props: any) => {
             }
           });
         if (ops && ops.length > 0) {
-          _updateRowEditActive(index, false);
           triggerBulkUpdateDry({ bulk: ops });
         }
       }
     },
-    [dryToUpdate, triggerBulkUpdateDry, _updateRowEditActive]
+    [dryToUpdate, triggerBulkUpdateDry]
   );
 
   const _updateItem = useCallback(
@@ -682,12 +622,11 @@ const TableDiy = (props: any) => {
             }
           });
         if (ops && ops.length > 0) {
-          _updateRowEditActive(index, false);
           triggerBulkUpdateItem({ bulk: ops });
         }
       }
     },
-    [itemToUpdate, triggerBulkUpdateItem, _updateRowEditActive]
+    [itemToUpdate, triggerBulkUpdateItem]
   );
 
   const _updateOrder = useCallback(
@@ -712,7 +651,6 @@ const TableDiy = (props: any) => {
             };
           });
         if (ops && ops.length > 0) {
-          _updateRowEditActive(index, false);
           triggerBulkUpdateOrder({ bulk: ops });
         }
       }
@@ -720,7 +658,6 @@ const TableDiy = (props: any) => {
     [
       orderToUpdate,
       triggerBulkUpdateOrder,
-      _updateRowEditActive,
       _updateWash,
       _updateDry,
       _updateItem,
@@ -754,8 +691,8 @@ const TableDiy = (props: any) => {
       setSelectedData(data);
       setSelectedIndex(index);
       const isClaimed =
-        orderToUpdate[index]?.claimStatus &&
-        orderToUpdate[index]?.claimStatus === "Claimed";
+        orderToUpdate[index]?.paidStatus &&
+        orderToUpdate[index]?.paidStatus === "Paid";
       if (!isClaimed) {
         _updateOrder(index, data._id, data);
       } else {
@@ -950,7 +887,8 @@ const TableDiy = (props: any) => {
             value =
               isEditActive &&
               !res["orderDry"]["machineNumber"] &&
-              res["orderDry"]?.dryId?.type ? (
+              res["orderDry"]?.dryId?.type &&
+              res["orderWash"]["machineNumber"] ? (
                 <input
                   className="pt-1 pb-1 pl-2 rounded-sm mr-2 w-[45px] border-2 border-semi-light"
                   type="number"
@@ -972,7 +910,9 @@ const TableDiy = (props: any) => {
               );
           } else if (res2.dataName === "foldCompleted") {
             value =
-              isEditActive && !res["foldCompleted"] ? (
+              isEditActive &&
+              !res["foldCompleted"] &&
+              res["orderDry"]["machineNumber"] ? (
                 <input
                   className="w-4 h-4 mt-[5px]"
                   type="checkbox"
@@ -1194,8 +1134,7 @@ const TableDiy = (props: any) => {
           } else if (res2.dataName === "paidStatus") {
             value =
               isEditActive &&
-              (!res[res2.dataName] || res[res2.dataName] !== "Paid") &&
-              res["foldCompleted"] ? (
+              (!res[res2.dataName] || res[res2.dataName] !== "Paid") ? (
                 <select
                   className="pt-1 pb-1 pl-2 rounded-sm mr-2 w-[67px] border-2 border-semi-light appearance-none"
                   onChange={(e: any) =>
@@ -1204,6 +1143,9 @@ const TableDiy = (props: any) => {
                 >
                   <option value="Unpaid">Select</option>
                   <option selected={res.paidStatus === "Unpaid"}>Unpaid</option>
+                  <option selected={res.paidStatus === "To Transfer"}>
+                    To Transfer
+                  </option>
                   <option selected={res.paidStatus === "Paid"}>Paid</option>
                 </select>
               ) : (
@@ -1213,21 +1155,17 @@ const TableDiy = (props: any) => {
             value =
               isEditActive &&
               res["paidStatus"] &&
-              res["paidStatus"] === "Paid" ? (
-                <select
-                  className="pt-1 pb-1 pl-2 rounded-sm mr-2 w-[87px] border-2 border-semi-light appearance-none"
-                  onChange={(e: any) =>
-                    _orderToUpdate(res._id, "claimStatus", e.target.value)
-                  }
-                >
-                  <option value="Unclaimed">Select</option>
-                  <option selected={res.claimStatus === "Unclaimed"}>
-                    Unclaimed
-                  </option>
-                  <option selected={res.claimStatus === "Claimed"}>
-                    Claimed
-                  </option>
-                </select>
+              res["paidStatus"] === "To Transfer" &&
+              res["claimStatus"] &&
+              res["claimStatus"] !== "Claimed" ? (
+                <input
+                  className="w-4 h-4 mt-[5px]"
+                  type="checkbox"
+                  onChange={(e: any) => {
+                    const value = e.target.checked ? "Claimed" : "null";
+                    _orderToUpdate(res._id, "claimStatus", value);
+                  }}
+                />
               ) : (
                 res[res2.dataName]
               );
@@ -1331,8 +1269,18 @@ const TableDiy = (props: any) => {
         </button>
       </div>
       <div className="flex justify-between mt-11">
-        <div>
+        <div className="flex">
           <h3 className="font-bold text-primary">Active Dropoff Orders</h3>
+          <div className="flex flex-col justify-center ml-5">
+            {isBulkUpdateDryLoading ||
+            isBulkUpdateInventoryStockLoading ||
+            isBulkUpdateItemLoading ||
+            isBulkUpdateOrderLoading ||
+            isBulkUpdateWashLoading ||
+            isBulkUpdateInventoryStockLoading ? (
+              <SmallLoading />
+            ) : null}
+          </div>
         </div>
         <div>
           <input

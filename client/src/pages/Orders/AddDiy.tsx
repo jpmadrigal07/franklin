@@ -40,7 +40,7 @@ const AddDiy = (props: any) => {
   const [customAddOnServices, setCustomAddOnServices] = useState<any>([]);
   const [customDiscount, setCustomDiscount] = useState<any>([]);
 
-  const [selectedCustomer, setSelectedCustomer] = useState("");
+  const [selectedCustomer, setSelectedCustomer] = useState<any>(null);
   const [weight, setWeight] = useState<number | undefined>();
   const [selectedWash, setSelectedWash] = useState("");
   const [selectedDry, setSelectedDry] = useState("");
@@ -81,7 +81,7 @@ const AddDiy = (props: any) => {
 
   const { data: orderData, isLoading: isOrderDataLoading } = useQuery(
     "order",
-    () => getAllOrder()
+    () => getAllOrder(`{"laundryId": { "$exists": false } }`)
   );
 
   const { data: customerData, isLoading: isCustomerDataLoading } = useQuery(
@@ -562,8 +562,8 @@ const AddDiy = (props: any) => {
       folderId: folderData && folderData[0]._id,
       weight,
       paidStatus: "Unpaid",
-      orderStatus: "Unclaimed",
-      claimStatus: "In",
+      orderStatus: "In",
+      claimStatus: "Unclaimed",
       washId: washId,
       dryId: dryId,
       plasticBag: pbQty,
@@ -594,8 +594,8 @@ const AddDiy = (props: any) => {
       plasticBag: pbQty,
       amountDue,
       paidStatus: "Unpaid",
-      orderStatus: "Unclaimed",
-      claimStatus: "In",
+      orderStatus: "In",
+      claimStatus: "Unclaimed",
     };
 
     const filteredValues = clean(orderToFilter);
@@ -802,12 +802,12 @@ const AddDiy = (props: any) => {
         <div>
           <h1 className="font-bold text-primary mt-7">Add DIY Order</h1>
         </div>
-        <div className="p-3 border-2 border-primary rounded-md">
-          <p className="text-center font-bold">NOTES</p>
-          <p className="text-center">Regular Wash</p>
-          <p className="text-center">Extra Dry</p>
-          <p className="text-center">Downy Antibac</p>
-        </div>
+        {selectedCustomer && JSON.parse(selectedCustomer)?.notes && (
+          <div className="p-3 border-2 border-primary rounded-md">
+            <p className="text-center font-bold">NOTES</p>
+            <p className="text-center">{JSON.parse(selectedCustomer)?.notes}</p>
+          </div>
+        )}
       </div>
       <form className="w-full mt-7">
         <div className="grid grid-cols-7 gap-4">

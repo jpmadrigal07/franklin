@@ -19,9 +19,9 @@ import { getAllWash } from "../../utils/wash";
 import { getAllDry } from "../../utils/dry";
 import { bulkUpdateInventory, getAllInventory } from "../../utils/inventory";
 import { bulkUpdateItem } from "../../utils/api/orderItem";
-import e from "express";
 import TotalModal from "./TotalModal";
 import ComputeTotalLoading from "./ComputeTotalLoading";
+import SmallLoading from "../../components/SmallLoading";
 
 type T_Header = {
   header: string;
@@ -105,13 +105,6 @@ const TableDiy = (props: any) => {
         setIsCancelModalOpen(false);
         setOpenClaimedOrderModal(false);
         refetchOrderData();
-        MySwal.fire({
-          title: "Update success!",
-          text: "Order has been updated",
-          icon: "success",
-          timer: 2500,
-          showConfirmButton: false,
-        });
       },
       onError: async (err: any) => {
         MySwal.fire({
@@ -134,15 +127,6 @@ const TableDiy = (props: any) => {
       setOpenClaimedOrderModal(false);
       refetchOrderData();
       setToUpdateGrandTotalId(selectedData?._id);
-      if (!MySwal.isVisible()) {
-        MySwal.fire({
-          title: "Update success!",
-          text: "Order has been updated",
-          icon: "success",
-          timer: 2500,
-          showConfirmButton: false,
-        });
-      }
     },
     onError: async (err: any) => {
       MySwal.fire({
@@ -161,15 +145,6 @@ const TableDiy = (props: any) => {
         setWashToUpdate([]);
         refetchOrderData();
         setToUpdateGrandTotalId(selectedData?._id);
-        if (!MySwal.isVisible()) {
-          MySwal.fire({
-            title: "Update success!",
-            text: "Order has been updated",
-            icon: "success",
-            timer: 2500,
-            showConfirmButton: false,
-          });
-        }
       },
       onError: async (err: any) => {
         MySwal.fire({
@@ -188,15 +163,6 @@ const TableDiy = (props: any) => {
         setDryToUpdate([]);
         refetchOrderData();
         setToUpdateGrandTotalId(selectedData?._id);
-        if (!MySwal.isVisible()) {
-          MySwal.fire({
-            title: "Update success!",
-            text: "Order has been updated",
-            icon: "success",
-            timer: 2500,
-            showConfirmButton: false,
-          });
-        }
       },
       onError: async (err: any) => {
         MySwal.fire({
@@ -215,15 +181,6 @@ const TableDiy = (props: any) => {
         setItemToUpdate([]);
         refetchOrderData();
         setToUpdateGrandTotalId(selectedData?._id);
-        if (!MySwal.isVisible()) {
-          MySwal.fire({
-            title: "Update success!",
-            text: "Order has been updated",
-            icon: "success",
-            timer: 2500,
-            showConfirmButton: false,
-          });
-        }
       },
       onError: async (err: any) => {
         MySwal.fire({
@@ -240,17 +197,6 @@ const TableDiy = (props: any) => {
     mutate: triggerBulkUpdateInventoryStock,
     isLoading: isBulkUpdateInventoryStockLoading,
   } = useMutation(async (order: any) => bulkUpdateInventory(order), {
-    onSuccess: async () => {
-      if (!MySwal.isVisible()) {
-        MySwal.fire({
-          title: "Update success!",
-          text: "Order has been updated",
-          icon: "success",
-          timer: 2500,
-          showConfirmButton: false,
-        });
-      }
-    },
     onError: async (err: any) => {
       MySwal.fire({
         title: "Ooops!",
@@ -591,7 +537,6 @@ const TableDiy = (props: any) => {
             }
           });
         if (ops && ops.length > 0) {
-          _updateRowEditActive(index, false);
           triggerBulkUpdateWash({ bulk: ops });
         }
       }
@@ -617,7 +562,6 @@ const TableDiy = (props: any) => {
             };
           });
         if (ops && ops.length > 0) {
-          _updateRowEditActive(index, false);
           triggerBulkUpdateInventoryStock({ bulk: ops });
         }
       }
@@ -655,7 +599,6 @@ const TableDiy = (props: any) => {
             }
           });
         if (ops && ops.length > 0) {
-          _updateRowEditActive(index, false);
           triggerBulkUpdateDry({ bulk: ops });
         }
       }
@@ -694,7 +637,6 @@ const TableDiy = (props: any) => {
             }
           });
         if (ops && ops.length > 0) {
-          _updateRowEditActive(index, false);
           triggerBulkUpdateItem({ bulk: ops });
         }
       }
@@ -724,7 +666,6 @@ const TableDiy = (props: any) => {
             };
           });
         if (ops && ops.length > 0) {
-          _updateRowEditActive(index, false);
           triggerBulkUpdateOrder({ bulk: ops });
         }
       }
@@ -736,6 +677,7 @@ const TableDiy = (props: any) => {
       _updateWash,
       _updateDry,
       _updateItem,
+      _updateInventoryStock,
     ]
   );
 
@@ -961,7 +903,8 @@ const TableDiy = (props: any) => {
             value =
               isEditActive &&
               !res["orderDry"]["machineNumber"] &&
-              res["orderDry"]?.dryId?.type ? (
+              res["orderDry"]?.dryId?.type &&
+              res["orderWash"]["machineNumber"] ? (
                 <input
                   className="pt-1 pb-1 pl-2 rounded-sm mr-2 w-[45px] border-2 border-semi-light"
                   type="number"
@@ -1193,48 +1136,63 @@ const TableDiy = (props: any) => {
                   (res: any) => res?.inventoryId?.name === "Plastic Bag"
                 )
               : null;
-            value = isEditActive ? (
-              <input
-                className="pt-1 pb-1 pl-2 rounded-sm mr-2 w-[45px] border-2 border-semi-light"
-                type="number"
-                defaultValue={plastic?.qty}
-                onChange={(e: any) => {
-                  _itemToUpdate(
-                    index,
-                    plastic?._id,
-                    res.jobOrderNumber,
-                    "qty",
-                    parseInt(e.target.value),
-                    "PB",
-                    pbItem?.unitCost
-                  );
-                  _inventoryStockToUpdate(
-                    pbItem?._id,
-                    parseInt(e.target.value),
-                    pbItem?.qty
-                  );
-                }}
-              />
-            ) : plastic ? (
-              plastic.qty
-            ) : (
-              "---"
-            );
+            value =
+              isEditActive && !plastic ? (
+                <input
+                  className="pt-1 pb-1 pl-2 rounded-sm mr-2 w-[45px] border-2 border-semi-light"
+                  type="number"
+                  defaultValue={plastic?.qty}
+                  onChange={(e: any) => {
+                    _itemToUpdate(
+                      index,
+                      plastic?._id,
+                      res.jobOrderNumber,
+                      "qty",
+                      parseInt(e.target.value),
+                      "PB",
+                      pbItem?.unitCost
+                    );
+                    _inventoryStockToUpdate(
+                      pbItem?._id,
+                      parseInt(e.target.value),
+                      pbItem?.qty
+                    );
+                  }}
+                />
+              ) : plastic ? (
+                plastic.qty
+              ) : (
+                "---"
+              );
           } else if (res2.dataName === "paidStatus") {
-            value = isEditActive ? (
-              <select
-                className="pt-1 pb-1 pl-2 rounded-sm mr-2 w-[67px] border-2 border-semi-light appearance-none"
-                onChange={(e: any) =>
-                  _orderToUpdate(res._id, "paidStatus", e.target.value)
-                }
-              >
-                <option value="Unpaid">Select</option>
-                <option selected={res.paidStatus === "Unpaid"}>Unpaid</option>
-                <option selected={res.paidStatus === "Paid"}>Paid</option>
-              </select>
-            ) : (
-              res[res2.dataName]
-            );
+            const plastic = Array.isArray(res["orderItem"])
+              ? res["orderItem"].find(
+                  (res: any) => res?.inventoryId?.name === "Plastic Bag"
+                )
+              : null;
+            const zonrox = Array.isArray(res["orderItem"])
+              ? res["orderItem"].find(
+                  (res: any) => res?.inventoryId?.name === "Zonrox"
+                )
+              : null;
+            value =
+              isEditActive &&
+              res["orderDry"]["machineNumber"] &&
+              plastic &&
+              zonrox ? (
+                <select
+                  className="pt-1 pb-1 pl-2 rounded-sm mr-2 w-[67px] border-2 border-semi-light appearance-none"
+                  onChange={(e: any) =>
+                    _orderToUpdate(res._id, "paidStatus", e.target.value)
+                  }
+                >
+                  <option value="Unpaid">Select</option>
+                  <option selected={res.paidStatus === "Unpaid"}>Unpaid</option>
+                  <option selected={res.paidStatus === "Paid"}>Paid</option>
+                </select>
+              ) : (
+                res[res2.dataName]
+              );
           } else if (res2.dataName === "createdAt") {
             value = moment(res[res2.dataName]).format("MM/DD/YYYY");
           } else {
@@ -1332,8 +1290,18 @@ const TableDiy = (props: any) => {
         </button>
       </div>
       <div className="flex justify-between mt-11">
-        <div>
-          <h3 className="font-bold text-primary">Active Diy Orders</h3>
+        <div className="flex">
+          <h3 className="font-bold text-primary">Active Dropoff Orders</h3>
+          <div className="flex flex-col justify-center ml-5">
+            {isBulkUpdateDryLoading ||
+            isBulkUpdateInventoryStockLoading ||
+            isBulkUpdateItemLoading ||
+            isBulkUpdateOrderLoading ||
+            isBulkUpdateWashLoading ||
+            isBulkUpdateInventoryStockLoading ? (
+              <SmallLoading />
+            ) : null}
+          </div>
         </div>
         <div>
           <input
