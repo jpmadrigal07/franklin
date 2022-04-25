@@ -54,6 +54,7 @@ const TableDiy = (props: any) => {
   const [toUpdateGrandTotalId, setToUpdateGrandTotalId] = useState("");
   const [inventoryStockToUpdate, setInventoryStockToUpdate] = useState<any>([]);
   const [selectedInventory, setSelectedInventory] = useState<any>([]);
+  const [sortedData, setSortedData] = useState<any>({});
 
   const { mutate: triggerVerifyPassword, isLoading: isVerifyPasswordLoading } =
     useMutation(async (password: any) => verifyPassword(password), {
@@ -541,7 +542,7 @@ const TableDiy = (props: any) => {
         }
       }
     },
-    [washToUpdate, triggerBulkUpdateWash, _updateRowEditActive]
+    [washToUpdate, triggerBulkUpdateWash]
   );
 
   const _updateInventoryStock = useCallback(
@@ -566,11 +567,7 @@ const TableDiy = (props: any) => {
         }
       }
     },
-    [
-      inventoryStockToUpdate,
-      triggerBulkUpdateInventoryStock,
-      _updateRowEditActive,
-    ]
+    [inventoryStockToUpdate, triggerBulkUpdateInventoryStock]
   );
 
   const _updateDry = useCallback(
@@ -603,7 +600,7 @@ const TableDiy = (props: any) => {
         }
       }
     },
-    [dryToUpdate, triggerBulkUpdateDry, _updateRowEditActive]
+    [dryToUpdate, triggerBulkUpdateDry]
   );
 
   const _updateItem = useCallback(
@@ -641,7 +638,7 @@ const TableDiy = (props: any) => {
         }
       }
     },
-    [itemToUpdate, triggerBulkUpdateItem, _updateRowEditActive]
+    [itemToUpdate, triggerBulkUpdateItem]
   );
 
   const _updateOrder = useCallback(
@@ -673,7 +670,6 @@ const TableDiy = (props: any) => {
     [
       orderToUpdate,
       triggerBulkUpdateOrder,
-      _updateRowEditActive,
       _updateWash,
       _updateDry,
       _updateItem,
@@ -1227,8 +1223,11 @@ const TableDiy = (props: any) => {
       _itemToUpdate,
       isSelectMultipleOpen,
       currentTableHeader,
-      _updateOrder,
       _multiOrderToUpdate,
+      _inventoryStockToUpdate,
+      _openClaimedOrderModal,
+      _selectedInventory,
+      selectedInventory,
     ]
   );
 
@@ -1252,6 +1251,75 @@ const TableDiy = (props: any) => {
       }
     }
   }, [searchPhrase, orderData, _remappedData]);
+
+  useEffect(() => {
+    if (sortedData?.data) {
+      let orderDataSorted = orderData;
+      if (sortedData?.data && sortedData?.data === "jobOrderNumber") {
+        orderDataSorted = orderDataSorted?.sort((a: any, b: any) => {
+          return sortedData?.sort === "up"
+            ? a.jobOrderNumber.localeCompare(b.jobOrderNumber)
+            : b.jobOrderNumber.localeCompare(a.jobOrderNumber);
+        });
+      }
+      if (sortedData?.data && sortedData?.data === "customer") {
+        orderDataSorted = orderDataSorted?.sort((a: any, b: any) => {
+          return sortedData?.sort === "up"
+            ? a.customerId.firstName.localeCompare(b.customerId.firstName)
+            : b.customerId.firstName.localeCompare(a.customerId.firstName);
+        });
+      }
+      if (sortedData?.data && sortedData?.data === "amountDue") {
+        orderDataSorted = orderDataSorted?.sort((a: any, b: any) => {
+          return sortedData?.sort === "up"
+            ? parseFloat(a.amountDue) - parseFloat(b.amountDue)
+            : parseFloat(b.amountDue) - parseFloat(a.amountDue);
+        });
+      }
+      if (sortedData?.data && sortedData?.data === "paidStatus") {
+        orderDataSorted = orderDataSorted?.sort((a: any, b: any) => {
+          return sortedData?.sort === "up"
+            ? a.paidStatus.localeCompare(b.paidStatus)
+            : b.paidStatus.localeCompare(a.paidStatus);
+        });
+      }
+      if (sortedData?.data && sortedData?.data === "wash") {
+        orderDataSorted = orderDataSorted?.sort((a: any, b: any) => {
+          return sortedData?.sort === "up"
+            ? a.orderWash?.washId?.type.localeCompare(b.orderWash?.washId?.type)
+            : b.orderWash?.washId?.type.localeCompare(
+                a.orderWash?.washId?.type
+              );
+        });
+      }
+      if (sortedData?.data && sortedData?.data === "dry") {
+        orderDataSorted = orderDataSorted?.sort((a: any, b: any) => {
+          return sortedData?.sort === "up"
+            ? a.orderDry?.dryId?.type.localeCompare(b.orderDry?.dryId?.type)
+            : b.orderDry?.dryId?.type.localeCompare(a.orderDry?.dryId?.type);
+        });
+      }
+      if (sortedData?.data && sortedData?.data === "wm") {
+        orderDataSorted = orderDataSorted?.sort((a: any, b: any) => {
+          return sortedData?.sort === "up"
+            ? parseFloat(a.orderWash?.machineNumber) -
+                parseFloat(b.orderWash?.machineNumber)
+            : parseFloat(b.orderWash?.machineNumber) -
+                parseFloat(a.orderWash?.machineNumber);
+        });
+      }
+      if (sortedData?.data && sortedData?.data === "dm") {
+        orderDataSorted = orderDataSorted?.sort((a: any, b: any) => {
+          return sortedData?.sort === "up"
+            ? parseFloat(a.orderDry?.machineNumber) -
+                parseFloat(b.orderDry?.machineNumber)
+            : parseFloat(b.orderDry?.machineNumber) -
+                parseFloat(a.orderDry?.machineNumber);
+        });
+      }
+      setOrder(_remappedData(orderDataSorted));
+    }
+  }, [orderData, _remappedData, sortedData]);
 
   useEffect(() => {
     if (orderData && orderData.length > 0 && order.length === 0) {
@@ -1367,6 +1435,13 @@ const TableDiy = (props: any) => {
         header={currentTableHeader}
         isLoading={isorderDataLoading}
         data={order}
+        columnSort={(e: any) =>
+          setSortedData({
+            sort: sortedData?.sort === "up" ? "down" : "up",
+            data: e,
+          })
+        }
+        columnSortIcon={sortedData}
       />
       <Modal
         state={isCancelModalOpen}

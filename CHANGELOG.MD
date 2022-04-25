@@ -9,6 +9,7 @@
 - Added minus function for adding item on dashboard
 - Fixed diy and do process
 - Add function for add notes on top right
+- Added sort function for dashboard and orders page
 
 ## 3.0.11
 

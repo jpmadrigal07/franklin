@@ -53,6 +53,7 @@ const TableDiy = (props: any) => {
   const [toUpdateGrandTotalId, setToUpdateGrandTotalId] = useState("");
   const [inventoryStockToUpdate, setInventoryStockToUpdate] = useState<any>([]);
   const [selectedInventory, setSelectedInventory] = useState<any>([]);
+  const [sortedData, setSortedData] = useState<any>({});
 
   const { mutate: triggerVerifyPassword, isLoading: isVerifyPasswordLoading } =
     useMutation(async (password: any) => verifyPassword(password), {
@@ -1233,9 +1234,107 @@ const TableDiy = (props: any) => {
   }, [searchPhrase, orderData, _remappedData]);
 
   useEffect(() => {
+    if (searchPhrase === "") {
+      if (orderData && orderData.length > 0) {
+        setOrder(_remappedData(orderData));
+      }
+    } else {
+      if (orderData && orderData.length > 0) {
+        const filteredorderData = orderData.filter(
+          (res: any) =>
+            res.customerId.firstName
+              .toLowerCase()
+              .includes(searchPhrase.toLowerCase()) ||
+            res.customerId.lastName
+              .toLowerCase()
+              .includes(searchPhrase.toLowerCase())
+        );
+        setOrder(_remappedData(filteredorderData));
+      }
+    }
+  }, [searchPhrase, orderData, _remappedData]);
+
+  useEffect(() => {
+    if (sortedData?.data) {
+      let orderDataSorted = orderData;
+      if (sortedData?.data && sortedData?.data === "jobOrderNumber") {
+        orderDataSorted = orderDataSorted?.sort((a: any, b: any) => {
+          return sortedData?.sort === "up"
+            ? a.jobOrderNumber.localeCompare(b.jobOrderNumber)
+            : b.jobOrderNumber.localeCompare(a.jobOrderNumber);
+        });
+      }
+      if (sortedData?.data && sortedData?.data === "customer") {
+        orderDataSorted = orderDataSorted?.sort((a: any, b: any) => {
+          return sortedData?.sort === "up"
+            ? a.customerId.firstName.localeCompare(b.customerId.firstName)
+            : b.customerId.firstName.localeCompare(a.customerId.firstName);
+        });
+      }
+      if (sortedData?.data && sortedData?.data === "amountDue") {
+        orderDataSorted = orderDataSorted?.sort((a: any, b: any) => {
+          return sortedData?.sort === "up"
+            ? parseFloat(a.amountDue) - parseFloat(b.amountDue)
+            : parseFloat(b.amountDue) - parseFloat(a.amountDue);
+        });
+      }
+      if (sortedData?.data && sortedData?.data === "paidStatus") {
+        orderDataSorted = orderDataSorted?.sort((a: any, b: any) => {
+          return sortedData?.sort === "up"
+            ? a.paidStatus.localeCompare(b.paidStatus)
+            : b.paidStatus.localeCompare(a.paidStatus);
+        });
+      }
+      if (sortedData?.data && sortedData?.data === "claimStatus") {
+        orderDataSorted = orderDataSorted?.sort((a: any, b: any) => {
+          return sortedData?.sort === "up"
+            ? a.claimStatus.localeCompare(b.claimStatus)
+            : b.claimStatus.localeCompare(a.claimStatus);
+        });
+      }
+      if (sortedData?.data && sortedData?.data === "wash") {
+        orderDataSorted = orderDataSorted?.sort((a: any, b: any) => {
+          return sortedData?.sort === "up"
+            ? a.orderWash?.washId?.type.localeCompare(b.orderWash?.washId?.type)
+            : b.orderWash?.washId?.type.localeCompare(
+                a.orderWash?.washId?.type
+              );
+        });
+      }
+      if (sortedData?.data && sortedData?.data === "dry") {
+        orderDataSorted = orderDataSorted?.sort((a: any, b: any) => {
+          return sortedData?.sort === "up"
+            ? a.orderDry?.dryId?.type.localeCompare(b.orderDry?.dryId?.type)
+            : b.orderDry?.dryId?.type.localeCompare(a.orderDry?.dryId?.type);
+        });
+      }
+      if (sortedData?.data && sortedData?.data === "wm") {
+        orderDataSorted = orderDataSorted?.sort((a: any, b: any) => {
+          return sortedData?.sort === "up"
+            ? parseFloat(a.orderWash?.machineNumber) -
+                parseFloat(b.orderWash?.machineNumber)
+            : parseFloat(b.orderWash?.machineNumber) -
+                parseFloat(a.orderWash?.machineNumber);
+        });
+      }
+      if (sortedData?.data && sortedData?.data === "dm") {
+        orderDataSorted = orderDataSorted?.sort((a: any, b: any) => {
+          return sortedData?.sort === "up"
+            ? parseFloat(a.orderDry?.machineNumber) -
+                parseFloat(b.orderDry?.machineNumber)
+            : parseFloat(b.orderDry?.machineNumber) -
+                parseFloat(a.orderDry?.machineNumber);
+        });
+      }
+      setOrder(_remappedData(orderDataSorted));
+    }
+  }, [orderData, _remappedData, sortedData]);
+
+  useEffect(() => {
     if (orderData && orderData.length > 0 && order.length === 0) {
       setRowEditActive(orderData.map(() => false));
-      setOrder(_remappedData(orderData));
+      let orderDataSorted = orderData;
+      setOrder(_remappedData(orderDataSorted));
     } else if (orderData && orderData.length === 0 && order.length > 0) {
       setOrder([]);
     }
@@ -1371,6 +1470,13 @@ const TableDiy = (props: any) => {
         header={currentTableHeader}
         isLoading={isorderDataLoading}
         data={order}
+        columnSort={(e: any) =>
+          setSortedData({
+            sort: sortedData?.sort === "up" ? "down" : "up",
+            data: e,
+          })
+        }
+        columnSortIcon={sortedData}
       />
       <Modal
         state={isCancelModalOpen}

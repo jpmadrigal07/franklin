@@ -27,6 +27,7 @@ const TableDropOff = (props: any) => {
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
   const [selectedJobOrderNumber, setSelectedJobOrderNumber] = useState("");
   const [selectedOrderId, setSelectedOrderId] = useState("");
+  const [sortedData, setSortedData] = useState<any>({});
 
   const {
     data: orderData,
@@ -163,9 +164,52 @@ const TableDropOff = (props: any) => {
 
   useEffect(() => {
     if (orderData && orderData.length > 0) {
-      setOrder(_remappedData(orderData));
+      let orderDataSorted = orderData;
+      if (sortedData?.data && sortedData?.data === "jobOrderNumber") {
+        orderDataSorted = orderDataSorted?.sort((a: any, b: any) => {
+          return sortedData?.sort === "up"
+            ? a.jobOrderNumber.localeCompare(b.jobOrderNumber)
+            : b.jobOrderNumber.localeCompare(a.jobOrderNumber);
+        });
+      }
+      if (sortedData?.data && sortedData?.data === "customer") {
+        orderDataSorted = orderDataSorted?.sort((a: any, b: any) => {
+          return sortedData?.sort === "up"
+            ? a.customerId.firstName.localeCompare(b.customerId.firstName)
+            : b.customerId.firstName.localeCompare(a.customerId.firstName);
+        });
+      }
+      if (sortedData?.data && sortedData?.data === "amountDue") {
+        orderDataSorted = orderDataSorted?.sort((a: any, b: any) => {
+          return sortedData?.sort === "up"
+            ? parseFloat(a.amountDue) - parseFloat(b.amountDue)
+            : parseFloat(b.amountDue) - parseFloat(a.amountDue);
+        });
+      }
+      if (sortedData?.data && sortedData?.data === "paidStatus") {
+        orderDataSorted = orderDataSorted?.sort((a: any, b: any) => {
+          return sortedData?.sort === "up"
+            ? a.paidStatus.localeCompare(b.paidStatus)
+            : b.paidStatus.localeCompare(a.paidStatus);
+        });
+      }
+      if (sortedData?.data && sortedData?.data === "claimStatus") {
+        orderDataSorted = orderDataSorted?.sort((a: any, b: any) => {
+          return sortedData?.sort === "up"
+            ? a.claimStatus.localeCompare(b.claimStatus)
+            : b.claimStatus.localeCompare(a.claimStatus);
+        });
+      }
+      if (sortedData?.data && sortedData?.data === "orderStatus") {
+        orderDataSorted = orderDataSorted?.sort((a: any, b: any) => {
+          return sortedData?.sort === "up"
+            ? a.orderStatus.localeCompare(b.orderStatus)
+            : b.orderStatus.localeCompare(a.orderStatus);
+        });
+      }
+      setOrder(_remappedData(orderDataSorted));
     }
-  }, [orderData, _remappedData]);
+  }, [orderData, _remappedData, sortedData]);
 
   const _cancelOrder = (jobOrderNumber: string, orderId: string) => {
     setSelectedJobOrderNumber(jobOrderNumber);
@@ -207,6 +251,13 @@ const TableDropOff = (props: any) => {
         header={tableHeader}
         isLoading={isorderDataLoading}
         data={order}
+        columnSort={(e: any) =>
+          setSortedData({
+            sort: sortedData?.sort === "up" ? "down" : "up",
+            data: e,
+          })
+        }
+        columnSortIcon={sortedData}
       />
       <Modal
         state={isCancelModalOpen}

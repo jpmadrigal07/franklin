@@ -1,9 +1,14 @@
+import { Icon } from "@iconify/react";
+import { useEffect, useState } from "react";
+
 const Table = ({
   header = [],
   isLoading = false,
   data = [],
   customColumnTextColor = [],
   hideColumn = "",
+  columnSort = () => {},
+  columnSortIcon = {},
 }: any) => {
   const _renderData = () => {
     if (!isLoading) {
@@ -82,7 +87,34 @@ const Table = ({
                             scope="col"
                             className="text-sm font-bold text-gray-900 px-6 py-2 text-left"
                           >
-                            {res.header}
+                            <span
+                              className="flex hover:cursor-pointer"
+                              onClick={() => columnSort(res.dataName)}
+                            >
+                              <span className="flex flex-col justify-center">
+                                {res.header}
+                              </span>
+                              <span className="flex flex-col ml-2">
+                                {columnSortIcon?.sort &&
+                                  columnSortIcon?.sort === "up" &&
+                                  columnSortIcon?.data === res.dataName && (
+                                    <Icon
+                                      icon="bi:caret-up-fill"
+                                      className="inline"
+                                      height={15}
+                                    />
+                                  )}
+                                {columnSortIcon?.sort &&
+                                  columnSortIcon?.sort === "down" &&
+                                  columnSortIcon?.data === res.dataName && (
+                                    <Icon
+                                      icon="bi:caret-down-fill"
+                                      className="inline"
+                                      height={15}
+                                    />
+                                  )}
+                              </span>
+                            </span>
                           </th>
                         );
                       }
