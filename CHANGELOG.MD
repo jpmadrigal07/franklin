@@ -10,6 +10,7 @@
 - Fixed diy and do process
 - Add function for add notes on top right
 - Added sort function for dashboard and orders page
+- Added disable edit state on column sort
 
 ## 3.0.11
 

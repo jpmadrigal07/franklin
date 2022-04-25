@@ -1256,6 +1256,7 @@ const TableDiy = (props: any) => {
 
   useEffect(() => {
     if (sortedData?.data) {
+      setRowEditActive(orderData.map(() => false));
       let orderDataSorted = orderData;
       if (sortedData?.data && sortedData?.data === "jobOrderNumber") {
         orderDataSorted = orderDataSorted?.sort((a: any, b: any) => {
