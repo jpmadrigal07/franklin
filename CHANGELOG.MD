@@ -11,6 +11,7 @@
 - Add function for add notes on top right
 - Added sort function for dashboard and orders page
 - Added disable edit state on column sort
+- Added print page function for orders page
 
 ## 3.0.11
 

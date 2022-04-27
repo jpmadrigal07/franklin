@@ -95,7 +95,7 @@ const TableDropOff = (props: any) => {
               } else if (res3 === "Print") {
                 return _constructTableActions(
                   res3,
-                  () => window.open(`/orders/print/${res._id}`, "_blank"),
+                  () => window.open(`/print/${res?.customerId?._id}`, "_blank"),
                   true,
                   res.orderStatus === "Canceled"
                 );

@@ -29,6 +29,10 @@ export default function Router() {
       children: [{ path: "", element: <Login /> }],
     },
     {
+      path: "print/:id",
+      children: [{ path: "", element: <Print /> }],
+    },
+    {
       path: "",
       element: <MainLayout />,
       children: [
@@ -115,7 +119,6 @@ export default function Router() {
               ],
             },
             { path: ":id", element: <ViewOrder /> },
-            { path: "print/:id", element: <h1>Print page</h1> },
           ],
         },
         { path: "inventory", element: <Inventory /> },
@@ -147,6 +150,7 @@ export default function Router() {
 // IMPORT COMPONENTS
 
 const Login = Loadable(lazy(() => import("../pages/Login")));
+const Print = Loadable(lazy(() => import("../pages/Print")));
 const DashboardDiy = Loadable(
   lazy(() => import("../pages/Dashboard/TableDiy"))
 );

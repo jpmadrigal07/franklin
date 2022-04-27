@@ -9,6 +9,7 @@ const Table = ({
   hideColumn = "",
   columnSort = () => {},
   columnSortIcon = {},
+  paddingLeftRight = true,
 }: any) => {
   const _renderData = () => {
     if (!isLoading) {
@@ -33,7 +34,9 @@ const Table = ({
                     const bold = `${custom?.bold && "font-bold"}`;
                     return (
                       <td
-                        className={`text-sm text-gray-900 px-6 py-2 whitespace-nowrap ${
+                        className={`text-sm text-gray-900 ${
+                          paddingLeftRight ? "px-6" : ""
+                        } py-2 whitespace-nowrap ${
                           res2.dataName === custom?.column
                             ? `${textColor} ${bold}`
                             : ""
@@ -73,7 +76,9 @@ const Table = ({
                         return (
                           <th
                             scope="col"
-                            className="text-sm font-bold text-gray-900 px-6 py-2 text-left"
+                            className={`text-sm font-bold text-gray-900 ${
+                              paddingLeftRight ? "px-6" : ""
+                            } py-2 text-left`}
                           >
                             {res.header}
                           </th>
@@ -85,7 +90,9 @@ const Table = ({
                         return (
                           <th
                             scope="col"
-                            className="text-sm font-bold text-gray-900 px-6 py-2 text-left"
+                            className={`text-sm font-bold text-gray-900 ${
+                              paddingLeftRight ? "px-6" : ""
+                            } py-2 text-left`}
                           >
                             <span
                               className="flex hover:cursor-pointer"
