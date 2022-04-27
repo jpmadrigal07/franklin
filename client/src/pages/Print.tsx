@@ -116,6 +116,7 @@ const Print = () => {
             }, 0)
           : 0;
       setTotal(totalPayment);
+      window.print();
     }
   }, [orderData, _remappedData]);
 
