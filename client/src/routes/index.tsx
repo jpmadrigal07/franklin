@@ -108,6 +108,8 @@ export default function Router() {
               children: [
                 { path: "add", element: <OrdersAddDropOff /> },
                 { path: "add/:id", element: <OrdersAddDropOff /> },
+                { path: "add/extra", element: <OrdersAddExtraDropOff /> },
+                { path: "add/extra/:id", element: <OrdersAddExtraDropOff /> },
               ],
             },
             { path: "diy", element: <OrdersDiy /> },
@@ -174,6 +176,9 @@ const OrdersDropOff = Loadable(
 const OrdersAddDiy = Loadable(lazy(() => import("../pages/Orders/AddDiy")));
 const OrdersAddDropOff = Loadable(
   lazy(() => import("../pages/Orders/AddDropOff"))
+);
+const OrdersAddExtraDropOff = Loadable(
+  lazy(() => import("../pages/Orders/AddExtraDropOff"))
 );
 const Inventory = Loadable(lazy(() => import("../pages/Inventory/Table")));
 const AddInventory = Loadable(lazy(() => import("../pages/Inventory/Add")));

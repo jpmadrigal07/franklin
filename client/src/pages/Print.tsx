@@ -1,8 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import DataTable from "../components/Table";
 import _constructTableActions from "../utils/constructTableActions";
-import { useMutation, useQuery } from "react-query";
-import { getAllCustomer, deleteCustomer } from "../utils/customer";
+import { useQuery } from "react-query";
 import { getAllOrder } from "../utils/order";
 import { useParams } from "react-router-dom";
 
@@ -116,9 +115,14 @@ const Print = () => {
             }, 0)
           : 0;
       setTotal(totalPayment);
-      window.print();
     }
   }, [orderData, _remappedData]);
+
+  useEffect(() => {
+    if (orderData && orderData.length > 0 && orders.length > 0) {
+      window.print();
+    }
+  }, [orderData, orders]);
 
   return (
     <>

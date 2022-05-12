@@ -27,7 +27,7 @@ const Header = () => {
         </span>
         <span
           className={topButtonStyle}
-          onClick={() => navigate("/orders/dropoff/add")}
+          onClick={() => navigate("/orders/dropoff/add/extra")}
         >
           Add Extra Drop-off
         </span>

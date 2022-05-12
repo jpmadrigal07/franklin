@@ -11,6 +11,7 @@ import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import { verifyPassword } from "../../utils/user";
 import numberWithCommas from "../../utils/numberWithCommas";
+import { bulkUpdateInventory } from "../../utils/inventory";
 import moment from "moment";
 
 type T_Header = {
@@ -19,7 +20,7 @@ type T_Header = {
 };
 
 const TableDropOff = (props: any) => {
-  const { loggedInUserType } = props;
+  const { loggedInUserUsername } = props;
   const navigate = useNavigate();
   const MySwal = withReactContent(Swal);
   const [order, setOrder] = useState([]);
@@ -28,6 +29,11 @@ const TableDropOff = (props: any) => {
   const [selectedJobOrderNumber, setSelectedJobOrderNumber] = useState("");
   const [selectedOrderId, setSelectedOrderId] = useState("");
   const [sortedData, setSortedData] = useState<any>({});
+  const [isAdminPasswordModalOpen, setIsAdminPasswordModal] = useState(false);
+  const [adminPassword, setAdminPassword] = useState("");
+  const [selectedOrderItemToUpdate, setSelectedOrderToUpdate] = useState<any>(
+    []
+  );
 
   const {
     data: orderData,
@@ -37,26 +43,71 @@ const TableDropOff = (props: any) => {
     getAllOrder(`{"laundryId": { "$exists": false}}`)
   );
 
+  const {
+    mutate: triggerBulkUpdateInventoryStock,
+    isLoading: isBulkUpdateInventoryStockLoading,
+  } = useMutation(async (order: any) => bulkUpdateInventory(order), {
+    onSuccess: async () => {
+      MySwal.fire({
+        title: "Update success!",
+        text: "Order has been updated",
+        icon: "success",
+        timer: 2500,
+        showConfirmButton: false,
+      });
+    },
+    onError: async (err: any) => {
+      MySwal.fire({
+        title: "Ooops!",
+        text: err,
+        icon: "warning",
+        confirmButtonText: "Okay",
+        confirmButtonColor: "#274c77",
+      });
+    },
+  });
+
   const { mutate: triggerUpdateOrder, isLoading: isUpdateOrderLoading } =
     useMutation(async (order: any) => updateOrder(order, selectedOrderId), {
       onSuccess: async () => {
         setSelectedJobOrderNumber("");
         setSelectedOrderId("");
         setIsCancelModalOpen(false);
+        setIsAdminPasswordModal(false);
         refetchOrderData();
-        MySwal.fire({
-          title: "Update success!",
-          text: "Order has been updated",
-          icon: "success",
-          timer: 2500,
-          showConfirmButton: false,
-        });
+        if (selectedOrderItemToUpdate.length === 0) {
+          MySwal.fire({
+            title: "Update success!",
+            text: "Order has been updated",
+            icon: "success",
+            timer: 2500,
+            showConfirmButton: false,
+          });
+        } else {
+          triggerBulkUpdateInventoryStock({ bulk: selectedOrderItemToUpdate });
+        }
       },
       onError: async (err: any) => {
         MySwal.fire({
           title: "Ooops!",
           text: err,
           icon: "warning",
+          confirmButtonText: "Okay",
+          confirmButtonColor: "#274c77",
+        });
+      },
+    });
+
+  const { mutate: triggerVerifyPassword, isLoading: isVerifyPasswordLoading } =
+    useMutation(async (password: any) => verifyPassword(password), {
+      onSuccess: async () => {
+        triggerUpdateOrder({ orderStatus: "Canceled" });
+      },
+      onError: async (err: any) => {
+        MySwal.fire({
+          title: "Ooopssssss!",
+          text: err,
+          icon: "error",
           confirmButtonText: "Okay",
           confirmButtonColor: "#274c77",
         });
@@ -88,7 +139,7 @@ const TableDropOff = (props: any) => {
               if (res3 === "Cancel") {
                 return _constructTableActions(
                   res3,
-                  () => _cancelOrder(res.jobOrderNumber, res._id),
+                  () => _cancelOrder(res.jobOrderNumber, res),
                   false,
                   res.orderStatus === "Canceled"
                 );
@@ -152,10 +203,17 @@ const TableDropOff = (props: any) => {
       }
     } else {
       if (orderData && orderData.length > 0) {
-        const filteredorderData = orderData.filter((res: any) =>
-          res.customerId.firstName
-            .toLowerCase()
-            .includes(searchPhrase.toLowerCase())
+        const filteredorderData = orderData.filter(
+          (res: any) =>
+            res.customerId.firstName
+              .toLowerCase()
+              .includes(searchPhrase.toLowerCase()) ||
+            res.customerId.lastName
+              .toLowerCase()
+              .includes(searchPhrase.toLowerCase()) ||
+            res.jobOrderNumber
+              .toLowerCase()
+              .includes(searchPhrase.toLowerCase())
         );
         setOrder(_remappedData(filteredorderData));
       }
@@ -211,10 +269,24 @@ const TableDropOff = (props: any) => {
     }
   }, [orderData, _remappedData, sortedData]);
 
-  const _cancelOrder = (jobOrderNumber: string, orderId: string) => {
+  const _cancelOrder = (jobOrderNumber: string, order: any) => {
     setSelectedJobOrderNumber(jobOrderNumber);
-    setSelectedOrderId(orderId);
+    setSelectedOrderId(order?._id);
     setIsCancelModalOpen(true);
+
+    const toUpdateItem = order?.orderItem
+      ? order?.orderItem?.map((res: any) => {
+          return {
+            updateOne: {
+              filter: { _id: res?.inventoryId?._id },
+              update: { $inc: { stock: res.qty } },
+              upsert: false,
+            },
+          };
+        })
+      : [];
+
+    setSelectedOrderToUpdate(toUpdateItem);
   };
 
   return (
@@ -270,17 +342,80 @@ const TableDropOff = (props: any) => {
           <>
             <button
               className="bg-primary text-white pt-1 pl-5 pb-1 pr-5 rounded-xl mr-3"
-              onClick={() => triggerUpdateOrder({ orderStatus: "Canceled" })}
-              disabled={isUpdateOrderLoading}
+              onClick={() => setIsAdminPasswordModal(!isAdminPasswordModalOpen)}
+              disabled={
+                isUpdateOrderLoading || isBulkUpdateInventoryStockLoading
+              }
             >
               Yes
             </button>
             <button
               className="pt-1 pl-5 pb-1 pr-5 rounded-xl bg-white border-2 border-primary text-primary"
               onClick={() => setIsCancelModalOpen(!isCancelModalOpen)}
-              disabled={isUpdateOrderLoading}
+              disabled={
+                isUpdateOrderLoading || isBulkUpdateInventoryStockLoading
+              }
             >
               No
+            </button>
+          </>
+        }
+        size="sm"
+      />
+      <Modal
+        state={isAdminPasswordModalOpen}
+        toggle={() => {
+          setIsAdminPasswordModal(!isAdminPasswordModalOpen);
+          setAdminPassword("");
+        }}
+        title={<h3>Enter Password</h3>}
+        content={
+          <input
+            className="pt-1 pb-1 pl-2 rounded-sm mr-2 w-full border-2 border-accent"
+            id="grid-first-name"
+            type="password"
+            autoComplete="off"
+            onChange={(e: any) => setAdminPassword(e.target.value)}
+            value={adminPassword}
+            disabled={
+              isVerifyPasswordLoading ||
+              isUpdateOrderLoading ||
+              isBulkUpdateInventoryStockLoading
+            }
+          />
+        }
+        clickOutsideClose={!isVerifyPasswordLoading}
+        footer={
+          <>
+            <button
+              className="bg-primary text-white pt-1 pl-5 pb-1 pr-5 rounded-xl mr-3"
+              onClick={() =>
+                triggerVerifyPassword({
+                  username: loggedInUserUsername,
+                  password: adminPassword,
+                })
+              }
+              disabled={
+                isVerifyPasswordLoading ||
+                isUpdateOrderLoading ||
+                isBulkUpdateInventoryStockLoading
+              }
+            >
+              Confirm
+            </button>
+            <button
+              className="pt-1 pl-5 pb-1 pr-5 rounded-xl bg-white border-2 border-primary text-primary"
+              onClick={() => {
+                setIsAdminPasswordModal(!isAdminPasswordModalOpen);
+                setAdminPassword("");
+              }}
+              disabled={
+                isVerifyPasswordLoading ||
+                isUpdateOrderLoading ||
+                isBulkUpdateInventoryStockLoading
+              }
+            >
+              Cancel
             </button>
           </>
         }
@@ -291,7 +426,7 @@ const TableDropOff = (props: any) => {
 };
 
 const mapStateToProps = (global: any) => ({
-  loggedInUserType: global.authenticatedUser.user.type,
+  loggedInUserUsername: global.authenticatedUser.user.username,
 });
 
 export default connect(mapStateToProps)(TableDropOff);

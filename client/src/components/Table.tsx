@@ -9,6 +9,7 @@ const Table = ({
   hideColumn = "",
   columnSort = () => {},
   columnSortIcon = {},
+  isColumnClickable = true,
   paddingLeftRight = true,
 }: any) => {
   const _renderData = () => {
@@ -95,8 +96,14 @@ const Table = ({
                             } py-2 text-left`}
                           >
                             <span
-                              className="flex hover:cursor-pointer"
-                              onClick={() => columnSort(res.dataName)}
+                              className={`flex ${
+                                isColumnClickable ? "hover:cursor-pointer" : ""
+                              }`}
+                              onClick={() =>
+                                isColumnClickable
+                                  ? columnSort(res.dataName)
+                                  : null
+                              }
                             >
                               <span className="flex flex-col justify-center">
                                 {res.header}

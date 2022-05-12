@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { connect } from "react-redux";
 import { useMutation, useQuery } from "react-query";
-import { getAllInventory } from "../../utils/inventory";
+import { addInventory, getAllInventory } from "../../utils/inventory";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import { useNavigate, useParams } from "react-router-dom";
@@ -17,6 +17,7 @@ import { getAllDry } from "../../utils/dry";
 import { getAllAddOn } from "../../utils/addOn";
 import { getAllDiscount } from "../../utils/discount";
 import nextJobOrderNumber from "../../utils/nextJobOrderNumber";
+import { getAllLaundry } from "../../utils/laundry";
 import { addOrder, getAllOrder } from "../../utils/order";
 import { addOrderWash } from "../../utils/api/orderWash";
 import { addOrderDry } from "../../utils/api/orderDry";
@@ -29,7 +30,7 @@ import {
 import { getAllStaff } from "../../utils/staff";
 import { getAllFolder } from "../../utils/api/folder";
 
-const AddDiy = (props: any) => {
+const AddExtraDropOff = (props: any) => {
   const { loggedInUserId, loggedInUserType } = props;
   const MySwal = withReactContent(Swal);
   const { id: paramId } = useParams();
@@ -44,7 +45,6 @@ const AddDiy = (props: any) => {
   const [weight, setWeight] = useState<number | undefined>();
   const [selectedWash, setSelectedWash] = useState("");
   const [selectedDry, setSelectedDry] = useState("");
-  const [pbQty, setPbQty] = useState<number | undefined>();
   const [selectedDetergentType, setSelectedDetergentType] = useState("");
   const [detergentQty, setDetergentQty] = useState<number | undefined>();
   const [selectedFabConType, setSelectedFabConType] = useState("");
@@ -74,14 +74,21 @@ const AddDiy = (props: any) => {
     getAllFolder(encodeURI(foldersCondition))
   );
 
+  const { data: laundryData } = useQuery("dropOffFee", () =>
+    getAllLaundry(`{"type":"Drop Off Fee"}`)
+  );
+
   const { data: staffData, refetch: refetchStaffData } = useQuery(
     "loggedInStaff",
-    () => getAllStaff(`{"userId":"${loggedInUserId}"}`)
+    () => getAllStaff(`{"userId":"${loggedInUserId}"}`),
+    {
+      enabled: false,
+    }
   );
 
   const { data: orderData, isLoading: isOrderDataLoading } = useQuery(
     "order",
-    () => getAllOrder(`{"laundryId": { "$exists": false } }`)
+    () => getAllOrder(`{"laundryId": { "$exists": true } }`)
   );
 
   const { data: customerData, isLoading: isCustomerDataLoading } = useQuery(
@@ -123,7 +130,7 @@ const AddDiy = (props: any) => {
       setSelectedCustomer(JSON.stringify(customer));
     }
     return () => {
-      setSaveType("saveAdd");
+      setSaveType("");
     };
   }, [customerData, paramId]);
 
@@ -136,8 +143,8 @@ const AddDiy = (props: any) => {
             jobOrderNumber:
               orderData &&
               nextJobOrderNumber(
-                orderData[0] ? orderData[0].jobOrderNumber : "000000Y",
-                "Y"
+                orderData[0] ? orderData[0].jobOrderNumber : "000000F",
+                "F"
               ),
             washId: selectedWash && JSON.parse(selectedWash)._id,
             qty: 1,
@@ -148,8 +155,8 @@ const AddDiy = (props: any) => {
             jobOrderNumber:
               orderData &&
               nextJobOrderNumber(
-                orderData[0] ? orderData[0].jobOrderNumber : "000000Y",
-                "Y"
+                orderData[0] ? orderData[0].jobOrderNumber : "000000F",
+                "F"
               ),
             dryId: selectedDry && JSON.parse(selectedDry)._id,
             qty: 1,
@@ -179,8 +186,8 @@ const AddDiy = (props: any) => {
             jobOrderNumber:
               orderData &&
               nextJobOrderNumber(
-                orderData[0] ? orderData[0].jobOrderNumber : "000000Y",
-                "Y"
+                orderData[0] ? orderData[0].jobOrderNumber : "000000F",
+                "F"
               ),
             dryId: selectedDry && JSON.parse(selectedDry)._id,
             qty: 1,
@@ -205,24 +212,18 @@ const AddDiy = (props: any) => {
     const detergentQtyFinal = detergentQty ? detergentQty : 0;
     const fabConQtyFinal = fabConQty ? fabConQty : 0;
     const zonroxQtyFinal = zonroxQty ? zonroxQty : 0;
-    const pbQtyFinal = pbQty ? pbQty : 0;
     const zonrox =
       inventoryData &&
       inventoryData.find(
         (res: any) => res.name === "Zonrox" && res.type === "Bleach"
-      );
-    const plasticBag =
-      inventoryData &&
-      inventoryData.find(
-        (res: any) => res.name === "Plastic Bag" && res.type === "Plastic"
       );
     if (detergentQtyFinal > 0) {
       triggerAddOrderItem({
         jobOrderNumber:
           orderData &&
           nextJobOrderNumber(
-            orderData[0] ? orderData[0].jobOrderNumber : "000000Y",
-            "Y"
+            orderData[0] ? orderData[0].jobOrderNumber : "000000F",
+            "F"
           ),
         inventoryId:
           selectedDetergentType && JSON.parse(selectedDetergentType)._id,
@@ -237,8 +238,8 @@ const AddDiy = (props: any) => {
         jobOrderNumber:
           orderData &&
           nextJobOrderNumber(
-            orderData[0] ? orderData[0].jobOrderNumber : "000000Y",
-            "Y"
+            orderData[0] ? orderData[0].jobOrderNumber : "000000F",
+            "F"
           ),
         inventoryId: selectedFabConType && JSON.parse(selectedFabConType)._id,
         qty: fabConQty,
@@ -252,25 +253,12 @@ const AddDiy = (props: any) => {
         jobOrderNumber:
           orderData &&
           nextJobOrderNumber(
-            orderData[0] ? orderData[0].jobOrderNumber : "000000Y",
-            "Y"
+            orderData[0] ? orderData[0].jobOrderNumber : "000000F",
+            "F"
           ),
         inventoryId: zonrox && zonrox?._id,
         qty: zonroxQtyFinal,
         total: zonrox ? zonrox?.unitCost * zonroxQtyFinal : 0,
-      });
-    }
-    if (pbQtyFinal > 0) {
-      triggerAddOrderItem({
-        jobOrderNumber:
-          orderData &&
-          nextJobOrderNumber(
-            orderData[0] ? orderData[0].jobOrderNumber : "000000Y",
-            "Y"
-          ),
-        inventoryId: plasticBag && plasticBag?._id,
-        qty: pbQtyFinal,
-        total: plasticBag ? plasticBag?.unitCost * pbQtyFinal : 0,
       });
     }
     if (selectedAddOnServices.length > 0) {
@@ -284,8 +272,8 @@ const AddDiy = (props: any) => {
         jobOrderNumber:
           orderData &&
           nextJobOrderNumber(
-            orderData[0] ? orderData[0].jobOrderNumber : "000000Y",
-            "Y"
+            orderData[0] ? orderData[0].jobOrderNumber : "000000F",
+            "F"
           ),
         addOnId: selectedAddOnService && JSON.parse(selectedAddOnService)._id,
         qty: 1,
@@ -298,8 +286,8 @@ const AddDiy = (props: any) => {
         jobOrderNumber:
           orderData &&
           nextJobOrderNumber(
-            orderData[0] ? orderData[0].jobOrderNumber : "000000Y",
-            "Y"
+            orderData[0] ? orderData[0].jobOrderNumber : "000000F",
+            "F"
           ),
         discountId: selectedDiscount && JSON.parse(selectedDiscount)._id,
         qty: 1,
@@ -319,9 +307,9 @@ const AddDiy = (props: any) => {
             `/print/${selectedCustomer && JSON.parse(selectedCustomer)._id}`,
             "_blank"
           );
-          navigate("/orders/diy");
+          navigate("/orders");
         } else {
-          window.location.href = `/orders/diy/add/${
+          window.location.href = `/orders/dropoff/add/extra/${
             selectedCustomer && JSON.parse(selectedCustomer)._id
           }`;
         }
@@ -366,8 +354,8 @@ const AddDiy = (props: any) => {
             jobOrderNumber:
               orderData &&
               nextJobOrderNumber(
-                orderData[0] ? orderData[0].jobOrderNumber : "000000Y",
-                "Y"
+                orderData[0] ? orderData[0].jobOrderNumber : "000000F",
+                "F"
               ),
             discountId: selectedDiscount && JSON.parse(selectedDiscount)._id,
             qty: 1,
@@ -389,9 +377,9 @@ const AddDiy = (props: any) => {
                 }`,
                 "_blank"
               );
-              navigate("/orders/diy");
+              navigate("/orders");
             } else {
-              window.location.href = `/orders/diy/add/${
+              window.location.href = `/orders/dropoff/add/extra/${
                 selectedCustomer && JSON.parse(selectedCustomer)._id
               }`;
             }
@@ -427,9 +415,9 @@ const AddDiy = (props: any) => {
             `/print/${selectedCustomer && JSON.parse(selectedCustomer)._id}`,
             "_blank"
           );
-          navigate("/orders/diy");
+          navigate("/orders");
         } else {
-          window.location.href = `/orders/diy/add/${
+          window.location.href = `/orders/dropoff/add/extra/${
             selectedCustomer && JSON.parse(selectedCustomer)._id
           }`;
         }
@@ -485,8 +473,8 @@ const AddDiy = (props: any) => {
         jobOrderNumber:
           orderData &&
           nextJobOrderNumber(
-            orderData[0] ? orderData[0].jobOrderNumber : "000000Y",
-            "Y"
+            orderData[0] ? orderData[0].jobOrderNumber : "000000F",
+            "F"
           ),
         addOnId: data.id,
         qty: 1,
@@ -503,8 +491,8 @@ const AddDiy = (props: any) => {
         jobOrderNumber:
           orderData &&
           nextJobOrderNumber(
-            orderData[0] ? orderData[0].jobOrderNumber : "000000Y",
-            "Y"
+            orderData[0] ? orderData[0].jobOrderNumber : "000000F",
+            "F"
           ),
         discountId: data.id,
         qty: 1,
@@ -537,17 +525,8 @@ const AddDiy = (props: any) => {
       inventoryData.find(
         (res: any) => res.name === "Zonrox" && res.type === "Bleach"
       );
-    const plasticBag =
-      inventoryData &&
-      inventoryData.find(
-        (res: any) => res.name === "Plastic Bag" && res.type === "Plastic"
-      );
-    const zonroxQtyFinal = typeof zonroxQty === "number" ? zonroxQty : null;
-    const pbQtyFinal = typeof pbQty === "number" ? pbQty : null;
-    const pbStockQty = plasticBag ? plasticBag.stock : 0;
-    const zonroxTotal = zonrox
-      ? zonrox.unitCost * (zonroxQtyFinal ? zonroxQtyFinal : 0)
-      : 0;
+    const zonroxQtyFinal = zonroxQty ? zonroxQty : 0;
+    const zonroxTotal = zonrox ? zonrox.unitCost * zonroxQtyFinal : 0;
     const zonroxStockQty = zonrox ? zonrox.stock : 0;
     const customAddOnServicesTotal =
       selectedAddOnServices.length > 0
@@ -594,12 +573,13 @@ const AddDiy = (props: any) => {
         staffData && loggedInUserType === "Staff"
           ? staffData[0]._id
           : loggedInUserId,
+      laundryId: null,
       customerId: selectedCustomer && JSON.parse(selectedCustomer)._id,
       jobOrderNumber:
         orderData &&
         nextJobOrderNumber(
-          orderData[0] ? orderData[0].jobOrderNumber : "000000Y",
-          "Y"
+          orderData[0] ? orderData[0].jobOrderNumber : "000000F",
+          "F"
         ),
       folderId: folderData && folderData[0]._id,
       weight,
@@ -608,7 +588,6 @@ const AddDiy = (props: any) => {
       claimStatus: "Unclaimed",
       washId: washId,
       dryId: dryId,
-      plasticBag: pbQty,
       detergentTypeId: detergentTypeId,
       detergentQty: detergentQty,
       fabConTypeId: fabConTypeId,
@@ -624,16 +603,16 @@ const AddDiy = (props: any) => {
         staffData && loggedInUserType === "Staff"
           ? staffData[0]._id
           : loggedInUserId,
+      laundryId: null,
       customerId: selectedCustomer && JSON.parse(selectedCustomer)._id,
       jobOrderNumber:
         orderData &&
         nextJobOrderNumber(
-          orderData[0] ? orderData[0].jobOrderNumber : "000000Y",
-          "Y"
+          orderData[0] ? orderData[0].jobOrderNumber : "000000F",
+          "F"
         ),
       folderId: folderData && folderData[0]._id,
       weight,
-      plasticBag: pbQty,
       amountDue,
       paidStatus: "Unpaid",
       orderStatus: "In",
@@ -698,15 +677,7 @@ const AddDiy = (props: any) => {
       customErrors = [...customErrors, ...newError];
     }
 
-    if (!Number.isInteger(detergentQtyFinal)) {
-      const newError = [
-        {
-          input: "detergentQty",
-          errorMessage: `Needs to be a whole number`,
-        },
-      ];
-      customErrors = [...customErrors, ...newError];
-    } else if (detergentQtyFinal > detergentTypeQty) {
+    if (detergentQtyFinal > detergentTypeQty) {
       const newError = [
         {
           input: "detergentQty",
@@ -716,15 +687,7 @@ const AddDiy = (props: any) => {
       customErrors = [...customErrors, ...newError];
     }
 
-    if (!Number.isInteger(fabConQtyFinal)) {
-      const newError = [
-        {
-          input: "fabConQty",
-          errorMessage: `Needs to be a whole number`,
-        },
-      ];
-      customErrors = [...customErrors, ...newError];
-    } else if (fabConQtyFinal > fabConTypeQty) {
+    if (fabConQtyFinal > fabConTypeQty) {
       const newError = [
         {
           input: "fabConQty",
@@ -734,66 +697,11 @@ const AddDiy = (props: any) => {
       customErrors = [...customErrors, ...newError];
     }
 
-    if (zonroxQtyFinal && !Number.isInteger(zonroxQtyFinal)) {
-      const newError = [
-        {
-          input: "zonrox",
-          errorMessage: `Needs to be a whole number`,
-        },
-      ];
-      customErrors = [...customErrors, ...newError];
-    }
-    if (
-      (zonroxQtyFinal || typeof zonroxQtyFinal === "number") &&
-      zonroxQtyFinal < 1
-    ) {
-      const newError = [
-        {
-          input: "zonrox",
-          errorMessage: "This needs to be greater than 0",
-        },
-      ];
-      customErrors = [...customErrors, ...newError];
-    } else if (
-      (zonroxQtyFinal || typeof zonroxQtyFinal === "number") &&
-      zonroxQtyFinal > zonroxStockQty
-    ) {
+    if (zonroxQtyFinal > zonroxStockQty) {
       const newError = [
         {
           input: "zonrox",
           errorMessage: `Remaining stocks is ${zonroxStockQty}`,
-        },
-      ];
-      customErrors = [...customErrors, ...newError];
-    }
-
-    if (pbQtyFinal && !Number.isInteger(pbQtyFinal)) {
-      const newError = [
-        {
-          input: "pb",
-          errorMessage: `Needs to be a whole number`,
-        },
-      ];
-      customErrors = [...customErrors, ...newError];
-    } else if (
-      (pbQtyFinal || typeof pbQtyFinal === "number") &&
-      pbQtyFinal < 1
-    ) {
-      const newError = [
-        {
-          input: "pb",
-          errorMessage: "This needs to be greater than 0",
-        },
-      ];
-      customErrors = [...customErrors, ...newError];
-    } else if (
-      (pbQtyFinal || typeof pbQtyFinal === "number") &&
-      pbQtyFinal > pbStockQty
-    ) {
-      const newError = [
-        {
-          input: "pb",
-          errorMessage: `Remaining stocks is ${pbStockQty}`,
         },
       ];
       customErrors = [...customErrors, ...newError];
@@ -909,11 +817,19 @@ const AddDiy = (props: any) => {
     setCustomDiscount(discount);
   };
 
+  useEffect(() => {
+    if (staffData && staffData.length > 0) {
+      refetchStaffData();
+    }
+  }, [staffData, refetchStaffData]);
+
   return (
     <>
       <div className="flex justify-between mt-11">
         <div>
-          <h1 className="font-bold text-primary mt-7">Add DIY Order</h1>
+          <h1 className="font-bold text-primary mt-7">
+            Add Extra Drop-Off Order
+          </h1>
         </div>
         {selectedCustomer && JSON.parse(selectedCustomer)?.notes && (
           <div className="p-3 border-2 border-primary rounded-md">
@@ -1004,7 +920,7 @@ const AddDiy = (props: any) => {
             )}
           </div>
         </div>
-        <div className="grid grid-cols-8 gap-4 mt-3">
+        <div className="grid grid-cols-7 gap-4 mt-3">
           <div>
             <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">
               Wash
@@ -1143,7 +1059,7 @@ const AddDiy = (props: any) => {
               }`}
               id="grid-first-name"
               type="number"
-              onChange={(e: any) => setDetergentQty(parseFloat(e.target.value))}
+              onChange={(e: any) => setDetergentQty(parseInt(e.target.value))}
               disabled={
                 isInventoryDataLoading ||
                 isOrderDataLoading ||
@@ -1221,7 +1137,7 @@ const AddDiy = (props: any) => {
               }`}
               id="grid-first-name"
               type="number"
-              onChange={(e: any) => setFabConQty(parseFloat(e.target.value))}
+              onChange={(e: any) => setFabConQty(parseInt(e.target.value))}
               disabled={
                 isInventoryDataLoading ||
                 isOrderDataLoading ||
@@ -1256,7 +1172,7 @@ const AddDiy = (props: any) => {
               }`}
               id="grid-first-name"
               type="number"
-              onChange={(e: any) => setZonroxQty(parseFloat(e.target.value))}
+              onChange={(e: any) => setZonroxQty(parseInt(e.target.value))}
               disabled={
                 isInventoryDataLoading ||
                 isOrderDataLoading ||
@@ -1273,29 +1189,6 @@ const AddDiy = (props: any) => {
             {findInputError(formErrors, "zonrox") ? (
               <p className="text-[12px] text-red">
                 {findInputError(formErrors, "zonrox")}
-              </p>
-            ) : (
-              ""
-            )}
-          </div>
-          <div>
-            <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">
-              PB
-            </label>
-            <input
-              className={`pt-1 pb-1 pl-2 rounded-sm mr-2 w-full border-2 ${
-                findInputError(formErrors, "pb")
-                  ? "border-red"
-                  : "border-accent"
-              }`}
-              id="grid-first-name"
-              type="number"
-              onChange={(e: any) => setPbQty(parseFloat(e.target.value))}
-              disabled={false}
-            />
-            {findInputError(formErrors, "pb") ? (
-              <p className="text-[12px] text-red">
-                {findInputError(formErrors, "pb")}
               </p>
             ) : (
               ""
@@ -1412,7 +1305,17 @@ const AddDiy = (props: any) => {
           <button
             className="bg-primary text-white pt-1 pl-5 pb-1 pr-5 rounded-xl mr-4"
             type="button"
-            disabled={false}
+            disabled={
+              isOrderDataLoading ||
+              isAddOrderLoading ||
+              isAddOrderWashLoading ||
+              isAddOrderDryLoading ||
+              isAddOrderItemLoading ||
+              isAddOrderAddOnLoading ||
+              isAddOrderDiscountLoading ||
+              isBulkAddOrderAddOnLoading ||
+              isBulkAddOrderDiscountLoading
+            }
             onClick={() => _addOrder("saveAdd")}
           >
             Save & Add
@@ -1420,7 +1323,17 @@ const AddDiy = (props: any) => {
           <button
             className="bg-primary text-white pt-1 pl-5 pb-1 pr-5 rounded-xl mr-4"
             type="button"
-            disabled={false}
+            disabled={
+              isOrderDataLoading ||
+              isAddOrderLoading ||
+              isAddOrderWashLoading ||
+              isAddOrderDryLoading ||
+              isAddOrderItemLoading ||
+              isAddOrderAddOnLoading ||
+              isAddOrderDiscountLoading ||
+              isBulkAddOrderAddOnLoading ||
+              isBulkAddOrderDiscountLoading
+            }
             onClick={() => _addOrder("saveEnd")}
           >
             Save & End
@@ -1436,4 +1349,4 @@ const mapStateToProps = (global: any) => ({
   loggedInUserType: global.authenticatedUser.user.type,
 });
 
-export default connect(mapStateToProps)(AddDiy);
+export default connect(mapStateToProps)(AddExtraDropOff);

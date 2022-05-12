@@ -303,6 +303,10 @@ const AddDropOff = (props: any) => {
         timer: 3000,
       }).then(() => {
         if (saveType === "saveEnd") {
+          window.open(
+            `/print/${selectedCustomer && JSON.parse(selectedCustomer)._id}`,
+            "_blank"
+          );
           navigate("/orders");
         } else {
           window.location.href = `/orders/dropoff/add/${
@@ -367,6 +371,12 @@ const AddDropOff = (props: any) => {
             timer: 3000,
           }).then(() => {
             if (saveType === "saveEnd") {
+              window.open(
+                `/print/${
+                  selectedCustomer && JSON.parse(selectedCustomer)._id
+                }`,
+                "_blank"
+              );
               navigate("/orders");
             } else {
               window.location.href = `/orders/dropoff/add/${
@@ -401,6 +411,10 @@ const AddDropOff = (props: any) => {
         timer: 3000,
       }).then(() => {
         if (saveType === "saveEnd") {
+          window.open(
+            `/print/${selectedCustomer && JSON.parse(selectedCustomer)._id}`,
+            "_blank"
+          );
           navigate("/orders");
         } else {
           window.location.href = `/orders/dropoff/add/${
@@ -511,8 +525,10 @@ const AddDropOff = (props: any) => {
       inventoryData.find(
         (res: any) => res.name === "Zonrox" && res.type === "Bleach"
       );
-    const zonroxQtyFinal = zonroxQty ? zonroxQty : 0;
-    const zonroxTotal = zonrox ? zonrox.unitCost * zonroxQtyFinal : 0;
+    const zonroxQtyFinal = typeof zonroxQty === "number" ? zonroxQty : null;
+    const zonroxTotal = zonrox
+      ? zonrox.unitCost * (zonroxQtyFinal ? zonroxQtyFinal : 0)
+      : 0;
     const zonroxStockQty = zonrox ? zonrox.stock : 0;
     const customAddOnServicesTotal =
       selectedAddOnServices.length > 0
@@ -685,7 +701,30 @@ const AddDropOff = (props: any) => {
       customErrors = [...customErrors, ...newError];
     }
 
-    if (zonroxQtyFinal > zonroxStockQty) {
+    if (zonroxQtyFinal && !Number.isInteger(zonroxQtyFinal)) {
+      const newError = [
+        {
+          input: "zonrox",
+          errorMessage: `Needs to be a whole number`,
+        },
+      ];
+      customErrors = [...customErrors, ...newError];
+    }
+    if (
+      (zonroxQtyFinal || typeof zonroxQtyFinal === "number") &&
+      zonroxQtyFinal < 1
+    ) {
+      const newError = [
+        {
+          input: "zonrox",
+          errorMessage: "This needs to be greater than 0",
+        },
+      ];
+      customErrors = [...customErrors, ...newError];
+    } else if (
+      (zonroxQtyFinal || typeof zonroxQtyFinal === "number") &&
+      zonroxQtyFinal > zonroxStockQty
+    ) {
       const newError = [
         {
           input: "zonrox",
@@ -851,7 +890,7 @@ const AddDropOff = (props: any) => {
                 isBulkAddOrderDiscountLoading
               }
             >
-              <option value="">Select Staff</option>
+              <option value="">Select Customer</option>
               {customerData &&
                 customerData.map((res: any) => {
                   const isSelected: boolean =

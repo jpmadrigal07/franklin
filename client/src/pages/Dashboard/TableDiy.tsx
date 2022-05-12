@@ -39,6 +39,8 @@ const TableDiy = (props: any) => {
   const [isAdminPasswordModalOpen, setIsAdminPasswordModal] = useState(false);
   const [selectedJobOrderNumber, setSelectedJobOrderNumber] = useState("");
   const [openClaimedOrderModal, setOpenClaimedOrderModal] = useState(false);
+  const [openClaimedMultiOrderModal, setOpenClaimedMultiOrderModal] =
+    useState(false);
   const [isTotalModalOpen, setIsTotalModalOpen] = useState(false);
   const [selectedOrderId, setSelectedOrderId] = useState("");
   const [rowEditActive, setRowEditActive] = useState<any>([]);
@@ -55,13 +57,16 @@ const TableDiy = (props: any) => {
   const [inventoryStockToUpdate, setInventoryStockToUpdate] = useState<any>([]);
   const [selectedInventory, setSelectedInventory] = useState<any>([]);
   const [sortedData, setSortedData] = useState<any>({});
+  const [selectedOrderItemToUpdate, setSelectedOrderToUpdate] = useState<any>(
+    []
+  );
+  const [itemSufficiencyState, setItemSufficiencyState] = useState<any>([]);
 
   const { mutate: triggerVerifyPassword, isLoading: isVerifyPasswordLoading } =
     useMutation(async (password: any) => verifyPassword(password), {
       onSuccess: async () => {
         setAdminPassword("");
-        setIsAdminPasswordModal(false);
-        setIsCancelModalOpen(true);
+        triggerUpdateOrder({ orderStatus: "Canceled" });
       },
       onError: async (err: any) => {
         MySwal.fire({
@@ -105,7 +110,19 @@ const TableDiy = (props: any) => {
         setSelectedOrderId("");
         setIsCancelModalOpen(false);
         setOpenClaimedOrderModal(false);
+        setIsAdminPasswordModal(false);
         refetchOrderData();
+        if (selectedOrderItemToUpdate.length === 0) {
+          MySwal.fire({
+            title: "Update success!",
+            text: "Order has been updated",
+            icon: "success",
+            timer: 2500,
+            showConfirmButton: false,
+          });
+        } else {
+          triggerBulkUpdateInventoryStock({ bulk: selectedOrderItemToUpdate });
+        }
       },
       onError: async (err: any) => {
         MySwal.fire({
@@ -126,6 +143,7 @@ const TableDiy = (props: any) => {
       setOrderToUpdate([]);
       setMultiOrderToUpdate([]);
       setOpenClaimedOrderModal(false);
+      setOpenClaimedMultiOrderModal(false);
       refetchOrderData();
       setToUpdateGrandTotalId(selectedData?._id);
     },
@@ -198,6 +216,17 @@ const TableDiy = (props: any) => {
     mutate: triggerBulkUpdateInventoryStock,
     isLoading: isBulkUpdateInventoryStockLoading,
   } = useMutation(async (order: any) => bulkUpdateInventory(order), {
+    onSuccess: async () => {
+      if (selectedOrderItemToUpdate.length > 0) {
+        MySwal.fire({
+          title: "Update success!",
+          text: "Order has been updated",
+          icon: "success",
+          timer: 2500,
+          showConfirmButton: false,
+        });
+      }
+    },
     onError: async (err: any) => {
       MySwal.fire({
         title: "Ooops!",
@@ -292,10 +321,16 @@ const TableDiy = (props: any) => {
         }
         if (key !== "id" && newOrderToUpdate.length > 0) {
           const newValue = newOrderToUpdate.map((res: any) => {
-            return {
+            const updatedValue =
+              key === "paidStatus" && value === "Paid" ? "Paid" : value;
+            let toReturn = {
               ...res,
-              [key]: value === "null" ? null : value,
+              [key]: value === "null" ? null : updatedValue,
             };
+            if (key === "paidStatus" && value === "Paid") {
+              toReturn.orderStatus = "Closed";
+            }
+            return toReturn;
           });
           setMultiOrderToUpdate([...newValue]);
         }
@@ -370,7 +405,8 @@ const TableDiy = (props: any) => {
       key: string,
       value: any,
       item: string,
-      price?: number
+      price?: number,
+      inventoryId?: string
     ) => {
       let newDryToUpdate = itemToUpdate;
       const exist = newDryToUpdate.find((res: any) => res.index === index);
@@ -389,6 +425,9 @@ const TableDiy = (props: any) => {
         }
         if (item === "PB") {
           toUpdateObj["inventoryId"] = pbItem ? pbItem[0]?._id : null;
+        }
+        if ((item === "DET" || item === "FAB") && inventoryId) {
+          toUpdateObj["inventoryId"] = inventoryId;
         }
         if (key === "qty" && price) {
           toUpdateObj["total"] =
@@ -445,6 +484,9 @@ const TableDiy = (props: any) => {
           }
           if (item === "PB") {
             toUpdateObj["inventoryId"] = pbItem ? pbItem[0]?._id : null;
+          }
+          if ((item === "DET" || item === "FAB") && inventoryId) {
+            toUpdateObj["inventoryId"] = inventoryId;
           }
           if (key === "qty" && price) {
             toUpdateObj["total"] =
@@ -698,21 +740,63 @@ const TableDiy = (props: any) => {
     }
   }, [triggerBulkUpdateOrder, multiOrderToUpdate]);
 
+  const isFloat = (x: number) => {
+    return !!(x % 1);
+  };
+
   const _openClaimedOrderModal = useCallback(
     (index: number, data: any) => {
       setSelectedData(data);
       setSelectedIndex(index);
-      const isClaimed =
-        orderToUpdate[index]?.paidStatus &&
-        orderToUpdate[index]?.paidStatus === "Paid";
-      if (!isClaimed) {
-        _updateOrder(index, data._id, data);
+      const isRowQtysFloat = itemToUpdate.map((res: any) => {
+        const floatExist = res?.data?.find((res2: any) => isFloat(res2.qty));
+        return floatExist ? true : false;
+      });
+      if (itemSufficiencyState[index]?.toString().includes("false")) {
+        MySwal.fire({
+          title: "Ooops!",
+          text: `Stocks insufficient - ${
+            !itemSufficiencyState[index][0] ? "Detergent," : ""
+          }${!itemSufficiencyState[index][1] ? "Fab Con," : ""}${
+            !itemSufficiencyState[index][2] ? "Zonrox," : ""
+          }${!itemSufficiencyState[index][3] ? "Plastic Bag" : ""}`,
+          icon: "warning",
+          confirmButtonText: "Okay",
+          confirmButtonColor: "#274c77",
+        });
+      } else if (isRowQtysFloat?.toString().includes("true")) {
+        MySwal.fire({
+          title: "Ooops!",
+          text: `Quantities needs to be a whole number.`,
+          icon: "warning",
+          confirmButtonText: "Okay",
+          confirmButtonColor: "#274c77",
+        });
       } else {
-        setOpenClaimedOrderModal(true);
+        const isClaimed =
+          orderToUpdate[index]?.paidStatus &&
+          orderToUpdate[index]?.paidStatus === "Paid";
+        if (!isClaimed) {
+          _updateOrder(index, data._id, data);
+        } else {
+          setOpenClaimedOrderModal(true);
+        }
       }
     },
-    [orderToUpdate, _updateOrder]
+    [orderToUpdate, _updateOrder, itemSufficiencyState]
   );
+
+  const _openClaimedMultiOrderModal = useCallback(() => {
+    const isPaidExist = multiOrderToUpdate.find(
+      (res: any) => res?.paidStatus === "Paid"
+    );
+
+    if (!isPaidExist) {
+      _updateMultiOrder();
+    } else {
+      setOpenClaimedMultiOrderModal(true);
+    }
+  }, [_updateMultiOrder, multiOrderToUpdate]);
 
   const _remappedData = useCallback(
     (data: any) => {
@@ -725,7 +809,7 @@ const TableDiy = (props: any) => {
               if (res3 === "Cancel" && !isEditActive) {
                 return _constructTableActions(
                   res3,
-                  () => _cancelOrder(res.jobOrderNumber, res._id),
+                  () => _cancelOrder(res.jobOrderNumber, res),
                   true,
                   res.orderStatus === "Canceled"
                 );
@@ -738,6 +822,9 @@ const TableDiy = (props: any) => {
                     setDryToUpdate([]);
                     setItemToUpdate([]);
                     setSelectedData({});
+                    setItemSufficiencyState(
+                      orderData.map(() => [true, true, true, true])
+                    );
                     _updateRowEditActive(index);
                   },
                   true,
@@ -932,77 +1019,89 @@ const TableDiy = (props: any) => {
             const inventory = selectedInventory.find(
               (res: any) => res.index === index && res.Detergent
             );
-            value = isEditActive ? (
-              <>
-                {selected?.inventoryId?._id ? (
-                  selected?.inventoryId?.stockCode
-                ) : (
-                  <select
-                    className="pt-1 pb-1 pl-2 rounded-sm mr-2 w-[50px] border-2 border-semi-light appearance-none"
-                    onChange={(e: any) => {
-                      const item =
-                        inventoryData &&
-                        inventoryData.find(
-                          (res: any) => res._id === e.target.value
+            value =
+              isEditActive && !res["orderWash"]["machineNumber"] ? (
+                <>
+                  {res["orderWash"]["machineNumber"] ? (
+                    selected?.inventoryId?.stockCode
+                  ) : (
+                    <select
+                      className="pt-1 pb-1 pl-2 rounded-sm mr-2 w-[50px] border-2 border-semi-light appearance-none"
+                      onChange={(e: any) => {
+                        const item =
+                          inventoryData &&
+                          inventoryData.find(
+                            (res: any) => res._id === e.target.value
+                          );
+                        _selectedInventory(item, index, "Detergent");
+                        _itemToUpdate(
+                          index,
+                          selected?._id,
+                          res.jobOrderNumber,
+                          "inventoryId",
+                          e.target.value,
+                          "DET",
+                          item?.unitCost
                         );
-                      _selectedInventory(item, index, "Detergent");
-                      _itemToUpdate(
-                        index,
-                        selected?._id,
-                        res.jobOrderNumber,
-                        "inventoryId",
-                        e.target.value,
-                        "DET",
-                        item?.unitCost
-                      );
-                    }}
-                  >
-                    <option></option>
-                    {items &&
-                      items.map((res2: any) => {
-                        return (
-                          <option
-                            value={res2._id}
-                            selected={res2._id === selected?.inventoryId._id}
-                          >
-                            {res2.stockCode}
-                          </option>
+                      }}
+                    >
+                      <option></option>
+                      {items &&
+                        items.map((res2: any) => {
+                          return (
+                            <option
+                              value={res2._id}
+                              selected={res2._id === selected?.inventoryId._id}
+                            >
+                              {res2.stockCode}
+                            </option>
+                          );
+                        })}
+                    </select>
+                  )}
+                  :
+                  {res["orderWash"]["machineNumber"] ? (
+                    selected?.qty
+                  ) : (
+                    <input
+                      className="pt-1 pb-1 pl-2 rounded-sm mr-2 w-[45px] border-2 border-semi-light"
+                      type="number"
+                      defaultValue={selected?.qty}
+                      onChange={(e: any) => {
+                        _itemToUpdate(
+                          index,
+                          selected?._id,
+                          res.jobOrderNumber,
+                          "qty",
+                          parseFloat(e.target.value),
+                          "DET",
+                          undefined,
+                          selected?.inventoryId._id
                         );
-                      })}
-                  </select>
-                )}
-                :
-                {selected?.qty ? (
-                  selected?.qty
-                ) : (
-                  <input
-                    className="pt-1 pb-1 pl-2 rounded-sm mr-2 w-[45px] border-2 border-semi-light"
-                    type="number"
-                    defaultValue={selected?.qty}
-                    disabled={!inventory || inventory?.Detergent?.stock < 0}
-                    onChange={(e: any) => {
-                      _itemToUpdate(
-                        index,
-                        selected?._id,
-                        res.jobOrderNumber,
-                        "qty",
-                        parseInt(e.target.value),
-                        "DET"
-                      );
-                      _inventoryStockToUpdate(
-                        inventory?.Detergent?._id,
-                        parseInt(e.target.value),
-                        inventory?.Detergent?.qty
-                      );
-                    }}
-                  />
-                )}
-              </>
-            ) : selected ? (
-              `${selected?.inventoryId?.stockCode}:${selected.qty}`
-            ) : (
-              "---"
-            );
+                        _inventoryStockToUpdate(
+                          inventory?.Detergent?._id,
+                          parseFloat(e.target.value),
+                          inventory?.Detergent?.qty
+                        );
+                        let newItemSufficiencyState = itemSufficiencyState;
+                        const remainingStocks = inventory?.Detergent?.stock
+                          ? inventory?.Detergent?.stock
+                          : items.find(
+                              (res5: any) =>
+                                res5._id === selected?.inventoryId._id
+                            )?.stock;
+                        newItemSufficiencyState[index][0] =
+                          remainingStocks >= parseFloat(e.target.value);
+                        setItemSufficiencyState([...newItemSufficiencyState]);
+                      }}
+                    />
+                  )}
+                </>
+              ) : selected ? (
+                `${selected?.inventoryId?.stockCode}:${selected.qty}`
+              ) : (
+                "---"
+              );
           } else if (res2.dataName === "fab") {
             const selected = Array.isArray(res["orderItem"])
               ? res["orderItem"].find(
@@ -1015,77 +1114,89 @@ const TableDiy = (props: any) => {
             const inventory = selectedInventory.find(
               (res: any) => res.index === index && res.FabCon
             );
-            value = isEditActive ? (
-              <>
-                {selected?.inventoryId?.stockCode ? (
-                  selected?.inventoryId?.stockCode
-                ) : (
-                  <select
-                    className="pt-1 pb-1 pl-2 rounded-sm mr-2 w-[50px] border-2 border-semi-light appearance-none"
-                    onChange={(e: any) => {
-                      const item =
-                        inventoryData &&
-                        inventoryData.find(
-                          (res: any) => res._id === e.target.value
+            value =
+              isEditActive && !res["orderWash"]["machineNumber"] ? (
+                <>
+                  {res["orderWash"]["machineNumber"] ? (
+                    selected?.inventoryId?.stockCode
+                  ) : (
+                    <select
+                      className="pt-1 pb-1 pl-2 rounded-sm mr-2 w-[50px] border-2 border-semi-light appearance-none"
+                      onChange={(e: any) => {
+                        const item =
+                          inventoryData &&
+                          inventoryData.find(
+                            (res: any) => res._id === e.target.value
+                          );
+                        _selectedInventory(item, index, "FabCon");
+                        _itemToUpdate(
+                          index,
+                          selected?._id,
+                          res.jobOrderNumber,
+                          "inventoryId",
+                          e.target.value,
+                          "FAB",
+                          item?.unitCost
                         );
-                      _selectedInventory(item, index, "FabCon");
-                      _itemToUpdate(
-                        index,
-                        selected?._id,
-                        res.jobOrderNumber,
-                        "inventoryId",
-                        e.target.value,
-                        "FAB",
-                        item?.unitCost
-                      );
-                    }}
-                  >
-                    <option></option>
-                    {items &&
-                      items.map((res2: any) => {
-                        return (
-                          <option
-                            value={res2._id}
-                            selected={res2._id === selected?.inventoryId._id}
-                          >
-                            {res2.stockCode}
-                          </option>
+                      }}
+                    >
+                      <option></option>
+                      {items &&
+                        items.map((res2: any) => {
+                          return (
+                            <option
+                              value={res2._id}
+                              selected={res2._id === selected?.inventoryId._id}
+                            >
+                              {res2.stockCode}
+                            </option>
+                          );
+                        })}
+                    </select>
+                  )}
+                  :
+                  {res["orderWash"]["machineNumber"] ? (
+                    selected?.qty
+                  ) : (
+                    <input
+                      className="pt-1 pb-1 pl-2 rounded-sm mr-2 w-[45px] border-2 border-semi-light"
+                      type="number"
+                      defaultValue={selected?.qty}
+                      onChange={(e: any) => {
+                        _itemToUpdate(
+                          index,
+                          selected?._id,
+                          res.jobOrderNumber,
+                          "qty",
+                          parseFloat(e.target.value),
+                          "FAB",
+                          undefined,
+                          selected?.inventoryId._id
                         );
-                      })}
-                  </select>
-                )}
-                :
-                {selected?.qty ? (
-                  selected?.qty
-                ) : (
-                  <input
-                    className="pt-1 pb-1 pl-2 rounded-sm mr-2 w-[45px] border-2 border-semi-light"
-                    type="number"
-                    disabled={!inventory || inventory?.FabCon?.stock < 1}
-                    defaultValue={selected?.qty}
-                    onChange={(e: any) => {
-                      _itemToUpdate(
-                        index,
-                        selected?._id,
-                        res.jobOrderNumber,
-                        "qty",
-                        parseInt(e.target.value),
-                        "FAB"
-                      );
-                      _inventoryStockToUpdate(
-                        inventory?.FabCon?._id,
-                        parseInt(e.target.value),
-                        inventory?.FabCon?.qty
-                      );
-                    }}
-                  />
-                )}
-              </>
-            ) : selected ? (
-              `${selected?.inventoryId?.stockCode}:${selected.qty}`
-            ) : (
-              "---"
-            );
+                        _inventoryStockToUpdate(
+                          inventory?.FabCon?._id,
+                          parseFloat(e.target.value),
+                          inventory?.FabCon?.qty
+                        );
+                        let newItemSufficiencyState = itemSufficiencyState;
+                        const remainingStocks = inventory?.FabCon?.stock
+                          ? inventory?.FabCon?.stock
+                          : items.find(
+                              (res5: any) =>
+                                res5._id === selected?.inventoryId._id
+                            )?.stock;
+                        newItemSufficiencyState[index][1] =
+                          remainingStocks >= parseFloat(e.target.value);
+                        setItemSufficiencyState([...newItemSufficiencyState]);
+                      }}
+                    />
+                  )}
+                </>
+              ) : selected ? (
+                `${selected?.inventoryId?.stockCode}:${selected.qty}`
+              ) : (
+                "---"
+              );
           } else if (res2.dataName === "zx") {
             const zxItem =
               inventoryData &&
@@ -1096,7 +1207,7 @@ const TableDiy = (props: any) => {
                 )
               : null;
             value =
-              isEditActive && !zonrox?.qty ? (
+              isEditActive && !res["orderWash"]["machineNumber"] ? (
                 <input
                   className="pt-1 pb-1 pl-2 rounded-sm mr-2 w-[45px] border-2 border-semi-light"
                   type="number"
@@ -1107,15 +1218,19 @@ const TableDiy = (props: any) => {
                       zonrox?._id,
                       res.jobOrderNumber,
                       "qty",
-                      parseInt(e.target.value),
+                      parseFloat(e.target.value),
                       "ZX",
                       zxItem?.unitCost
                     );
                     _inventoryStockToUpdate(
                       zxItem?._id,
-                      parseInt(e.target.value),
+                      parseFloat(e.target.value),
                       zonrox?.qty
                     );
+                    let newItemSufficiencyState = itemSufficiencyState;
+                    newItemSufficiencyState[index][2] =
+                      zxItem?.stock >= parseFloat(e.target.value);
+                    setItemSufficiencyState([...newItemSufficiencyState]);
                   }}
                 />
               ) : zonrox ? (
@@ -1144,15 +1259,19 @@ const TableDiy = (props: any) => {
                       plastic?._id,
                       res.jobOrderNumber,
                       "qty",
-                      parseInt(e.target.value),
+                      parseFloat(e.target.value),
                       "PB",
                       pbItem?.unitCost
                     );
                     _inventoryStockToUpdate(
                       pbItem?._id,
-                      parseInt(e.target.value),
+                      parseFloat(e.target.value),
                       pbItem?.qty
                     );
+                    let newItemSufficiencyState = itemSufficiencyState;
+                    newItemSufficiencyState[index][3] =
+                      pbItem?.stock >= parseFloat(e.target.value);
+                    setItemSufficiencyState([...newItemSufficiencyState]);
                   }}
                 />
               ) : plastic ? (
@@ -1184,6 +1303,9 @@ const TableDiy = (props: any) => {
                 >
                   <option value="Unpaid">Select</option>
                   <option selected={res.paidStatus === "Unpaid"}>Unpaid</option>
+                  <option selected={res.paidStatus === "To Transfer"}>
+                    To Transfer
+                  </option>
                   <option selected={res.paidStatus === "Paid"}>Paid</option>
                 </select>
               ) : (
@@ -1228,16 +1350,18 @@ const TableDiy = (props: any) => {
       _openClaimedOrderModal,
       _selectedInventory,
       selectedInventory,
+      itemSufficiencyState,
+      orderData,
     ]
   );
 
   useEffect(() => {
-    if (searchPhrase === "") {
+    if (!sortedData.data && searchPhrase === "") {
       if (orderData && orderData.length > 0) {
         setOrder(_remappedData(orderData));
       }
     } else {
-      if (orderData && orderData.length > 0) {
+      if (!sortedData.data && orderData && orderData.length > 0) {
         const filteredorderData = orderData.filter(
           (res: any) =>
             res.customerId.firstName
@@ -1245,16 +1369,32 @@ const TableDiy = (props: any) => {
               .includes(searchPhrase.toLowerCase()) ||
             res.customerId.lastName
               .toLowerCase()
+              .includes(searchPhrase.toLowerCase()) ||
+            res.jobOrderNumber
+              .toLowerCase()
               .includes(searchPhrase.toLowerCase())
         );
         setOrder(_remappedData(filteredorderData));
       }
     }
-  }, [searchPhrase, orderData, _remappedData]);
+  }, [searchPhrase, orderData, _remappedData, sortedData]);
 
   useEffect(() => {
     if (sortedData?.data) {
-      setRowEditActive(orderData.map(() => false));
+      const checkerRowEditActive = rowEditActive.every(
+        (v: boolean) => v === false
+      );
+      if (!checkerRowEditActive) {
+        setRowEditActive(orderData.map(() => false));
+      }
+      const checkerItemSuffciencyState = itemSufficiencyState
+        .map((res: any) => {
+          return res.every((v: boolean) => v === true);
+        })
+        .every((v: boolean) => v === true);
+      if (!checkerItemSuffciencyState) {
+        setItemSufficiencyState(orderData.map(() => [true, true, true, true]));
+      }
       let orderDataSorted = orderData;
       if (sortedData?.data && sortedData?.data === "jobOrderNumber") {
         orderDataSorted = orderDataSorted?.sort((a: any, b: any) => {
@@ -1320,21 +1460,52 @@ const TableDiy = (props: any) => {
       }
       setOrder(_remappedData(orderDataSorted));
     }
-  }, [orderData, _remappedData, sortedData]);
+  }, [
+    orderData,
+    _remappedData,
+    sortedData,
+    itemSufficiencyState,
+    rowEditActive,
+  ]);
 
   useEffect(() => {
-    if (orderData && orderData.length > 0 && order.length === 0) {
+    if (
+      searchPhrase === "" &&
+      orderData &&
+      orderData.length > 0 &&
+      order.length === 0
+    ) {
       setRowEditActive(orderData.map(() => false));
+      setItemSufficiencyState(orderData.map(() => [true, true, true, true]));
       setOrder(_remappedData(orderData));
-    } else if (orderData && orderData.length === 0) {
+    } else if (
+      searchPhrase === "" &&
+      orderData &&
+      orderData.length === 0 &&
+      order.length > 0
+    ) {
       setOrder([]);
     }
-  }, [orderData, _remappedData, order]);
+  }, [orderData, _remappedData, order, searchPhrase]);
 
-  const _cancelOrder = (jobOrderNumber: string, orderId: string) => {
-    setIsAdminPasswordModal(true);
+  const _cancelOrder = (jobOrderNumber: string, order: any) => {
+    setIsCancelModalOpen(true);
     setSelectedJobOrderNumber(jobOrderNumber);
-    setSelectedOrderId(orderId);
+    setSelectedOrderId(order?._id);
+
+    const toUpdateItem = order?.orderItem
+      ? order?.orderItem?.map((res: any) => {
+          return {
+            updateOne: {
+              filter: { _id: res?.inventoryId?._id },
+              update: { $inc: { stock: res.qty } },
+              upsert: false,
+            },
+          };
+        })
+      : [];
+
+    setSelectedOrderToUpdate(toUpdateItem);
   };
 
   useEffect(() => {
@@ -1360,7 +1531,7 @@ const TableDiy = (props: any) => {
       </div>
       <div className="flex justify-between mt-11">
         <div className="flex">
-          <h3 className="font-bold text-primary">Active Dropoff Orders</h3>
+          <h3 className="font-bold text-primary">Active DIY Orders</h3>
           <div className="flex flex-col justify-center ml-5">
             {isBulkUpdateDryLoading ||
             isBulkUpdateInventoryStockLoading ||
@@ -1377,6 +1548,7 @@ const TableDiy = (props: any) => {
             type="text"
             className="pt-1 pb-1 pl-2 rounded-sm mr-2"
             placeholder="Search"
+            disabled={typeof sortedData?.data !== "undefined"}
             onChange={(e: any) => setSearchPhrase(e.target.value)}
           />
           <Icon icon="bi:search" className="inline" height={24} />
@@ -1411,11 +1583,12 @@ const TableDiy = (props: any) => {
               >
                 <option>Paid Status</option>
                 <option>Paid</option>
+                <option>To Transfer</option>
                 <option>Unpaid</option>
               </select>
               <span
                 className="hover:cursor-pointer text-primary hover:underline mr-2 font-bold"
-                onClick={() => _updateMultiOrder()}
+                onClick={() => _openClaimedMultiOrderModal()}
               >
                 Save
               </span>
@@ -1436,6 +1609,7 @@ const TableDiy = (props: any) => {
         header={currentTableHeader}
         isLoading={isorderDataLoading}
         data={order}
+        isColumnClickable={searchPhrase === ""}
         columnSort={(e: any) =>
           setSortedData({
             sort: sortedData?.sort === "up" ? "down" : "up",
@@ -1455,7 +1629,7 @@ const TableDiy = (props: any) => {
           <>
             <button
               className="bg-primary text-white pt-1 pl-5 pb-1 pr-5 rounded-xl mr-3"
-              onClick={() => triggerUpdateOrder({ orderStatus: "Canceled" })}
+              onClick={() => setIsAdminPasswordModal(!isAdminPasswordModalOpen)}
               disabled={isUpdateOrderLoading}
             >
               Yes
@@ -1539,6 +1713,37 @@ const TableDiy = (props: any) => {
             <button
               className="pt-1 pl-5 pb-1 pr-5 rounded-xl bg-white border-2 border-primary text-primary"
               onClick={() => setOpenClaimedOrderModal(!openClaimedOrderModal)}
+              disabled={isUpdateOrderLoading}
+            >
+              No
+            </button>
+          </>
+        }
+        size="sm"
+      />
+      <Modal
+        state={openClaimedMultiOrderModal}
+        toggle={() =>
+          setOpenClaimedMultiOrderModal(!openClaimedMultiOrderModal)
+        }
+        title={<h3>Close Job Orders</h3>}
+        content={
+          <h5>{`This action will close all the selected Job. Do you want to continue?`}</h5>
+        }
+        footer={
+          <>
+            <button
+              className="bg-primary text-white pt-1 pl-5 pb-1 pr-5 rounded-xl mr-3"
+              onClick={() => _updateMultiOrder()}
+              disabled={isUpdateOrderLoading}
+            >
+              Yes
+            </button>
+            <button
+              className="pt-1 pl-5 pb-1 pr-5 rounded-xl bg-white border-2 border-primary text-primary"
+              onClick={() =>
+                setOpenClaimedMultiOrderModal(!openClaimedMultiOrderModal)
+              }
               disabled={isUpdateOrderLoading}
             >
               No
