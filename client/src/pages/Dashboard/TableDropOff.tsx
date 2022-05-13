@@ -519,7 +519,7 @@ const TableDiy = (props: any) => {
       const oldVal = oldValue ? oldValue : 0;
       let newInventoryToUpdate = inventoryStockToUpdate;
       const exist = newInventoryToUpdate.find((res: any) => res.id === id);
-      const value = newVal > oldVal ? -(newVal - oldVal) : newVal - oldVal;
+      const value = newVal > oldVal ? -(newVal - oldVal) : oldVal - newVal;
       if (!exist) {
         let toUpdateObj: any = {};
         toUpdateObj["id"] = id;
@@ -1107,10 +1107,13 @@ const TableDiy = (props: any) => {
                           undefined,
                           selected?.inventoryId._id
                         );
+                        const inventoryId = inventory?.Detergent?._id
+                          ? inventory?.Detergent?._id
+                          : selected?.inventoryId._id;
                         _inventoryStockToUpdate(
-                          inventory?.Detergent?._id,
+                          inventoryId,
                           parseFloat(e.target.value),
-                          inventory?.Detergent?.qty
+                          selected?.qty
                         );
                         let newItemSufficiencyState = itemSufficiencyState;
                         const remainingStocks = inventory?.Detergent?.stock
@@ -1202,10 +1205,13 @@ const TableDiy = (props: any) => {
                           undefined,
                           selected?.inventoryId._id
                         );
+                        const inventoryId = inventory?.FabCon?._id
+                          ? inventory?.FabCon?._id
+                          : selected?.inventoryId._id;
                         _inventoryStockToUpdate(
-                          inventory?.FabCon?._id,
+                          inventoryId,
                           parseFloat(e.target.value),
-                          inventory?.FabCon?.qty
+                          selected?.qty
                         );
                         let newItemSufficiencyState = itemSufficiencyState;
                         const remainingStocks = inventory?.FabCon?.stock

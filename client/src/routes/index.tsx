@@ -33,6 +33,10 @@ export default function Router() {
       children: [{ path: "", element: <Print /> }],
     },
     {
+      path: "print/solo/:id",
+      children: [{ path: "", element: <SoloPrint /> }],
+    },
+    {
       path: "",
       element: <MainLayout />,
       children: [
@@ -153,6 +157,7 @@ export default function Router() {
 
 const Login = Loadable(lazy(() => import("../pages/Login")));
 const Print = Loadable(lazy(() => import("../pages/Print")));
+const SoloPrint = Loadable(lazy(() => import("../pages/SoloPrint")));
 const DashboardDiy = Loadable(
   lazy(() => import("../pages/Dashboard/TableDiy"))
 );

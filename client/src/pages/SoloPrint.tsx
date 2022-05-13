@@ -20,11 +20,7 @@ const Print = () => {
     data: orderData,
     isLoading: isorderDataLoading,
     refetch: refetchOrderData,
-  } = useQuery("printOrders", () =>
-    getAllOrder(
-      `{"customerId": "${paramId}" , "orderStatus": { "$ne": "Closed" }, "orderStatus": { "$ne": "Canceled" }}`
-    )
-  );
+  } = useQuery("printOrder", () => getAllOrder(`{"_id": "${paramId}"}`));
 
   const tableHeader = useMemo(
     () => [
