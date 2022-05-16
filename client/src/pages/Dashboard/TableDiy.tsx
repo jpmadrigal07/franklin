@@ -773,10 +773,10 @@ const TableDiy = (props: any) => {
           confirmButtonColor: "#274c77",
         });
       } else {
-        const isClaimed =
-          orderToUpdate[index]?.paidStatus &&
-          orderToUpdate[index]?.paidStatus === "Paid";
-        if (!isClaimed) {
+        const isPaid = orderToUpdate.find(
+          (res: any) => res.id === data._id && res.paidStatus === "Paid"
+        );
+        if (!isPaid) {
           _updateOrder(index, data._id, data);
         } else {
           setOpenClaimedOrderModal(true);
@@ -807,11 +807,13 @@ const TableDiy = (props: any) => {
           if (res2.dataName === "endActions") {
             value = tableEndActions.map((res3: any) => {
               if (res3 === "Cancel" && !isEditActive) {
+                const isNotCancelable =
+                  res.orderStatus === "Canceled" || res.paidStatus === "Paid";
                 return _constructTableActions(
                   res3,
                   () => _cancelOrder(res.jobOrderNumber, res),
                   true,
-                  res.orderStatus === "Canceled"
+                  isNotCancelable
                 );
               } else if (res3 === "Back" && isEditActive) {
                 return _constructTableActions(
@@ -1291,16 +1293,8 @@ const TableDiy = (props: any) => {
                   (res: any) => res?.inventoryId?.name === "Plastic Bag"
                 )
               : null;
-            const zonrox = Array.isArray(res["orderItem"])
-              ? res["orderItem"].find(
-                  (res: any) => res?.inventoryId?.name === "Zonrox"
-                )
-              : null;
             value =
-              isEditActive &&
-              res["orderDry"]["machineNumber"] &&
-              plastic &&
-              zonrox ? (
+              isEditActive && res["orderDry"]["machineNumber"] ? (
                 <select
                   className="pt-1 pb-1 pl-2 rounded-sm mr-2 w-[67px] border-2 border-semi-light appearance-none"
                   onChange={(e: any) =>
@@ -1590,7 +1584,6 @@ const TableDiy = (props: any) => {
                 <option>Paid Status</option>
                 <option>Paid</option>
                 <option>To Transfer</option>
-                <option>Unpaid</option>
               </select>
               <span
                 className="hover:cursor-pointer text-primary hover:underline mr-2 font-bold"

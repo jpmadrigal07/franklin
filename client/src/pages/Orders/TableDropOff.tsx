@@ -138,11 +138,13 @@ const TableDropOff = (props: any) => {
           if (res2.dataName === "endActions") {
             value = tableEndActions.map((res3: any) => {
               if (res3 === "Cancel") {
+                const isNotCancelable =
+                  res.orderStatus === "Canceled" || res.paidStatus === "Paid";
                 return _constructTableActions(
                   res3,
                   () => _cancelOrder(res.jobOrderNumber, res),
                   false,
-                  res.orderStatus === "Canceled"
+                  isNotCancelable
                 );
               } else if (res3 === "Print") {
                 return _constructTableActions(

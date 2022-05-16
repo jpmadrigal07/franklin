@@ -21,6 +21,7 @@ router.get("/", async (req, res) => {
   if (condition._id) {
     condition._id = ObjectId(condition._id);
   }
+
   try {
     const getAllOrder = await Order.aggregate([
       { $match: condition },
@@ -330,7 +331,8 @@ router.patch("/bulk/dashboard", async (req, res) => {
   const { bulk } = req.body;
   if (bulk && bulk.length > 0) {
     try {
-      const updateOrder = await Order.bulkWrite(bulk);
+      const stringss = JSON.stringify(bulk);
+      const updateOrder = await Order.bulkWrite(JSON.parse(stringss));
       res.json(updateOrder);
     } catch ({ message: errMessage }) {
       const message = errMessage ? errMessage : UNKNOW_ERROR_OCCURED;

@@ -328,19 +328,53 @@ const TableDiy = (props: any) => {
         if (key !== "id" && newOrderToUpdate.length > 0) {
           const newValue = newOrderToUpdate.map((res: any) => {
             const isItemAllowedClaimed = orderData.find(
-              (res3: any) => res3._id === res.id && res3.foldCompleted
+              (res3: any) =>
+                res3._id === res.id &&
+                (res3.paidStatus === "Paid" ||
+                  res3.paidStatus === "To Transfer") &&
+                ((res3.laundryId && res3.foldCompleted) || !res3.laundryId)
             );
-            const updatedValue =
-              key === "claimStatus"
-                ? value === "Claimed" && isItemAllowedClaimed
-                  ? "Claimed"
-                  : "Unclaimed"
-                : value;
+            const isItemAllowedFold = orderData.find(
+              (res3: any) =>
+                res3._id === res.id &&
+                res3.orderWash?.machineNumber &&
+                res3.orderDry?.machineNumber
+            );
+            const isItemAllowedPaid = orderData.find(
+              (res3: any) =>
+                res3._id === res.id &&
+                ((res3.laundryId && res3.foldCompleted) || !res3.laundryId)
+            );
+            let updatedValue: any = "";
+            if (
+              key === "claimStatus" &&
+              value === "Claimed" &&
+              isItemAllowedClaimed
+            ) {
+              updatedValue = "Claimed";
+            } else if (
+              key === "claimStatus" &&
+              (value !== "Claimed" || !isItemAllowedClaimed)
+            ) {
+              updatedValue = "Unclaimed";
+            } else if (key === "paidStatus" && !isItemAllowedPaid) {
+              updatedValue = "Unpaid";
+            } else if (key === "foldCompleted" && !isItemAllowedFold) {
+              updatedValue = null;
+            } else {
+              updatedValue = value;
+            }
             let toReturn = {
               ...res,
               [key]: value === "null" ? null : updatedValue,
             };
-            if (updatedValue === "Claimed") {
+            const isToClose = orderData.find(
+              (res3: any) =>
+                res3._id === res.id &&
+                ((res3.paidStatus === "Paid" && updatedValue === "Claimed") ||
+                  (res3.claimStatus === "Claimed" && updatedValue === "Paid"))
+            );
+            if (isToClose) {
               toReturn.orderStatus = "Closed";
             }
             return toReturn;
@@ -798,7 +832,7 @@ const TableDiy = (props: any) => {
 
   const _openClaimedMultiOrderModal = useCallback(() => {
     const isClaimedExist = multiOrderToUpdate.find(
-      (res: any) => res?.claimStatus === "Claimed"
+      (res: any) => res?.orderStatus === "Closed"
     );
 
     if (!isClaimedExist) {
@@ -817,11 +851,13 @@ const TableDiy = (props: any) => {
           if (res2.dataName === "endActions") {
             value = tableEndActions.map((res3: any) => {
               if (res3 === "Cancel" && !isEditActive) {
+                const isNotCancelable =
+                  res.orderStatus === "Canceled" || res.paidStatus === "Paid";
                 return _constructTableActions(
                   res3,
                   () => _cancelOrder(res.jobOrderNumber, res),
                   true,
-                  res.orderStatus === "Canceled"
+                  isNotCancelable
                 );
               } else if (res3 === "Back" && isEditActive) {
                 return _constructTableActions(
@@ -1300,8 +1336,6 @@ const TableDiy = (props: any) => {
           } else if (res2.dataName === "claimStatus") {
             value =
               isEditActive &&
-              res["paidStatus"] &&
-              res["paidStatus"] !== "Unpaid" &&
               ((res.laundryId && res["foldCompleted"]) ||
                 (!res.laundryId && !res["foldCompleted"])) &&
               res["claimStatus"] &&
@@ -1611,7 +1645,6 @@ const TableDiy = (props: any) => {
               >
                 <option>Claim Status</option>
                 <option>Claimed</option>
-                <option>Unclaimed</option>
               </select>
               <input
                 className="w-4 h-4 mr-2"
