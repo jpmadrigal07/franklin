@@ -16,6 +16,8 @@ export const addUser = (body: any = null) =>
   apiCall(`${BASE}`, POST_HEADERS, "POST", body);
 export const updateUser = (body: any = null, id: string = "") =>
   apiCall(`${BASE}/${id}`, POST_HEADERS, "PATCH", body);
+export const generateReport = (body: any = null) =>
+  apiCall(`${BASE}/export-excel`, POST_HEADERS, "POST", body);
 export const changePassword = (body: any = null) =>
   apiCall(`${BASE}/change-password`, POST_HEADERS, "POST", body);
 export const verifyPassword = (body: any = null) =>
