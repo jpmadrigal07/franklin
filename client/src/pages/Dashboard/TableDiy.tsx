@@ -1256,7 +1256,7 @@ const TableDiy = (props: any) => {
                 )
               : null;
             value =
-              isEditActive && !plastic ? (
+              isEditActive && res.paidStatus !== "Paid" ? (
                 <input
                   className="pt-1 pb-1 pl-2 rounded-sm mr-2 w-[45px] border-2 border-semi-light"
                   type="number"
@@ -1288,29 +1288,23 @@ const TableDiy = (props: any) => {
                 "---"
               );
           } else if (res2.dataName === "paidStatus") {
-            const plastic = Array.isArray(res["orderItem"])
-              ? res["orderItem"].find(
-                  (res: any) => res?.inventoryId?.name === "Plastic Bag"
-                )
-              : null;
-            value =
-              isEditActive && res["orderDry"]["machineNumber"] ? (
-                <select
-                  className="pt-1 pb-1 pl-2 rounded-sm mr-2 w-[67px] border-2 border-semi-light appearance-none"
-                  onChange={(e: any) =>
-                    _orderToUpdate(res._id, "paidStatus", e.target.value)
-                  }
-                >
-                  <option value="Unpaid">Select</option>
-                  <option selected={res.paidStatus === "Unpaid"}>Unpaid</option>
-                  <option selected={res.paidStatus === "To Transfer"}>
-                    To Transfer
-                  </option>
-                  <option selected={res.paidStatus === "Paid"}>Paid</option>
-                </select>
-              ) : (
-                res[res2.dataName]
-              );
+            value = isEditActive ? (
+              <select
+                className="pt-1 pb-1 pl-2 rounded-sm mr-2 w-[67px] border-2 border-semi-light appearance-none"
+                onChange={(e: any) =>
+                  _orderToUpdate(res._id, "paidStatus", e.target.value)
+                }
+              >
+                <option value="Unpaid">Select</option>
+                <option selected={res.paidStatus === "Unpaid"}>Unpaid</option>
+                <option selected={res.paidStatus === "To Transfer"}>
+                  To Transfer
+                </option>
+                <option selected={res.paidStatus === "Paid"}>Paid</option>
+              </select>
+            ) : (
+              res[res2.dataName]
+            );
           } else if (res2.dataName === "createdAt") {
             value = moment(res[res2.dataName]).format("MM/DD/YYYY");
           } else {

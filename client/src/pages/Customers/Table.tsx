@@ -86,7 +86,8 @@ const Table = (props: any) => {
         const filteredCustomerData = customerData.filter(
           (res: any) =>
             res.firstName.toLowerCase().includes(searchPhrase.toLowerCase()) ||
-            res.lastName.toLowerCase().includes(searchPhrase.toLowerCase())
+            res.lastName.toLowerCase().includes(searchPhrase.toLowerCase()) ||
+            res.contactNumber.toLowerCase().includes(searchPhrase.toLowerCase())
         );
         setCustomers(_remappedData(filteredCustomerData));
       }

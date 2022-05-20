@@ -644,39 +644,6 @@ const AddDiy = (props: any) => {
     const validatedData: any = validate(filteredValues);
     const errors = validatedData ? getErrorsFromValidation(validatedData) : [];
     let customErrors: any[] = [];
-    if (!washId && !dryId && !detergentTypeId && !fabConTypeId && !zonroxQty) {
-      const newError = [
-        {
-          input: "washId",
-          errorMessage: "Select at least 1 service or item",
-        },
-        {
-          input: "dryId",
-          errorMessage: "Select at least 1 service or item",
-        },
-        {
-          input: "detergentTypeId",
-          errorMessage: "Select at least 1 service or item",
-        },
-        {
-          input: "detergentQty",
-          errorMessage: "Select at least 1 service or item",
-        },
-        {
-          input: "fabConTypeId",
-          errorMessage: "Select at least 1 service or item",
-        },
-        {
-          input: "fabConQty",
-          errorMessage: "Select at least 1 service or item",
-        },
-        {
-          input: "zonrox",
-          errorMessage: "Select at least 1 service or item",
-        },
-      ];
-      customErrors = [...customErrors, ...newError];
-    }
 
     if (detergentTypeId && !detergentQty) {
       const newError = [

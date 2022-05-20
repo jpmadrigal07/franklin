@@ -317,8 +317,8 @@ const Order = () => {
             <p className="font-bold">
               <span className="font-bold text-primary">Service Type:</span>{" "}
               {!isOrderLoading
-                ? orderDataObj?.laundryId
-                  ? "Drop-off"
+                ? paramId?.slice(-1) === "F"
+                  ? "DO"
                   : "DIY"
                 : "..."}
             </p>

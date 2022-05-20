@@ -91,6 +91,7 @@ const Table = () => {
       { header: "JO Number", dataName: "jobOrderNumber" },
       { header: "Date", dataName: "createdAt" },
       { header: "Service Type", dataName: "serviceType" },
+      { header: "Order Status", dataName: "orderStatus" },
       { header: "Total", dataName: "amountDue" },
       { header: "Action", dataName: "endActions" },
     ],
