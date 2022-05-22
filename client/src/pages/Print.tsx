@@ -1,9 +1,8 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import DataTable from "../components/Table";
-import _constructTableActions from "../utils/constructTableActions";
 import { useQuery } from "react-query";
 import { getAllOrder } from "../utils/order";
-import { useParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 
 type T_Header = {
   header: string;
@@ -11,7 +10,9 @@ type T_Header = {
 };
 
 const Print = () => {
-  const { id: paramId } = useParams();
+  const [searchParams] = useSearchParams();
+  const toPrintJO = searchParams.get("toPrintJO");
+  const toPrintJOArr = toPrintJO ? toPrintJO.split(",") : [];
   const [orders, setOrders] = useState([]);
   const [totalLoads, setTotalLoads] = useState<any>(null);
   const [total, setTotal] = useState<any>(null);
@@ -22,7 +23,9 @@ const Print = () => {
     refetch: refetchOrderData,
   } = useQuery("printOrders", () =>
     getAllOrder(
-      `{"customerId": "${paramId}" , "orderStatus": { "$ne": "Closed" }, "orderStatus": { "$ne": "Canceled" }}`
+      `{"jobOrderNumber": { "$in":  [${toPrintJOArr.map(
+        (res: any) => `"${res}"`
+      )}] } , "orderStatus": { "$ne": "Closed" }, "orderStatus": { "$ne": "Canceled" }}`
     )
   );
 

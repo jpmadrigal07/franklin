@@ -4,7 +4,7 @@ import { useMutation, useQuery } from "react-query";
 import { getAllInventory } from "../../utils/inventory";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import Asterisk from "../../components/Asterisk";
 import validate from "../../validation/order";
 import getErrorsFromValidation from "../../utils/getErrorsFromValidation";
@@ -34,8 +34,9 @@ const AddDiy = (props: any) => {
   const MySwal = withReactContent(Swal);
   const { id: paramId } = useParams();
   const navigate = useNavigate();
-
-  const [saveType, setSaveType] = useState("");
+  const [searchParams] = useSearchParams();
+  const customerId = searchParams.get("customerId");
+  const toPrintJO = searchParams.get("toPrintJO");
 
   const [customAddOnServices, setCustomAddOnServices] = useState<any>([]);
   const [customDiscount, setCustomDiscount] = useState<any>([]);
@@ -114,23 +115,20 @@ const AddDiy = (props: any) => {
   );
 
   useEffect(() => {
-    if (paramId) {
+    if (customerId) {
       const customer =
         customerData &&
         customerData.find((res: any) => {
-          return res._id === paramId;
+          return res._id === customerId;
         });
       setSelectedCustomer(JSON.stringify(customer));
     }
-    return () => {
-      setSaveType("saveAdd");
-    };
-  }, [customerData, paramId]);
+  }, [customerData, customerId]);
 
   const { mutate: triggerAddOrder, isLoading: isAddOrderLoading } = useMutation(
     async (order: any) => addOrder(order),
     {
-      onSuccess: async () => {
+      onSuccess: async (data: any, variables: any) => {
         if (selectedWash && JSON.parse(selectedWash)._id) {
           triggerAddOrderWash({
             jobOrderNumber:
@@ -142,6 +140,7 @@ const AddDiy = (props: any) => {
             washId: selectedWash && JSON.parse(selectedWash)._id,
             qty: 1,
             total: selectedWash ? JSON.parse(selectedWash)?.price : 0,
+            saveType: variables?.saveType,
           });
         } else if (selectedDry && JSON.parse(selectedDry)._id) {
           triggerAddOrderDry({
@@ -154,9 +153,10 @@ const AddDiy = (props: any) => {
             dryId: selectedDry && JSON.parse(selectedDry)._id,
             qty: 1,
             total: selectedDry ? JSON.parse(selectedDry)?.price : 0,
+            saveType: variables?.saveType,
           });
         } else {
-          _thirdRequests();
+          _thirdRequests(variables?.saveType);
         }
       },
       onError: async (err: any) => {
@@ -173,7 +173,7 @@ const AddDiy = (props: any) => {
 
   const { mutate: triggerAddOrderWash, isLoading: isAddOrderWashLoading } =
     useMutation(async (order: any) => addOrderWash(order), {
-      onSuccess: async () => {
+      onSuccess: async (data: any, variables: any) => {
         if (selectedDry && JSON.parse(selectedDry)._id) {
           triggerAddOrderDry({
             jobOrderNumber:
@@ -185,9 +185,10 @@ const AddDiy = (props: any) => {
             dryId: selectedDry && JSON.parse(selectedDry)._id,
             qty: 1,
             total: selectedDry ? JSON.parse(selectedDry)?.price : 0,
+            saveType: variables?.saveType,
           });
         } else {
-          _thirdRequests();
+          _thirdRequests(variables?.saveType);
         }
       },
       onError: async (err: any) => {
@@ -201,7 +202,7 @@ const AddDiy = (props: any) => {
       },
     });
 
-  const _thirdRequests = () => {
+  const _thirdRequests = (saveType: string) => {
     const detergentQtyFinal = detergentQty ? detergentQty : 0;
     const fabConQtyFinal = fabConQty ? fabConQty : 0;
     const zonroxQtyFinal = zonroxQty ? zonroxQty : 0;
@@ -316,14 +317,24 @@ const AddDiy = (props: any) => {
       }).then(() => {
         if (saveType === "saveEnd") {
           window.open(
-            `/print/${selectedCustomer && JSON.parse(selectedCustomer)._id}`,
+            `/print?toPrintJO=${toPrintJO ? toPrintJO : ""}${
+              toPrintJO ? "," : ""
+            }${nextJobOrderNumber(
+              orderData[0] ? orderData[0].jobOrderNumber : "000000Y",
+              "Y"
+            )}`,
             "_blank"
           );
           navigate("/orders/diy");
-        } else {
-          window.location.href = `/orders/diy/add/${
+        } else if (saveType === "saveAdd") {
+          window.location.href = `/orders/diy/add?customerId=${
             selectedCustomer && JSON.parse(selectedCustomer)._id
-          }`;
+          }&toPrintJO=${toPrintJO ? toPrintJO : ""}${
+            toPrintJO ? "," : ""
+          }${nextJobOrderNumber(
+            orderData[0] ? orderData[0].jobOrderNumber : "000000Y",
+            "Y"
+          )}`;
         }
       });
     }
@@ -331,8 +342,8 @@ const AddDiy = (props: any) => {
 
   const { mutate: triggerAddOrderDry, isLoading: isAddOrderDryLoading } =
     useMutation(async (order: any) => addOrderDry(order), {
-      onSuccess: async () => {
-        _thirdRequests();
+      onSuccess: async (data: any, variables: any) => {
+        _thirdRequests(variables?.saveType);
       },
       onError: async (err: any) => {
         MySwal.fire({
@@ -360,7 +371,7 @@ const AddDiy = (props: any) => {
 
   const { mutate: triggerAddOrderAddOn, isLoading: isAddOrderAddOnLoading } =
     useMutation(async (order: any) => addOrderAddOn(order), {
-      onSuccess: async () => {
+      onSuccess: async (data: any, variables: any) => {
         if (selectedDiscount && JSON.parse(selectedDiscount)._id) {
           triggerAddOrderDiscount({
             jobOrderNumber:
@@ -372,6 +383,7 @@ const AddDiy = (props: any) => {
             discountId: selectedDiscount && JSON.parse(selectedDiscount)._id,
             qty: 1,
             total: selectedDiscount ? JSON.parse(selectedDiscount)?.price : 0,
+            saveType: variables?.saveType,
           });
         } else {
           MySwal.fire({
@@ -382,18 +394,26 @@ const AddDiy = (props: any) => {
             showConfirmButton: false,
             timer: 3000,
           }).then(() => {
-            if (saveType === "saveEnd") {
+            if (variables?.saveType === "saveEnd") {
               window.open(
-                `/print/${
-                  selectedCustomer && JSON.parse(selectedCustomer)._id
-                }`,
+                `/print?toPrintJO=${toPrintJO ? toPrintJO : ""}${
+                  toPrintJO ? "," : ""
+                }${nextJobOrderNumber(
+                  orderData[0] ? orderData[0].jobOrderNumber : "000000Y",
+                  "Y"
+                )}`,
                 "_blank"
               );
               navigate("/orders/diy");
-            } else {
-              window.location.href = `/orders/diy/add/${
+            } else if (variables?.saveType === "saveAdd") {
+              window.location.href = `/orders/diy/add?customerId=${
                 selectedCustomer && JSON.parse(selectedCustomer)._id
-              }`;
+              }&toPrintJO=${toPrintJO ? toPrintJO : ""}${
+                toPrintJO ? "," : ""
+              }${nextJobOrderNumber(
+                orderData[0] ? orderData[0].jobOrderNumber : "000000Y",
+                "Y"
+              )}`;
             }
           });
         }
@@ -413,7 +433,7 @@ const AddDiy = (props: any) => {
     mutate: triggerAddOrderDiscount,
     isLoading: isAddOrderDiscountLoading,
   } = useMutation(async (order: any) => addOrderDiscount(order), {
-    onSuccess: async () => {
+    onSuccess: async (data: any, variables: any) => {
       MySwal.fire({
         title: "Order created!",
         text: "You will be redirected",
@@ -422,16 +442,26 @@ const AddDiy = (props: any) => {
         showConfirmButton: false,
         timer: 3000,
       }).then(() => {
-        if (saveType === "saveEnd") {
+        if (variables?.saveType === "saveEnd") {
           window.open(
-            `/print/${selectedCustomer && JSON.parse(selectedCustomer)._id}`,
+            `/print?toPrintJO=${toPrintJO ? toPrintJO : ""}${
+              toPrintJO ? "," : ""
+            }${nextJobOrderNumber(
+              orderData[0] ? orderData[0].jobOrderNumber : "000000Y",
+              "Y"
+            )}`,
             "_blank"
           );
           navigate("/orders/diy");
-        } else {
-          window.location.href = `/orders/diy/add/${
+        } else if (variables?.saveType === "saveAdd") {
+          window.location.href = `/orders/diy/add?customerId=${
             selectedCustomer && JSON.parse(selectedCustomer)._id
-          }`;
+          }&toPrintJO=${toPrintJO ? toPrintJO : ""}${
+            toPrintJO ? "," : ""
+          }${nextJobOrderNumber(
+            orderData[0] ? orderData[0].jobOrderNumber : "000000Y",
+            "Y"
+          )}`;
         }
       });
     },
@@ -515,7 +545,6 @@ const AddDiy = (props: any) => {
   };
 
   const _addOrder = (type: string) => {
-    setSaveType(type);
     const washTotal = selectedWash ? JSON.parse(selectedWash)?.price : 0;
     const dryTotal = selectedDry ? JSON.parse(selectedDry)?.price : 0;
     const detergentQtyFinal = detergentQty ? detergentQty : 0;
@@ -638,6 +667,7 @@ const AddDiy = (props: any) => {
       paidStatus: "Unpaid",
       orderStatus: "In",
       claimStatus: "Unclaimed",
+      saveType: type,
     };
 
     const filteredValues = clean(orderToFilter);
@@ -920,7 +950,7 @@ const AddDiy = (props: any) => {
               {customerData &&
                 customerData.map((res: any) => {
                   const isSelected: boolean =
-                    paramId && res._id === paramId ? true : false;
+                    customerId && res._id === customerId ? true : false;
                   return (
                     <option value={JSON.stringify(res)} selected={isSelected}>
                       {res.firstName} {res.lastName}

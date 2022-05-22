@@ -290,7 +290,21 @@ const TableDiy = (props: any) => {
       if (!exist) {
         let toUpdateObj: any = {};
         toUpdateObj["id"] = id;
-        if (key === "paidStatus" && value === "Paid") {
+        const isOrderDryMachineNumberExist = orderData.find(
+          (item: any) => item._id === id && item.orderDry?.machineNumber
+        );
+        const isOrderPaid = orderData.find(
+          (item: any) => item._id === id && item.paidStatus === "Paid"
+        );
+        if (
+          key === "paidStatus" &&
+          value === "Paid" &&
+          isOrderDryMachineNumberExist
+        ) {
+          toUpdateObj["orderStatus"] = "Closed";
+          toUpdateObj["updatedAt"] = moment().format();
+        }
+        if (key === "dryCompleted" && value !== "" && isOrderPaid) {
           toUpdateObj["orderStatus"] = "Closed";
           toUpdateObj["updatedAt"] = moment().format();
         }
@@ -302,7 +316,7 @@ const TableDiy = (props: any) => {
         setOrderToUpdate([...newOrderToUpdate]);
       }
     },
-    [orderToUpdate]
+    [orderToUpdate, orderData]
   );
 
   const _multiOrderToUpdate = useCallback(
@@ -321,13 +335,20 @@ const TableDiy = (props: any) => {
         }
         if (key !== "id" && newOrderToUpdate.length > 0) {
           const newValue = newOrderToUpdate.map((res: any) => {
+            const isOrderDryMachineNumberExist = orderData.find(
+              (item: any) => item._id === res.id && item.orderDry?.machineNumber
+            );
             const updatedValue =
               key === "paidStatus" && value === "Paid" ? "Paid" : value;
             let toReturn = {
               ...res,
               [key]: value === "null" ? null : updatedValue,
             };
-            if (key === "paidStatus" && value === "Paid") {
+            if (
+              key === "paidStatus" &&
+              value === "Paid" &&
+              isOrderDryMachineNumberExist
+            ) {
               toReturn.orderStatus = "Closed";
             }
             return toReturn;
@@ -336,7 +357,7 @@ const TableDiy = (props: any) => {
         }
       }
     },
-    [multiOrderToUpdate]
+    [multiOrderToUpdate, orderData]
   );
 
   const _washToUpdate = useCallback(
@@ -773,30 +794,52 @@ const TableDiy = (props: any) => {
           confirmButtonColor: "#274c77",
         });
       } else {
-        const isPaid = orderToUpdate.find(
-          (res: any) => res.id === data._id && res.paidStatus === "Paid"
-        );
-        if (!isPaid) {
+        const isToClose = orderToUpdate.find((res: any) => {
+          const isOrderDryMachineNumberExist = orderData.find(
+            (item: any) => item._id === data._id && item.orderDry?.machineNumber
+          );
+          const isOrderPaid = orderData.find(
+            (item: any) => item._id === data._id && item.paidStatus === "Paid"
+          );
+          return (
+            res.id === data._id &&
+            ((res.paidStatus === "Paid" && isOrderDryMachineNumberExist) ||
+              (res.dryCompleted && isOrderPaid))
+          );
+        });
+        if (!isToClose) {
           _updateOrder(index, data._id, data);
         } else {
           setOpenClaimedOrderModal(true);
         }
       }
     },
-    [orderToUpdate, _updateOrder, itemSufficiencyState]
+    [orderToUpdate, _updateOrder, itemSufficiencyState, orderData, itemToUpdate]
   );
 
   const _openClaimedMultiOrderModal = useCallback(() => {
-    const isPaidExist = multiOrderToUpdate.find(
-      (res: any) => res?.paidStatus === "Paid"
+    const toCloseData = multiOrderToUpdate.filter(
+      (res: any) => res?.paidStatus === "Paid" || res?.dryCompleted
     );
 
-    if (!isPaidExist) {
-      _updateMultiOrder();
-    } else {
+    const isSaveToClose = toCloseData.map((res: any) => {
+      const isOrderDryMachineNumberExist = orderData.find(
+        (item: any) => item._id === res.id && item.orderDry?.machineNumber
+      );
+      const isOrderPaid = orderData.find(
+        (item: any) => item._id === res.id && item.paidStatus === "Paid"
+      );
+      return (res?.paidStatus === "Paid" && isOrderDryMachineNumberExist) ||
+        (res?.dryCompleted && isOrderPaid)
+        ? true
+        : false;
+    });
+    if (isSaveToClose.toString().includes("true")) {
       setOpenClaimedMultiOrderModal(true);
+    } else {
+      _updateMultiOrder();
     }
-  }, [_updateMultiOrder, multiOrderToUpdate]);
+  }, [_updateMultiOrder, multiOrderToUpdate, orderData]);
 
   const _remappedData = useCallback(
     (data: any) => {

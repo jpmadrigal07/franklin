@@ -29,7 +29,7 @@ export default function Router() {
       children: [{ path: "", element: <Login /> }],
     },
     {
-      path: "print/:id",
+      path: "print",
       children: [{ path: "", element: <Print /> }],
     },
     {
