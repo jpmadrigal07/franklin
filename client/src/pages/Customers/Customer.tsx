@@ -106,7 +106,7 @@ const Table = () => {
         const mainData = tableHeader.map((res2: any) => {
           let value;
           if (res2.dataName === "serviceType") {
-            value = res.laundryId ? "Drop Off" : "DIY";
+            value = res.jobOrderNumber?.slice(-1) === "Y" ? "DIY" : "DO";
           } else if (res2.dataName === "createdAt") {
             value = dateSlash(res.createdAt);
           } else if (res2.dataName === "amountDue") {

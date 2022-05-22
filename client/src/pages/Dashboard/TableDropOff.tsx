@@ -322,7 +322,12 @@ const TableDiy = (props: any) => {
         if (!exist && key === "id") {
           let toUpdateObj: any = {};
           toUpdateObj[key] = value === "null" ? null : value;
-          toUpdateObj["foldCompleted"] = null;
+          const isFoldCompleted = orderData.find(
+            (res: any) => res._id === toUpdateObj?.id && res.foldCompleted
+          );
+          if (!isFoldCompleted) {
+            toUpdateObj["foldCompleted"] = null;
+          }
           setMultiOrderToUpdate([...newOrderToUpdate, toUpdateObj]);
         }
         if (key !== "id" && newOrderToUpdate.length > 0) {
@@ -345,6 +350,9 @@ const TableDiy = (props: any) => {
                 res3._id === res.id &&
                 ((res3.laundryId && res3.foldCompleted) || !res3.laundryId)
             );
+            const isFoldCompleted = orderData.find(
+              (res3: any) => res3._id === res.id && res3.foldCompleted
+            );
             let updatedValue: any = "";
             if (
               key === "claimStatus" &&
@@ -361,6 +369,12 @@ const TableDiy = (props: any) => {
               updatedValue = "Unpaid";
             } else if (key === "foldCompleted" && !isItemAllowedFold) {
               updatedValue = null;
+            } else if (
+              key === "foldCompleted" &&
+              isItemAllowedFold &&
+              isFoldCompleted
+            ) {
+              updatedValue = isFoldCompleted?.foldCompleted;
             } else {
               updatedValue = value;
             }
@@ -811,12 +825,15 @@ const TableDiy = (props: any) => {
           confirmButtonColor: "#274c77",
         });
       } else {
+        const toUpdateIndex = orderToUpdate.findIndex(
+          (res: any) => res.id === data._id
+        );
         const isClaimed =
-          orderToUpdate[index]?.claimStatus &&
-          orderToUpdate[index]?.claimStatus === "Claimed";
+          orderToUpdate[toUpdateIndex]?.claimStatus &&
+          orderToUpdate[toUpdateIndex]?.claimStatus === "Claimed";
         const isPaid =
-          orderToUpdate[index]?.paidStatus &&
-          orderToUpdate[index]?.paidStatus === "Paid";
+          orderToUpdate[toUpdateIndex]?.paidStatus &&
+          orderToUpdate[toUpdateIndex]?.paidStatus === "Paid";
         if (
           (isClaimed && data?.paidStatus === "Paid") ||
           (isPaid && data?.claimStatus === "Claimed")
@@ -1312,7 +1329,7 @@ const TableDiy = (props: any) => {
               );
           } else if (res2.dataName === "paidStatus") {
             value =
-              isEditActive && !res.paidStatus ? (
+              isEditActive && res.paidStatus !== "Paid" ? (
                 <select
                   className="pt-1 pb-1 pl-2 rounded-sm mr-2 w-[67px] border-2 border-semi-light appearance-none"
                   onChange={(e: any) =>
