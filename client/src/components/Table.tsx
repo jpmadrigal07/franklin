@@ -25,7 +25,7 @@ const Table = ({
               >
                 {header
                   .filter((res3: any) => res3.dataName !== hideColumn)
-                  .map((res2: any) => {
+                  .map((res2: any, index: number) => {
                     const custom = customColumnTextColor.find(
                       (a: any) => a.column === res2.dataName
                     );
@@ -42,6 +42,7 @@ const Table = ({
                             ? `${textColor} ${bold}`
                             : ""
                         }`}
+                        key={index}
                       >
                         {res[res2.dataName] !== "0" ? res[res2.dataName] : "0"}
                       </td>
@@ -67,7 +68,7 @@ const Table = ({
               <table className="min-w-full">
                 <thead className="border-b-2">
                   <tr>
-                    {header.map((res: any) => {
+                    {header.map((res: any, index: number) => {
                       if (
                         res.dataName === "endActions" &&
                         data[0] &&
@@ -80,6 +81,7 @@ const Table = ({
                             className={`text-sm font-bold text-gray-900 ${
                               paddingLeftRight ? "px-6" : ""
                             } py-2 text-left`}
+                            key={index}
                           >
                             {res.header}
                           </th>
@@ -94,6 +96,7 @@ const Table = ({
                             className={`text-sm font-bold text-gray-900 ${
                               paddingLeftRight ? "px-6" : ""
                             } py-2 text-left`}
+                            key={index}
                           >
                             <span
                               className={`flex ${

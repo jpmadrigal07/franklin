@@ -73,7 +73,7 @@ const ComputeTotalLoading = (props: any) => {
   }, [services, addOns, orderData, orderId, triggerUpdateOrder]);
 
   useEffect(() => {
-    if (orderId !== "") {
+    if (orderId && orderId !== "") {
       refetchOrderData();
     }
     return () => {

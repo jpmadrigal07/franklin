@@ -1317,7 +1317,7 @@ const TableDiy = (props: any) => {
                     _inventoryStockToUpdate(
                       pbItem?._id,
                       parseFloat(e.target.value),
-                      pbItem?.qty
+                      plastic?.qty
                     );
                     let newItemSufficiencyState = itemSufficiencyState;
                     newItemSufficiencyState[index][3] =
