@@ -8,7 +8,8 @@ import moment from "moment";
 
 const Reports = () => {
   const MySwal = withReactContent(Swal);
-  const [value, onChange] = useState(new Date());
+  const [from, setFrom] = useState(new Date());
+  const [to, setTo] = useState(new Date());
 
   const { mutate: triggerGenerateReport, isLoading: isGenerateReportLoading } =
     useMutation(async (report: any) => generateReport(report), {
@@ -26,16 +27,39 @@ const Reports = () => {
       },
     });
 
+  const _generateReport = (from: string, to: string) => {
+    const isValid = moment(to).isSameOrAfter(moment(from));
+    if (isValid) {
+      triggerGenerateReport({ from, to });
+    } else {
+      MySwal.fire({
+        title: "Ooops!",
+        text: "Date is invalid",
+        icon: "warning",
+        confirmButtonText: "Okay",
+        confirmButtonColor: "#274c77",
+      });
+    }
+  };
+
   return (
     <>
       <DatePicker
-        onChange={onChange}
-        value={value}
+        onChange={setFrom}
+        value={from}
+        disabled={isGenerateReportLoading}
+      />
+      <span> to </span>
+      <DatePicker
+        onChange={setTo}
+        value={to}
         disabled={isGenerateReportLoading}
       />
       <button
         className={`w-[90px] ml-7 bg-primary text-white hover:bg-primary-dark h-[28px]`}
-        onClick={() => triggerGenerateReport({ date: moment(value).format() })}
+        onClick={() =>
+          _generateReport(moment(from).format(), moment(to).format())
+        }
         disabled={isGenerateReportLoading}
       >
         Export

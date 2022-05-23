@@ -93,14 +93,16 @@ router.post("/verify-password", async (req, res) => {
 // @desc    Add A User
 // @access  Private
 router.post("/export-excel", async (req, res) => {
-  const { date } = req.body;
+  const { from, to } = req.body;
 
-  const filename = `Report-${moment(date).format("MMDDYY")}.xlsx`;
+  const filename = `Report-${moment(from).format("MMDDYY")}-${moment(to).format(
+    "MMDDYY"
+  )}.xlsx`;
 
   const ordersCondition = {
     createdAt: {
-      $gte: new Date(moment(date).startOf("day")),
-      $lt: new Date(moment(date).endOf("day")),
+      $gte: new Date(moment(from).startOf("day")),
+      $lt: new Date(moment(to).endOf("day")),
     },
     deletedAt: { $exists: false },
     orderStatus: { $ne: "Closed" },
@@ -639,49 +641,49 @@ router.post("/export-excel", async (req, res) => {
 
     const newMappedData = getAllOrder.map((item) => {
       const discount = item.orderDiscount.reduce(function (a, b) {
-        return a + b.discountId.price;
+        return a + b?.discountId?.price ? b?.discountId?.price : 0;
       }, 0);
 
       const regularDry =
-        item.orderDry && item.orderDry.dryId.type === "Regular"
-          ? item.orderDry.qty
+        item.orderDry?.dryId && item.orderDry?.dryId.type === "Regular"
+          ? item.orderDry.machineNumber
           : "";
       const shortDry =
-        item.orderDry && item.orderDry.dryId.type === "Short"
-          ? item.orderDry.qty
+        item.orderDry?.dryId && item.orderDry?.dryId.type === "Short"
+          ? item.orderDry.machineNumber
           : "";
       const extraDry =
-        item.orderDry && item.orderDry.dryId.type === "Extra"
-          ? item.orderDry.qty
+        item.orderDry?.dryId && item.orderDry?.dryId.type === "Extra"
+          ? item.orderDry.machineNumber
           : "";
       const rDry =
-        item.orderDry && item.orderDry.dryId.type === "Regular+Extra"
-          ? item.orderDry.qty
+        item.orderDry?.dryId && item.orderDry?.dryId.type === "Regular+Extra"
+          ? item.orderDry.machineNumber
           : "";
       const sDry =
-        item.orderDry && item.orderDry.dryId.type === "Short+Extra"
-          ? item.orderDry.qty
+        item.orderDry?.dryId && item.orderDry?.dryId.type === "Short+Extra"
+          ? item.orderDry.machineNumber
           : "";
 
       const lightWash =
-        item.orderWash && item.orderWash.washId.type === "Light"
-          ? item.orderWash.qty
+        item.orderWash?.washId && item.orderWash?.washId.type === "Light"
+          ? item.orderWash.machineNumber
           : "";
       const mediumWash =
-        item.orderWash && item.orderWash.washId.type === "Medium"
-          ? item.orderWash.qty
+        item.orderWash?.washId && item.orderWash?.washId.type === "Medium"
+          ? item.orderWash.machineNumber
           : "";
       const heavyWash =
-        item.orderWash && item.orderWash.washId.type === "Heavy"
-          ? item.orderWash.qty
+        item.orderWash?.washId && item.orderWash?.washId.type === "Heavy"
+          ? item.orderWash.machineNumber
           : "";
       const sWash =
-        item.orderWash && item.orderWash.washId.type === "Spin"
-          ? item.orderWash.qty
+        item.orderWash?.washId && item.orderWash?.washId.type === "Spin"
+          ? item.orderWash.machineNumber
           : "";
       const rsWash =
-        item.orderWash && item.orderWash.washId.type === "Rinse+Spin"
-          ? item.orderWash.qty
+        item.orderWash?.washId && item.orderWash?.washId.type === "Rinse+Spin"
+          ? item.orderWash.machineNumber
           : "";
 
       return [
@@ -698,10 +700,18 @@ router.post("/export-excel", async (req, res) => {
         extraDry,
         rDry,
         sDry,
-        getLaundry[0].price,
-        item.amountDue,
-        discount,
-        item.amountDue,
+        getLaundry[0].price
+          ? getLaundry[0].price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+          : "0",
+        item.amountDue
+          ? item.amountDue.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+          : "0",
+        discount
+          ? discount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+          : "0",
+        item.amountDue
+          ? item.amountDue.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+          : "0",
       ];
     });
 
