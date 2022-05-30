@@ -750,16 +750,16 @@ router.post("/export-excel", async (req, res) => {
     const totalRow = newMappedData.reduce(
       function (a, b) {
         let accu = a;
-        accu[4] = b[4] ? accu[4] + parseFloat(b[4]) : accu[4];
-        accu[5] = b[5] ? accu[5] + parseFloat(b[5]) : accu[5];
-        accu[6] = b[6] ? accu[6] + parseFloat(b[6]) : accu[6];
-        accu[7] = b[7] ? accu[7] + parseFloat(b[7]) : accu[7];
-        accu[8] = b[8] ? accu[8] + parseFloat(b[8]) : accu[8];
-        accu[9] = b[9] ? accu[9] + parseFloat(b[9]) : accu[9];
-        accu[10] = b[10] ? accu[10] + parseFloat(b[10]) : accu[10];
-        accu[11] = b[11] ? accu[11] + parseFloat(b[11]) : accu[11];
-        accu[12] = b[12] ? accu[12] + parseFloat(b[12]) : accu[12];
-        accu[13] = b[13] ? accu[13] + parseFloat(b[13]) : accu[13];
+        accu[4] = b[4] ? accu[4] + 1 : accu[4];
+        accu[5] = b[5] ? accu[5] + 1 : accu[5];
+        accu[6] = b[6] ? accu[6] + 1 : accu[6];
+        accu[7] = b[7] ? accu[7] + 1 : accu[7];
+        accu[8] = b[8] ? accu[8] + 1 : accu[8];
+        accu[9] = b[9] ? accu[9] + 1 : accu[9];
+        accu[10] = b[10] ? accu[10] + 1 : accu[10];
+        accu[11] = b[11] ? accu[11] + 1 : accu[11];
+        accu[12] = b[12] ? accu[12] + 1 : accu[12];
+        accu[13] = b[13] ? accu[13] + 1 : accu[13];
         return accu;
       },
       ["", "", "", "", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "", "", "", ""]
