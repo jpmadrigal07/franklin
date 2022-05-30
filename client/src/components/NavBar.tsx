@@ -60,12 +60,15 @@ const NavBar = (props: any) => {
   );
 
   useEffect(() => {
+    const interval = setInterval(() => {
+      setTime(new Date().getTime());
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
     triggerTokenVerify({ token: sessionToken });
   }, [sessionToken, triggerTokenVerify]);
-
-  // setInterval(() => {
-  //   setTime(new Date().getTime());
-  // }, 1000);
 
   const { mutate: triggerLastLogin } = useMutation(
     async (user: any) => updateUser(user, loggedInId),

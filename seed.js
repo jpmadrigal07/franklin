@@ -21,6 +21,10 @@ const mongoDbFunction = async () => {
   const zonrox = await Inventory.find({ type: "Bleach", name: "Zonrox" });
   const fabcon = await Inventory.find({ type: "FabCon", name: "Surf" });
   const detergent = await Inventory.find({ type: "Detergent", name: "Ariel" });
+  const plasticBag = await Inventory.find({
+    type: "Plastic",
+    name: "Plastic Bag",
+  });
 
   if (!laundry || laundry.length === 0) {
     const insert = await Laundry.create({
@@ -38,6 +42,16 @@ const mongoDbFunction = async () => {
       stock: 20,
     });
     console.log("Response zonrox: ", insert);
+  }
+  if (!plasticBag || plasticBag.length === 0) {
+    const insert = await Inventory.create({
+      type: "Plastic",
+      name: "Plastic Bag",
+      unitCost: 25,
+      stockCode: "AAD",
+      stock: 20,
+    });
+    console.log("Response plastic bag: ", insert);
   }
   if (!fabcon || fabcon.length === 0) {
     const insert = await Inventory.create({

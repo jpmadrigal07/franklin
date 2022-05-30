@@ -921,7 +921,6 @@ const AddExtraDropOff = (props: any) => {
           <div>
             <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">
               Wash
-              <Asterisk />
             </label>
             <select
               className={`pt-1 pb-1 pl-2 rounded-sm mr-2 w-full border-2 ${
@@ -962,7 +961,6 @@ const AddExtraDropOff = (props: any) => {
           <div>
             <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">
               Dry
-              <Asterisk />
             </label>
             <select
               className={`pt-1 pb-1 pl-2 rounded-sm mr-2 w-full border-2 ${
@@ -1003,7 +1001,6 @@ const AddExtraDropOff = (props: any) => {
           <div>
             <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">
               Detergent Type
-              <Asterisk />
             </label>
             <select
               className={`pt-1 pb-1 pl-2 rounded-sm mr-2 w-full border-2 ${
@@ -1046,7 +1043,6 @@ const AddExtraDropOff = (props: any) => {
           <div>
             <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">
               Detergent Qty
-              <Asterisk />
             </label>
             <input
               className={`pt-1 pb-1 pl-2 rounded-sm mr-2 w-full border-2 ${
@@ -1081,7 +1077,6 @@ const AddExtraDropOff = (props: any) => {
           <div>
             <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">
               FabCon Type
-              <Asterisk />
             </label>
             <select
               className={`pt-1 pb-1 pl-2 rounded-sm mr-2 w-full border-2 border-2 ${
@@ -1124,7 +1119,6 @@ const AddExtraDropOff = (props: any) => {
           <div>
             <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">
               FabCon Qty
-              <Asterisk />
             </label>
             <input
               className={`pt-1 pb-1 pl-2 rounded-sm mr-2 w-full border-2 ${
@@ -1159,7 +1153,6 @@ const AddExtraDropOff = (props: any) => {
           <div>
             <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">
               ZX
-              <Asterisk />
             </label>
             <input
               className={`pt-1 pb-1 pl-2 rounded-sm mr-2 w-full border-2 ${

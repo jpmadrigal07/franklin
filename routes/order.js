@@ -18,6 +18,9 @@ router.get("/", async (req, res) => {
   if (condition.customerId) {
     condition.customerId = ObjectId(condition.customerId);
   }
+  if (condition.staffId) {
+    condition.staffId = ObjectId(condition.staffId);
+  }
   if (condition._id) {
     condition._id = ObjectId(condition._id);
   }

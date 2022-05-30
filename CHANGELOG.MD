@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.0.15
+
+- Fix bugs for https://docs.google.com/document/d/1dbR71KzH77lgaYsWv7lggoLMEg1PrQYAaInnLoNEBtQ
+
 ## 3.0.14
 
 - Added export excel function on Reports page

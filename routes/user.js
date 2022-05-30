@@ -105,8 +105,7 @@ router.post("/export-excel", async (req, res) => {
       $lt: new Date(moment(to).endOf("day")),
     },
     deletedAt: { $exists: false },
-    orderStatus: { $ne: "Closed" },
-    orderStatus: { $ne: "Canceled" },
+    orderStatus: "Closed",
   };
 
   const workBook = new Excel.Workbook();
@@ -116,6 +115,7 @@ router.post("/export-excel", async (req, res) => {
   const row2 = workSheet.getRow(2);
   const row3 = workSheet.getRow(3);
   const customerCol = workSheet.getColumn(1);
+  const dateCol = workSheet.getColumn(2);
 
   workSheet.getCell("A1").border = {
     top: { style: "medium" },
@@ -131,7 +131,7 @@ router.post("/export-excel", async (req, res) => {
     right: { style: "medium" },
   };
 
-  workSheet.getCell("N1").border = {
+  workSheet.getCell("O1").border = {
     top: { style: "medium" },
     left: { style: "medium" },
     bottom: { style: "medium" },
@@ -166,14 +166,14 @@ router.post("/export-excel", async (req, res) => {
     right: { style: "medium" },
   };
 
-  workSheet.getCell("I2").border = {
+  workSheet.getCell("E2").border = {
     top: { style: "medium" },
     left: { style: "medium" },
     bottom: { style: "medium" },
     right: { style: "medium" },
   };
 
-  workSheet.getCell("N2").border = {
+  workSheet.getCell("J2").border = {
     top: { style: "medium" },
     left: { style: "medium" },
     bottom: { style: "medium" },
@@ -201,7 +201,7 @@ router.post("/export-excel", async (req, res) => {
     right: { style: "medium" },
   };
 
-  workSheet.getCell("D3").border = {
+  workSheet.getCell("R2").border = {
     top: { style: "medium" },
     left: { style: "medium" },
     bottom: { style: "medium" },
@@ -271,64 +271,74 @@ router.post("/export-excel", async (req, res) => {
     right: { style: "medium" },
   };
 
+  workSheet.getCell("N3").border = {
+    top: { style: "medium" },
+    left: { style: "medium" },
+    bottom: { style: "medium" },
+    right: { style: "medium" },
+  };
+
   row1.getCell("A").value = "CUSTOMER";
   row1.getCell("B").value = "JOB ORDER";
-  row1.getCell("N").value = "PAYMENT";
+  row1.getCell("O").value = "PAYMENT";
 
-  workSheet.mergeCells("B1:M1");
-  workSheet.mergeCells("N1:Q1");
+  workSheet.mergeCells("B1:N1");
+  workSheet.mergeCells("O1:R1");
 
   workSheet.mergeCells("A2:A3");
   workSheet.mergeCells("B2:B3");
   workSheet.mergeCells("C2:C3");
+  workSheet.mergeCells("D2:D3");
 
   row2.getCell("A").value = "CUSTOMER NAME";
-  row2.getCell("B").value = "JO NUM";
-  row2.getCell("C").value = "DIY/DO";
-  row2.getCell("D").value = "WASH";
-  row2.getCell("I").value = "DRY";
-  row2.getCell("N").value = "DO FEE";
-  row2.getCell("O").value = "AMT";
-  row2.getCell("P").value = "DISC";
-  row2.getCell("Q").value = "TOTAL";
+  row2.getCell("B").value = "DATE";
+  row2.getCell("C").value = "JO NUM";
+  row2.getCell("D").value = "DIY/DO";
+  row2.getCell("E").value = "WASH";
+  row2.getCell("J").value = "DRY";
+  row2.getCell("O").value = "DO FEE";
+  row2.getCell("P").value = "AMT";
+  row2.getCell("Q").value = "DISC";
+  row2.getCell("R").value = "TOTAL";
 
-  workSheet.mergeCells("D2:H2");
-  workSheet.mergeCells("I2:M2");
+  workSheet.mergeCells("E2:I2");
+  workSheet.mergeCells("J2:N2");
 
-  workSheet.mergeCells("N2:N3");
   workSheet.mergeCells("O2:O3");
   workSheet.mergeCells("P2:P3");
   workSheet.mergeCells("Q2:Q3");
+  workSheet.mergeCells("R2:R3");
 
-  row3.getCell("D").value = "L";
-  row3.getCell("E").value = "M";
-  row3.getCell("F").value = "H";
-  row3.getCell("G").value = "SP";
-  row3.getCell("H").value = "RSP";
-  row3.getCell("I").value = "R";
-  row3.getCell("J").value = "S";
-  row3.getCell("K").value = "E";
-  row3.getCell("L").value = "R+";
-  row3.getCell("M").value = "S+";
+  row3.getCell("E").value = "L";
+  row3.getCell("F").value = "M";
+  row3.getCell("G").value = "H";
+  row3.getCell("H").value = "SP";
+  row3.getCell("I").value = "RSP";
+  row3.getCell("J").value = "R";
+  row3.getCell("K").value = "S";
+  row3.getCell("L").value = "E";
+  row3.getCell("M").value = "R+";
+  row3.getCell("N").value = "S+";
 
   row1.getCell("A").alignment = { horizontal: "center" };
   row1.getCell("B").alignment = { horizontal: "center" };
-  row1.getCell("N").alignment = { horizontal: "center" };
+  row1.getCell("O").alignment = { horizontal: "center" };
 
   customerCol.width = 26;
+  dateCol.width = 13;
 
   row2.getCell("A").alignment = { horizontal: "center" };
   row2.getCell("B").alignment = { horizontal: "center" };
   row2.getCell("C").alignment = { horizontal: "center" };
   row2.getCell("D").alignment = { horizontal: "center" };
-  row2.getCell("I").alignment = { horizontal: "center" };
+  row2.getCell("E").alignment = { horizontal: "center" };
+  row2.getCell("J").alignment = { horizontal: "center" };
 
-  row2.getCell("N").alignment = { horizontal: "center" };
   row2.getCell("O").alignment = { horizontal: "center" };
   row2.getCell("P").alignment = { horizontal: "center" };
   row2.getCell("Q").alignment = { horizontal: "center" };
+  row2.getCell("R").alignment = { horizontal: "center" };
 
-  row3.getCell("D").alignment = { horizontal: "center" };
   row3.getCell("E").alignment = { horizontal: "center" };
   row3.getCell("F").alignment = { horizontal: "center" };
   row3.getCell("G").alignment = { horizontal: "center" };
@@ -338,6 +348,7 @@ router.post("/export-excel", async (req, res) => {
   row3.getCell("K").alignment = { horizontal: "center" };
   row3.getCell("L").alignment = { horizontal: "center" };
   row3.getCell("M").alignment = { horizontal: "center" };
+  row3.getCell("N").alignment = { horizontal: "center" };
 
   workSheet.getCell("A1").font = {
     bold: true,
@@ -347,7 +358,7 @@ router.post("/export-excel", async (req, res) => {
     bold: true,
   };
 
-  workSheet.getCell("N1").font = {
+  workSheet.getCell("O1").font = {
     bold: true,
   };
 
@@ -367,11 +378,11 @@ router.post("/export-excel", async (req, res) => {
     bold: true,
   };
 
-  workSheet.getCell("I2").font = {
+  workSheet.getCell("E2").font = {
     bold: true,
   };
 
-  workSheet.getCell("N2").font = {
+  workSheet.getCell("J2").font = {
     bold: true,
   };
 
@@ -387,7 +398,7 @@ router.post("/export-excel", async (req, res) => {
     bold: true,
   };
 
-  workSheet.getCell("D3").font = {
+  workSheet.getCell("R2").font = {
     bold: true,
   };
 
@@ -424,6 +435,10 @@ router.post("/export-excel", async (req, res) => {
   };
 
   workSheet.getCell("M3").font = {
+    bold: true,
+  };
+
+  workSheet.getCell("N3").font = {
     bold: true,
   };
 
@@ -641,7 +656,7 @@ router.post("/export-excel", async (req, res) => {
 
     const newMappedData = getAllOrder.map((item) => {
       const discount = item.orderDiscount.reduce(function (a, b) {
-        return a + b?.discountId?.price ? b?.discountId?.price : 0;
+        return b?.total ? a + b?.total : 0;
       }, 0);
 
       const regularDry =
@@ -686,8 +701,29 @@ router.post("/export-excel", async (req, res) => {
           ? item.orderWash.machineNumber
           : "";
 
+      const doFee =
+        item.jobOrderNumber.slice(-1) === "F" && item.laundryId
+          ? getLaundry[0].price
+            ? getLaundry[0].price
+                .toString()
+                .replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+            : "0"
+          : "0";
+
+      const amount = item.amountDue
+        ? item.amountDue.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+        : "0";
+
+      const discountFinal = discount
+        ? discount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+        : "0";
+
+      const finalAmount =
+        parseFloat(discountFinal) + parseFloat(amount) - parseFloat(doFee);
+
       return [
         `${item.customerId.firstName} ${item.customerId.lastName}`,
+        moment(item.createdAt).format("MM/DD/YYYY"),
         item.jobOrderNumber,
         `${item.jobOrderNumber.slice(-1) === "Y" ? "DIY" : "DO"}`,
         lightWash,
@@ -700,15 +736,9 @@ router.post("/export-excel", async (req, res) => {
         extraDry,
         rDry,
         sDry,
-        getLaundry[0].price
-          ? getLaundry[0].price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-          : "0",
-        item.amountDue
-          ? item.amountDue.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-          : "0",
-        discount
-          ? discount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-          : "0",
+        doFee,
+        finalAmount,
+        discountFinal,
         item.amountDue
           ? item.amountDue.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
           : "0",
@@ -716,10 +746,31 @@ router.post("/export-excel", async (req, res) => {
     });
 
     // add new rows and return them as array of row objects
-    workSheet.addRows(newMappedData);
+
+    const totalRow = newMappedData.reduce(
+      function (a, b) {
+        let accu = a;
+        accu[4] = b[4] ? accu[4] + parseFloat(b[4]) : accu[4];
+        accu[5] = b[5] ? accu[5] + parseFloat(b[5]) : accu[5];
+        accu[6] = b[6] ? accu[6] + parseFloat(b[6]) : accu[6];
+        accu[7] = b[7] ? accu[7] + parseFloat(b[7]) : accu[7];
+        accu[8] = b[8] ? accu[8] + parseFloat(b[8]) : accu[8];
+        accu[9] = b[9] ? accu[9] + parseFloat(b[9]) : accu[9];
+        accu[10] = b[10] ? accu[10] + parseFloat(b[10]) : accu[10];
+        accu[11] = b[11] ? accu[11] + parseFloat(b[11]) : accu[11];
+        accu[12] = b[12] ? accu[12] + parseFloat(b[12]) : accu[12];
+        accu[13] = b[13] ? accu[13] + parseFloat(b[13]) : accu[13];
+        return accu;
+      },
+      ["", "", "", "", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "", "", "", ""]
+    );
+
+    const mappedDataWithTotal = [...newMappedData, totalRow];
+
+    workSheet.addRows(mappedDataWithTotal);
 
     let counter = 3;
-    newMappedData.forEach(() => {
+    mappedDataWithTotal.forEach(() => {
       counter++;
       workSheet.getCell(`A${counter}`).border = {
         top: { style: "medium" },
@@ -818,6 +869,12 @@ router.post("/export-excel", async (req, res) => {
         right: { style: "medium" },
       };
       workSheet.getCell(`Q${counter}`).border = {
+        top: { style: "medium" },
+        left: { style: "medium" },
+        bottom: { style: "medium" },
+        right: { style: "medium" },
+      };
+      workSheet.getCell(`R${counter}`).border = {
         top: { style: "medium" },
         left: { style: "medium" },
         bottom: { style: "medium" },

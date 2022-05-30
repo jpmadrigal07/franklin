@@ -345,11 +345,6 @@ const TableDiy = (props: any) => {
                 res3.orderWash?.machineNumber &&
                 res3.orderDry?.machineNumber
             );
-            const isItemAllowedPaid = orderData.find(
-              (res3: any) =>
-                res3._id === res.id &&
-                ((res3.laundryId && res3.foldCompleted) || !res3.laundryId)
-            );
             const isFoldCompleted = orderData.find(
               (res3: any) => res3._id === res.id && res3.foldCompleted
             );
@@ -365,8 +360,6 @@ const TableDiy = (props: any) => {
               (value !== "Claimed" || !isItemAllowedClaimed)
             ) {
               updatedValue = "Unclaimed";
-            } else if (key === "paidStatus" && !isItemAllowedPaid) {
-              updatedValue = "Unpaid";
             } else if (key === "foldCompleted" && !isItemAllowedFold) {
               updatedValue = null;
             } else if (
@@ -909,7 +902,11 @@ const TableDiy = (props: any) => {
                   res3,
                   () => _openClaimedOrderModal(index, res),
                   false,
-                  isBulkUpdateOrderLoading || res.orderStatus === "Canceled"
+                  isBulkUpdateOrderLoading ||
+                    isUpdateOrderLoading ||
+                    isBulkUpdateItemLoading ||
+                    isBulkUpdateInventoryStockLoading ||
+                    res.orderStatus === "Canceled"
                 );
               }
             });
@@ -1168,6 +1165,10 @@ const TableDiy = (props: any) => {
                           parseFloat(e.target.value),
                           selected?.qty
                         );
+                        const updatedQty =
+                          parseFloat(e.target.value) > selected?.qty
+                            ? -(parseFloat(e.target.value) - selected?.qty)
+                            : selected?.qty - parseFloat(e.target.value);
                         let newItemSufficiencyState = itemSufficiencyState;
                         const remainingStocks = inventory?.Detergent?.stock
                           ? inventory?.Detergent?.stock
@@ -1176,7 +1177,9 @@ const TableDiy = (props: any) => {
                                 res5._id === selected?.inventoryId._id
                             )?.stock;
                         newItemSufficiencyState[index][0] =
-                          remainingStocks >= parseFloat(e.target.value);
+                          updatedQty < 0
+                            ? remainingStocks >= Math.abs(updatedQty)
+                            : true;
                         setItemSufficiencyState([...newItemSufficiencyState]);
                       }}
                     />
@@ -1266,6 +1269,10 @@ const TableDiy = (props: any) => {
                           parseFloat(e.target.value),
                           selected?.qty
                         );
+                        const updatedQty =
+                          parseFloat(e.target.value) > selected?.qty
+                            ? -(parseFloat(e.target.value) - selected?.qty)
+                            : selected?.qty - parseFloat(e.target.value);
                         let newItemSufficiencyState = itemSufficiencyState;
                         const remainingStocks = inventory?.FabCon?.stock
                           ? inventory?.FabCon?.stock
@@ -1274,7 +1281,9 @@ const TableDiy = (props: any) => {
                                 res5._id === selected?.inventoryId._id
                             )?.stock;
                         newItemSufficiencyState[index][1] =
-                          remainingStocks >= parseFloat(e.target.value);
+                          updatedQty < 0
+                            ? remainingStocks >= Math.abs(updatedQty)
+                            : true;
                         setItemSufficiencyState([...newItemSufficiencyState]);
                       }}
                     />
@@ -1316,9 +1325,17 @@ const TableDiy = (props: any) => {
                       parseFloat(e.target.value),
                       zonrox?.qty
                     );
+                    const updatedQty =
+                      parseFloat(e.target.value) > zonrox?.qty
+                        ? -(parseFloat(e.target.value) - zonrox?.qty)
+                        : zonrox?.qty
+                        ? zonrox?.qty
+                        : 0 - parseFloat(e.target.value);
                     let newItemSufficiencyState = itemSufficiencyState;
                     newItemSufficiencyState[index][2] =
-                      zxItem?.stock >= parseFloat(e.target.value);
+                      updatedQty < 0
+                        ? zxItem?.stock >= Math.abs(updatedQty)
+                        : true;
                     setItemSufficiencyState([...newItemSufficiencyState]);
                   }}
                 />
@@ -1350,7 +1367,9 @@ const TableDiy = (props: any) => {
             value =
               isEditActive &&
               ((res.laundryId && res["foldCompleted"]) ||
-                (!res.laundryId && !res["foldCompleted"])) &&
+                (!res.laundryId &&
+                  !res["foldCompleted"] &&
+                  res["orderDry"]["machineNumber"])) &&
               res["claimStatus"] &&
               res["claimStatus"] !== "Claimed" ? (
                 <input
@@ -1404,6 +1423,9 @@ const TableDiy = (props: any) => {
       _selectedInventory,
       selectedInventory,
       itemSufficiencyState,
+      isBulkUpdateInventoryStockLoading,
+      isUpdateOrderLoading,
+      isBulkUpdateItemLoading,
     ]
   );
 
