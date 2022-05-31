@@ -9,7 +9,7 @@ const ObjectId = require("mongoose").Types.ObjectId;
 // @desc    Get All Order
 // @access  Public
 router.get("/", async (req, res) => {
-  const condition = req.query.condition ? JSON.parse(req.query.condition) : {};
+  let condition = req.query.condition ? JSON.parse(req.query.condition) : {};
   if (!condition.deletedAt) {
     condition.deletedAt = {
       $exists: false,
@@ -23,6 +23,16 @@ router.get("/", async (req, res) => {
   }
   if (condition._id) {
     condition._id = ObjectId(condition._id);
+  }
+
+  if (condition.multiFolderId) {
+    condition = {
+      ...condition,
+      folderId: {
+        $in: condition.multiFolderId.map((res) => ObjectId(res)),
+      },
+    };
+    delete condition.multiFolderId;
   }
 
   try {

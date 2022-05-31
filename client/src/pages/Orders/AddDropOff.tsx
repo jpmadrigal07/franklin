@@ -42,6 +42,10 @@ const AddDropOff = (props: any) => {
   const [customAddOnServices, setCustomAddOnServices] = useState<any>([]);
   const [customDiscount, setCustomDiscount] = useState<any>([]);
 
+  const [isOpenCustomer, setIsOpenCustomer] = useState(false);
+  const [searchCustomer, setSearchCustomer] = useState("");
+  const [customers, setCustomers] = useState([]);
+
   const [selectedCustomer, setSelectedCustomer] = useState<any>(null);
   const [weight, setWeight] = useState<number | undefined>();
   const [selectedWash, setSelectedWash] = useState("");
@@ -131,6 +135,17 @@ const AddDropOff = (props: any) => {
       setSelectedCustomer(JSON.stringify(customer));
     }
   }, [customerData, customerId]);
+
+  useEffect(() => {
+    if (customerData && customerData.length > 0) {
+      const filteredCustomerData = customerData.filter(
+        (res: any) =>
+          res.firstName.toLowerCase().includes(searchCustomer.toLowerCase()) ||
+          res.lastName.toLowerCase().includes(searchCustomer.toLowerCase())
+      );
+      setCustomers(filteredCustomerData);
+    }
+  }, [searchCustomer, customerData]);
 
   const { mutate: triggerAddOrder, isLoading: isAddOrderLoading } = useMutation(
     async (order: any) => addOrder(order),
@@ -867,38 +882,97 @@ const AddDropOff = (props: any) => {
               Customer Name
               <Asterisk />
             </label>
-            <select
-              className={`pt-1 pb-1 pl-2 rounded-sm mr-2 w-full border-2 ${
-                findInputError(formErrors, "customerId")
-                  ? "border-red"
-                  : "border-accent"
-              } appearance-none`}
-              onChange={(e: any) => setSelectedCustomer(e.target.value)}
-              disabled={
-                isCustomerDataLoading ||
-                isOrderDataLoading ||
-                isAddOrderLoading ||
-                isAddOrderWashLoading ||
-                isAddOrderDryLoading ||
-                isAddOrderItemLoading ||
-                isAddOrderAddOnLoading ||
-                isAddOrderDiscountLoading ||
-                isBulkAddOrderAddOnLoading ||
-                isBulkAddOrderDiscountLoading
-              }
-            >
-              <option value="">Select Customer</option>
-              {customerData &&
-                customerData.map((res: any) => {
-                  const isSelected: boolean =
-                    customerId && res._id === customerId ? true : false;
-                  return (
-                    <option value={JSON.stringify(res)} selected={isSelected}>
-                      {res.firstName} {res.lastName}
-                    </option>
-                  );
-                })}
-            </select>
+            <div>
+              <button
+                className={`pt-1 pb-1 pl-2 rounded-sm mr-2 w-full border-2 ${
+                  findInputError(formErrors, "customerId")
+                    ? "border-red"
+                    : "border-accent"
+                } appearance-none bg-white`}
+                onClick={(e: any) => {
+                  e.preventDefault();
+                  setIsOpenCustomer(!isOpenCustomer);
+                }}
+                disabled={
+                  isCustomerDataLoading ||
+                  isOrderDataLoading ||
+                  isAddOrderLoading ||
+                  isAddOrderWashLoading ||
+                  isAddOrderDryLoading ||
+                  isAddOrderItemLoading ||
+                  isAddOrderAddOnLoading ||
+                  isAddOrderDiscountLoading ||
+                  isBulkAddOrderAddOnLoading ||
+                  isBulkAddOrderDiscountLoading
+                }
+              >
+                <span className="float-left">
+                  {selectedCustomer
+                    ? `${JSON.parse(selectedCustomer).firstName} ${
+                        JSON.parse(selectedCustomer).lastName
+                      }`
+                    : "Select Customer"}
+                </span>
+
+                <svg
+                  className="h-4 float-right fill-current text-white mt-[3px] mr-[7px]"
+                  version="1.1"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 129 129"
+                  xmlnsXlink="http://www.w3.org/1999/xlink"
+                  enable-background="new 0 0 129 129"
+                >
+                  <g>
+                    <path d="m121.3,34.6c-1.6-1.6-4.2-1.6-5.8,0l-51,51.1-51.1-51.1c-1.6-1.6-4.2-1.6-5.8,0-1.6,1.6-1.6,4.2 0,5.8l53.9,53.9c0.8,0.8 1.8,1.2 2.9,1.2 1,0 2.1-0.4 2.9-1.2l53.9-53.9c1.7-1.6 1.7-4.2 0.1-5.8z" />
+                  </g>
+                </svg>
+              </button>
+              {isOpenCustomer ? (
+                <div className="absolute rounded shadow-md my-2 pin-t pin-l bg-white max-w-[500px]">
+                  <ul className="list-reset">
+                    <li className="p-2">
+                      <input
+                        autoFocus
+                        className="border-2 rounded h-8 w-full px-2"
+                        onChange={(e: any) => setSearchCustomer(e.target.value)}
+                      />
+                      <br />
+                    </li>
+                    {customers &&
+                      customers.map((res: any) => {
+                        const isSelected: boolean =
+                          (customerId && res._id === customerId) ||
+                          res._id === JSON.parse(selectedCustomer)?._id
+                            ? true
+                            : false;
+                        return (
+                          <li
+                            onClick={() => {
+                              setSelectedCustomer(JSON.stringify(res));
+                              setIsOpenCustomer(!isOpenCustomer);
+                            }}
+                          >
+                            <p className="p-2 block text-black hover:bg-grey-light cursor-pointer hover:bg-light">
+                              {`${res.firstName} ${res.lastName}`}
+                              {isSelected && (
+                                <svg
+                                  className="float-right"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  width="18"
+                                  height="18"
+                                  viewBox="0 0 18 18"
+                                >
+                                  <path d="M6.61 11.89L3.5 8.78 2.44 9.84 6.61 14l8.95-8.95L14.5 4z" />
+                                </svg>
+                              )}
+                            </p>
+                          </li>
+                        );
+                      })}
+                  </ul>
+                </div>
+              ) : null}
+            </div>
             {findInputError(formErrors, "customerId") ? (
               <p className="text-[12px] text-red">
                 {findInputError(formErrors, "customerId")}

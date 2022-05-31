@@ -227,14 +227,16 @@ const Table = () => {
           <button
             className="bg-primary text-white pt-1 pl-5 pb-1 pr-5 rounded-xl mr-4"
             type="button"
-            onClick={() => navigate(`/orders/diy/add/${paramId}`)}
+            onClick={() => navigate(`/orders/diy/add?customerId=${paramId}`)}
           >
             Add DIY
           </button>
           <button
             className="bg-primary text-white pt-1 pl-5 pb-1 pr-5 rounded-xl"
             type="button"
-            onClick={() => navigate(`/orders/dropoff/add/${paramId}`)}
+            onClick={() =>
+              navigate(`/orders/dropoff/add?customerId=${paramId}`)
+            }
           >
             Add DO
           </button>

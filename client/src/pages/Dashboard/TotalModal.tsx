@@ -23,7 +23,10 @@ const TotalModal = (props: any) => {
     refetch: refetchOrderData,
   } = useQuery(
     "userOrder",
-    () => getAllOrder(`{"customerId":"${customerId}"}`),
+    () =>
+      getAllOrder(
+        `{ "customerId": "${customerId}", "$or": [ { "paidStatus": "Unpaid" }, { "paidStatus": "To Transfer" } ] }`
+      ),
     {
       enabled: false,
     }
@@ -110,11 +113,13 @@ const TotalModal = (props: any) => {
       content={
         <>
           <h4 className="font-bold text-primary">Active Orders</h4>
-          <DataTable
-            header={tableHeader}
-            isLoading={isOrderLoading}
-            data={order}
-          />
+          <div className="max-h-[500px] overflow-y-auto overflow-x-hidden">
+            <DataTable
+              header={tableHeader}
+              isLoading={isOrderLoading}
+              data={order}
+            />
+          </div>
           <h3 className="mt-3">
             TOTAL: <span className="font-bold">₱{numberWithCommas(total)}</span>
           </h3>

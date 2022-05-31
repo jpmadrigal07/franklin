@@ -194,29 +194,34 @@ const TableDiy = (props: any) => {
       },
     });
 
-  const { mutate: triggerBulkUpdateItem, isLoading: isBulkUpdateItemLoading } =
-    useMutation(async (order: any) => bulkUpdateItem(order), {
-      onSuccess: async () => {
-        setItemToUpdate([]);
-        refetchOrderData();
-        setToUpdateGrandTotalId(selectedData?._id);
-      },
-      onError: async (err: any) => {
-        MySwal.fire({
-          title: "Ooops!",
-          text: err,
-          icon: "warning",
-          confirmButtonText: "Okay",
-          confirmButtonColor: "#274c77",
-        });
-      },
-    });
+  const {
+    mutate: triggerBulkUpdateItem,
+    isLoading: isBulkUpdateItemLoading,
+    reset: resetBulkUpdateItem,
+  } = useMutation(async (order: any) => bulkUpdateItem(order), {
+    onSuccess: async () => {
+      setItemToUpdate([]);
+      refetchOrderData();
+      setToUpdateGrandTotalId(selectedData?._id);
+    },
+    onError: async (err: any) => {
+      MySwal.fire({
+        title: "Ooops!",
+        text: err,
+        icon: "warning",
+        confirmButtonText: "Okay",
+        confirmButtonColor: "#274c77",
+      });
+    },
+  });
 
   const {
     mutate: triggerBulkUpdateInventoryStock,
     isLoading: isBulkUpdateInventoryStockLoading,
+    reset: resetBulkUpdateInventoryStock,
   } = useMutation(async (order: any) => bulkUpdateInventory(order), {
     onSuccess: async () => {
+      setInventoryStockToUpdate([]);
       if (selectedOrderItemToUpdate.length > 0) {
         MySwal.fire({
           title: "Update success!",
@@ -767,6 +772,8 @@ const TableDiy = (props: any) => {
 
   const _openClaimedOrderModal = useCallback(
     (index: number, data: any) => {
+      resetBulkUpdateItem();
+      resetBulkUpdateInventoryStock();
       setSelectedData(data);
       setSelectedIndex(index);
       const isRowQtysFloat = itemToUpdate.map((res: any) => {

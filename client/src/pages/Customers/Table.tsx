@@ -141,13 +141,13 @@ const Table = (props: any) => {
             if (res3 === "New DIY") {
               return _constructTableActions(
                 res3,
-                () => navigate(`/orders/diy/add/${res._id}`),
+                () => navigate(`/orders/diy/add?customerId=${res._id}`),
                 false
               );
             } else if (res3 === "New DO") {
               return _constructTableActions(
                 res3,
-                () => navigate(`/orders/dropoff/add/${res._id}`),
+                () => navigate(`/orders/dropoff/add?customerId=${res._id}`),
                 true
               );
             }
