@@ -79,10 +79,6 @@ const AddExtraDropOff = (props: any) => {
     getAllFolder(encodeURI(foldersCondition))
   );
 
-  const { data: laundryData } = useQuery("dropOffFee", () =>
-    getAllLaundry(`{"type":"Drop Off Fee"}`)
-  );
-
   const { data: staffData, refetch: refetchStaffData } = useQuery(
     "loggedInStaff",
     () => getAllStaff(`{"userId":"${loggedInUserId}"}`),

@@ -40,9 +40,13 @@ const Order = () => {
     data: laundryData,
     isLoading: isLaundryLoading,
     refetch: refetchLaundryData,
-  } = useQuery("dropOffFee", () => getAllLaundry(`{"type":"Drop Off Fee"}`), {
-    enabled: false,
-  });
+  } = useQuery(
+    "orderDropOffFee",
+    () => getAllLaundry(`{"type":"Drop Off Fee"}`),
+    {
+      enabled: false,
+    }
+  );
 
   const { data: orderWashData, isLoading: isOrderWashLoading } = useQuery(
     "orderWash",
@@ -74,7 +78,7 @@ const Order = () => {
       refetchLaundryData();
     }
     return () => {
-      queryClient.removeQueries("dropOffFee");
+      queryClient.removeQueries("orderDropOffFee");
     };
   }, [orderDataObj, refetchLaundryData, queryClient]);
 

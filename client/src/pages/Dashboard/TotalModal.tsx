@@ -1,7 +1,7 @@
 import { useState, useMemo, useCallback, useEffect } from "react";
 import Modal from "../../components/Modal";
 import { useNavigate } from "react-router-dom";
-import { useQuery } from "react-query";
+import { useQuery, useQueryClient } from "react-query";
 import { getAllOrder } from "../../utils/order";
 import DataTable from "../../components/Table";
 import numberWithCommas from "../../utils/numberWithCommas";
@@ -13,6 +13,7 @@ type T_Header = {
 
 const TotalModal = (props: any) => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { customerId, isModalOpen, setIsModalOpen } = props;
   const [order, setOrder] = useState<any>([]);
   const [total, setTotal] = useState(0);
@@ -43,7 +44,12 @@ const TotalModal = (props: any) => {
     if (isModalOpen && customerId) {
       refetchOrderData();
     }
-  }, [isModalOpen, customerId, refetchOrderData]);
+    return () => {
+      queryClient.removeQueries("userOrder");
+      setTotal(0);
+      setOrder([]);
+    };
+  }, [isModalOpen, customerId, refetchOrderData, queryClient]);
 
   const _remappedData = useCallback(
     (data: any) => {
@@ -91,7 +97,7 @@ const TotalModal = (props: any) => {
       setTotal(orderTotal);
       setOrder(_remappedData(orderData));
     }
-  }, [orderData, _remappedData, order]);
+  }, [orderData, _remappedData, order, queryClient]);
 
   return (
     <Modal

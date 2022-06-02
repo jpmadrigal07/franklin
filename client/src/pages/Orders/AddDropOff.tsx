@@ -79,7 +79,7 @@ const AddDropOff = (props: any) => {
     getAllFolder(encodeURI(foldersCondition))
   );
 
-  const { data: laundryData } = useQuery("dropOffFee", () =>
+  const { data: laundryData } = useQuery("addDropOffFee", () =>
     getAllLaundry(`{"type":"Drop Off Fee"}`)
   );
 
