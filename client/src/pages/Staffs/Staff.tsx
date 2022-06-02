@@ -54,7 +54,9 @@ const Table = () => {
     "folderOrders",
     () =>
       getAllOrder(
-        `{"multiFolderId": [${folderIds.map((res: any) => `"${res}"`)}] }`
+        `{ "$and": [ { "laundryId": { "$exists": true } }, { "laundryId": { "$ne": null } } ], "multiFolderId": [${folderIds.map(
+          (res: any) => `"${res}"`
+        )}] }`
       ),
     {
       enabled: false,
@@ -71,6 +73,7 @@ const Table = () => {
     return () => {
       setUserId("");
       queryClient.removeQueries("cashierOrders");
+      queryClient.removeQueries("folderOrders");
     };
   }, [staffData, queryClient]);
 

@@ -75,7 +75,7 @@ router.post("/", async (req, res) => {
         const createCustomer = await newCustomer.save();
         res.json(createCustomer);
       } else {
-        throw new Error("Username must be unique");
+        throw new Error("Email and Mobile Number must be unique");
       }
     } catch ({ message: errMessage }) {
       const message = errMessage ? errMessage : UNKNOW_ERROR_OCCURED;

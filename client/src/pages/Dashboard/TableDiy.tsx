@@ -1572,17 +1572,23 @@ const TableDiy = (props: any) => {
     setSelectedJobOrderNumber(jobOrderNumber);
     setSelectedOrderId(order?._id);
 
-    const toUpdateItem = order?.orderItem
-      ? order?.orderItem?.map((res: any) => {
-          return {
-            updateOne: {
-              filter: { _id: res?.inventoryId?._id },
-              update: { $inc: { stock: res.qty } },
-              upsert: false,
-            },
-          };
-        })
-      : [];
+    const toUpdateItem =
+      order?.orderItem && order?.orderItem.length > 0
+        ? order?.orderItem
+            ?.map((res: any) => {
+              const isEmpty = Object.keys(res).length === 0;
+              return (
+                !isEmpty && {
+                  updateOne: {
+                    filter: { _id: res?.inventoryId?._id },
+                    update: { $inc: { stock: res.qty } },
+                    upsert: false,
+                  },
+                }
+              );
+            })
+            .filter((res2: any) => res2)
+        : [];
 
     setSelectedOrderToUpdate(toUpdateItem);
   };

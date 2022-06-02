@@ -259,12 +259,14 @@ const Table = (props: any) => {
       </h1>
       <div className="flex justify-between mt-11">
         <div>
-          <button
-            className="bg-primary text-white pt-1 pl-5 pb-1 pr-5 rounded-xl"
-            onClick={() => navigate("/inventory/add")}
-          >
-            Add New
-          </button>
+          {loggedInUserType === "Admin" && (
+            <button
+              className="bg-primary text-white pt-1 pl-5 pb-1 pr-5 rounded-xl"
+              onClick={() => navigate("/inventory/add")}
+            >
+              Add New
+            </button>
+          )}
         </div>
         <div>
           <input

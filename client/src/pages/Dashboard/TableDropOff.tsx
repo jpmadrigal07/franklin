@@ -304,11 +304,35 @@ const TableDiy = (props: any) => {
           toUpdateObj["orderStatus"] = "Closed";
           toUpdateObj["updatedAt"] = moment().format();
         }
+
         toUpdateObj[key] = value === "null" ? null : value;
         setOrderToUpdate([...newOrderToUpdate, toUpdateObj]);
       } else {
         const index = newOrderToUpdate.findIndex((res: any) => res.id === id);
-        newOrderToUpdate[index][key] = value === "null" ? null : value;
+        const existToUpdate = newOrderToUpdate.find(
+          (res: any) => res.id === id
+        );
+        if (
+          existToUpdate?.orderStatus === "Closed" &&
+          key === "claimStatus" &&
+          (value === "Unclaimed" || value === "null") &&
+          item?.paidStatus === "Paid"
+        ) {
+          newOrderToUpdate[index]["orderStatus"] = "In";
+        } else if (
+          existToUpdate?.orderStatus !== "Claimed" &&
+          key === "claimStatus" &&
+          value === "Claimed" &&
+          item?.paidStatus === "Paid"
+        ) {
+          newOrderToUpdate[index]["orderStatus"] = "Closed";
+        }
+        newOrderToUpdate[index][key] =
+          value === "null"
+            ? key === "claimStatus"
+              ? "Unclaimed"
+              : null
+            : value;
         setOrderToUpdate([...newOrderToUpdate]);
       }
     },
@@ -1377,6 +1401,8 @@ const TableDiy = (props: any) => {
                 (!res.laundryId &&
                   !res["foldCompleted"] &&
                   res["orderDry"]["machineNumber"])) &&
+              (res["paidStatus"] === "To Transfer" ||
+                res["paidStatus"] === "Paid") &&
               res["claimStatus"] &&
               res["claimStatus"] !== "Claimed" ? (
                 <input
@@ -1582,17 +1608,23 @@ const TableDiy = (props: any) => {
     setSelectedJobOrderNumber(jobOrderNumber);
     setSelectedOrderId(order?._id);
 
-    const toUpdateItem = order?.orderItem
-      ? order?.orderItem?.map((res: any) => {
-          return {
-            updateOne: {
-              filter: { _id: res?.inventoryId?._id },
-              update: { $inc: { stock: res.qty } },
-              upsert: false,
-            },
-          };
-        })
-      : [];
+    const toUpdateItem =
+      order?.orderItem && order?.orderItem.length > 0
+        ? order?.orderItem
+            ?.map((res: any) => {
+              const isEmpty = Object.keys(res).length === 0;
+              return (
+                !isEmpty && {
+                  updateOne: {
+                    filter: { _id: res?.inventoryId?._id },
+                    update: { $inc: { stock: res.qty } },
+                    upsert: false,
+                  },
+                }
+              );
+            })
+            .filter((res2: any) => res2)
+        : [];
 
     setSelectedOrderToUpdate(toUpdateItem);
   };

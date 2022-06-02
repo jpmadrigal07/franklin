@@ -26,6 +26,7 @@ const Table = (props: any) => {
   const [customers, setCustomers] = useState([]);
   const [searchPhrase, setSearchPhrase] = useState("");
   const [adminPassword, setAdminPassword] = useState("");
+  const [sortedData, setSortedData] = useState<any>({});
   const [selectedCustomerId, setSelectedCustomerId] = useState("");
   const [selectedCustomerName, setSelectedCustomerName] = useState("");
 
@@ -101,9 +102,68 @@ const Table = (props: any) => {
 
   useEffect(() => {
     if (customerData && customerData.length > 0) {
-      setCustomers(_remappedData(customerData));
+      let customerDataSorted = customerData;
+      if (sortedData?.data && sortedData?.data === "name") {
+        customerDataSorted = customerDataSorted?.sort((a: any, b: any) => {
+          return sortedData?.sort === "up"
+            ? a.lastName.localeCompare(b.lastName)
+            : b.lastName.localeCompare(a.lastName);
+        });
+      }
+      if (sortedData?.data && sortedData?.data === "contactNumber") {
+        customerDataSorted = customerDataSorted?.sort((a: any, b: any) => {
+          return sortedData?.sort === "up"
+            ? a.contactNumber.localeCompare(b.contactNumber)
+            : b.contactNumber.localeCompare(a.contactNumber);
+        });
+      }
+      if (sortedData?.data && sortedData?.data === "email") {
+        customerDataSorted = customerDataSorted?.sort((a: any, b: any) => {
+          const firstEmail = a.email ? a.email : "";
+          const secondEmail = b.email ? b.email : "";
+          return sortedData?.sort === "up"
+            ? firstEmail.localeCompare(secondEmail)
+            : secondEmail.localeCompare(firstEmail);
+        });
+      }
+      if (sortedData?.data && sortedData?.data === "landline") {
+        customerDataSorted = customerDataSorted?.sort((a: any, b: any) => {
+          const firstLandline = a.landline ? a.landline : "";
+          const secondLandline = b.landline ? b.landline : "";
+          return sortedData?.sort === "up"
+            ? firstLandline.localeCompare(secondLandline)
+            : secondLandline.localeCompare(firstLandline);
+        });
+      }
+      if (sortedData?.data && sortedData?.data === "street") {
+        customerDataSorted = customerDataSorted?.sort((a: any, b: any) => {
+          const firstStreet = a.street ? a.street : "";
+          const secondStreet = b.street ? b.street : "";
+          return sortedData?.sort === "up"
+            ? firstStreet.localeCompare(secondStreet)
+            : secondStreet.localeCompare(firstStreet);
+        });
+      }
+      if (sortedData?.data && sortedData?.data === "birthDate") {
+        customerDataSorted = customerDataSorted?.sort((a: any, b: any) => {
+          let sort = a;
+          if (b.bdYear) {
+            sort =
+              sortedData?.sort === "up"
+                ? a.bdYear.localeCompare(b.bdYear)
+                : b.bdYear.localeCompare(a.bdYear);
+          } else {
+            sort =
+              sortedData?.sort === "up"
+                ? a.bdMonth.localeCompare(b.bdMonth)
+                : b.bdMonth.localeCompare(a.bdMonth);
+          }
+          return sort;
+        });
+      }
+      setCustomers(_remappedData(customerDataSorted));
     }
-  }, [customerData]);
+  }, [customerData, sortedData]);
 
   const tableHeader = [
     { header: "", dataName: "frontActions" },
@@ -131,7 +191,7 @@ const Table = (props: any) => {
       const mainData = tableHeader.map((res2: any) => {
         let value;
         if (res2.dataName === "name") {
-          value = `${res.firstName} ${res.lastName}${res.notes ? "*" : ""}`;
+          value = `${res.lastName} ${res.firstName}${res.notes ? "*" : ""}`;
         } else if (res2.dataName === "birthDate") {
           value = moment(
             `${res.bdMonth}/${res.bdDay}/${res.bdYear ? res.bdYear : "1970"}`
@@ -218,6 +278,13 @@ const Table = (props: any) => {
         header={tableHeader}
         isLoading={isCustomerDataLoading}
         data={customers}
+        columnSort={(e: any) =>
+          setSortedData({
+            sort: sortedData?.sort === "up" ? "down" : "up",
+            data: e,
+          })
+        }
+        columnSortIcon={sortedData}
       />
       <Modal
         state={isDeleteModalOpen}
