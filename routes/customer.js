@@ -65,8 +65,7 @@ router.post("/", async (req, res) => {
     });
     try {
       const getCustomer = await Customer.find({
-        contactNumber,
-        email,
+        $or: [{ contactNumber }, { email }],
         deletedAt: {
           $exists: false,
         },
@@ -91,7 +90,8 @@ router.post("/", async (req, res) => {
 // @access  Private
 router.patch("/:id", async (req, res) => {
   const condition = req.body;
-  const { firstName, lastName, bdMonth, bdDay, contactNumber } = condition;
+  const { firstName, lastName, bdMonth, bdDay, contactNumber, email } =
+    condition;
   if (
     firstName === "" ||
     lastName === "" ||
@@ -103,15 +103,26 @@ router.patch("/:id", async (req, res) => {
   } else {
     if (!isEmpty(condition)) {
       try {
-        const updateCustomer = await Customer.findByIdAndUpdate(
-          req.params.id,
-          {
-            $set: condition,
-            updatedAt: Date.now(),
+        const getCustomer = await Customer.find({
+          $or: [{ contactNumber }, { email }],
+          _id: { $ne: req.params.id },
+          deletedAt: {
+            $exists: false,
           },
-          { new: true }
-        );
-        res.json(updateCustomer);
+        });
+        if (getCustomer.length === 0) {
+          const updateCustomer = await Customer.findByIdAndUpdate(
+            req.params.id,
+            {
+              $set: condition,
+              updatedAt: Date.now(),
+            },
+            { new: true }
+          );
+          res.json(updateCustomer);
+        } else {
+          throw new Error("Email and Mobile Number must be unique");
+        }
       } catch ({ message: errMessage }) {
         const message = errMessage ? errMessage : UNKNOW_ERROR_OCCURED;
         res.status(500).json(message);

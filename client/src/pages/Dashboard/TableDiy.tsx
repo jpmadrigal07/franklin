@@ -160,10 +160,37 @@ const TableDiy = (props: any) => {
 
   const { mutate: triggerBulkUpdateWash, isLoading: isBulkUpdateWashLoading } =
     useMutation(async (order: any) => bulkUpdateWash(order), {
-      onSuccess: async () => {
+      onSuccess: async (data: any, variables: any) => {
         setWashToUpdate([]);
         refetchOrderData();
         setToUpdateGrandTotalId(selectedData?._id);
+        if (variables.bulk[0].updateOne || variables.bulk[0].insertOne) {
+          const addedOrderWash = variables.bulk[0].updateOne
+            ? variables.bulk[0].updateOne.update["$set"]
+            : variables.bulk[0].insertOne.document;
+          const selectedOrder = orderData.find(
+            (res: any) => res.jobOrderNumber === addedOrderWash?.jobOrderNumber
+          );
+          const ops = addedOrderWash?.id
+            ? {
+                updateOne: {
+                  filter: { jobOrderNumber: addedOrderWash.jobOrderNumber },
+                  update: {
+                    amountDue:
+                      selectedOrder.amountDue -
+                      selectedOrder?.orderWash?.total +
+                      addedOrderWash.total,
+                  },
+                },
+              }
+            : {
+                updateOne: {
+                  filter: { jobOrderNumber: addedOrderWash.jobOrderNumber },
+                  update: { $inc: { amountDue: addedOrderWash.total } },
+                },
+              };
+          triggerBulkUpdateOrder({ bulk: [ops] });
+        }
       },
       onError: async (err: any) => {
         MySwal.fire({
@@ -178,10 +205,37 @@ const TableDiy = (props: any) => {
 
   const { mutate: triggerBulkUpdateDry, isLoading: isBulkUpdateDryLoading } =
     useMutation(async (order: any) => bulkUpdateDry(order), {
-      onSuccess: async () => {
+      onSuccess: async (data: any, variables: any) => {
         setDryToUpdate([]);
         refetchOrderData();
         setToUpdateGrandTotalId(selectedData?._id);
+        if (variables.bulk[0].updateOne || variables.bulk[0].insertOne) {
+          const addedOrderWash = variables.bulk[0].updateOne
+            ? variables.bulk[0].updateOne.update["$set"]
+            : variables.bulk[0].insertOne.document;
+          const selectedOrder = orderData.find(
+            (res: any) => res.jobOrderNumber === addedOrderWash?.jobOrderNumber
+          );
+          const ops = addedOrderWash?.id
+            ? {
+                updateOne: {
+                  filter: { jobOrderNumber: addedOrderWash.jobOrderNumber },
+                  update: {
+                    amountDue:
+                      selectedOrder.amountDue -
+                      selectedOrder?.orderWash?.total +
+                      addedOrderWash.total,
+                  },
+                },
+              }
+            : {
+                updateOne: {
+                  filter: { jobOrderNumber: addedOrderWash.jobOrderNumber },
+                  update: { $inc: { amountDue: addedOrderWash.total } },
+                },
+              };
+          triggerBulkUpdateOrder({ bulk: [ops] });
+        }
       },
       onError: async (err: any) => {
         MySwal.fire({
@@ -719,6 +773,23 @@ const TableDiy = (props: any) => {
         const toUpdate = id
           ? [orderToUpdate.find((res: any) => res.id === id)]
           : orderToUpdate;
+        const existOnWashToUpdate = washToUpdate.find(
+          (res: any) => res.id === data?._id
+        );
+        const orderAmountDueToUpdate = existOnWashToUpdate && {
+          updateOne: {
+            filter: { _id: existOnWashToUpdate.id },
+            update: {
+              $inc: {
+                amountDue: existOnWashToUpdate?.orderWash?._id
+                  ? data.amountDue -
+                    data?.orderWash?.total +
+                    existOnWashToUpdate.price
+                  : existOnWashToUpdate.price,
+              },
+            },
+          },
+        };
         const ops =
           toUpdate &&
           toUpdate.map((item: any) => {
@@ -731,7 +802,10 @@ const TableDiy = (props: any) => {
             };
           });
         if (ops && ops.length > 0) {
-          triggerBulkUpdateOrder({ bulk: ops });
+          const finalOps = [...ops, orderAmountDueToUpdate].filter(
+            (res: any) => res
+          );
+          triggerBulkUpdateOrder({ bulk: finalOps });
         }
       }
     },
@@ -742,6 +816,7 @@ const TableDiy = (props: any) => {
       _updateDry,
       _updateItem,
       _updateInventoryStock,
+      washToUpdate,
     ]
   );
 

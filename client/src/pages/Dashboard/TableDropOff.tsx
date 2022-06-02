@@ -158,10 +158,37 @@ const TableDiy = (props: any) => {
 
   const { mutate: triggerBulkUpdateWash, isLoading: isBulkUpdateWashLoading } =
     useMutation(async (order: any) => bulkUpdateWash(order), {
-      onSuccess: async () => {
+      onSuccess: async (data: any, variables: any) => {
         setWashToUpdate([]);
         refetchOrderData();
         setToUpdateGrandTotalId(selectedData?._id);
+        if (variables.bulk[0].updateOne || variables.bulk[0].insertOne) {
+          const addedOrderWash = variables.bulk[0].updateOne
+            ? variables.bulk[0].updateOne.update["$set"]
+            : variables.bulk[0].insertOne.document;
+          const selectedOrder = orderData.find(
+            (res: any) => res.jobOrderNumber === addedOrderWash?.jobOrderNumber
+          );
+          const ops = addedOrderWash?.id
+            ? {
+                updateOne: {
+                  filter: { jobOrderNumber: addedOrderWash.jobOrderNumber },
+                  update: {
+                    amountDue:
+                      selectedOrder.amountDue -
+                      selectedOrder?.orderWash?.total +
+                      addedOrderWash.total,
+                  },
+                },
+              }
+            : {
+                updateOne: {
+                  filter: { jobOrderNumber: addedOrderWash.jobOrderNumber },
+                  update: { $inc: { amountDue: addedOrderWash.total } },
+                },
+              };
+          triggerBulkUpdateOrder({ bulk: [ops] });
+        }
       },
       onError: async (err: any) => {
         MySwal.fire({
@@ -176,10 +203,37 @@ const TableDiy = (props: any) => {
 
   const { mutate: triggerBulkUpdateDry, isLoading: isBulkUpdateDryLoading } =
     useMutation(async (order: any) => bulkUpdateDry(order), {
-      onSuccess: async () => {
+      onSuccess: async (data: any, variables: any) => {
         setDryToUpdate([]);
         refetchOrderData();
         setToUpdateGrandTotalId(selectedData?._id);
+        if (variables.bulk[0].updateOne || variables.bulk[0].insertOne) {
+          const addedOrderWash = variables.bulk[0].updateOne
+            ? variables.bulk[0].updateOne.update["$set"]
+            : variables.bulk[0].insertOne.document;
+          const selectedOrder = orderData.find(
+            (res: any) => res.jobOrderNumber === addedOrderWash?.jobOrderNumber
+          );
+          const ops = addedOrderWash?.id
+            ? {
+                updateOne: {
+                  filter: { jobOrderNumber: addedOrderWash.jobOrderNumber },
+                  update: {
+                    amountDue:
+                      selectedOrder.amountDue -
+                      selectedOrder?.orderWash?.total +
+                      addedOrderWash.total,
+                  },
+                },
+              }
+            : {
+                updateOne: {
+                  filter: { jobOrderNumber: addedOrderWash.jobOrderNumber },
+                  update: { $inc: { amountDue: addedOrderWash.total } },
+                },
+              };
+          triggerBulkUpdateOrder({ bulk: [ops] });
+        }
       },
       onError: async (err: any) => {
         MySwal.fire({
@@ -324,6 +378,15 @@ const TableDiy = (props: any) => {
           key === "claimStatus" &&
           value === "Claimed" &&
           item?.paidStatus === "Paid"
+        ) {
+          newOrderToUpdate[index]["orderStatus"] = "Closed";
+        } else if (
+          (existToUpdate?.paidStatus === "Paid" &&
+            key === "claimStatus" &&
+            value === "Claimed") ||
+          (existToUpdate?.claimStatus === "Claimed" &&
+            key === "paidStatus" &&
+            value === "Paid")
         ) {
           newOrderToUpdate[index]["orderStatus"] = "Closed";
         }
@@ -860,7 +923,8 @@ const TableDiy = (props: any) => {
           orderToUpdate[toUpdateIndex]?.paidStatus === "Paid";
         if (
           (isClaimed && data?.paidStatus === "Paid") ||
-          (isPaid && data?.claimStatus === "Claimed")
+          (isPaid && data?.claimStatus === "Claimed") ||
+          (isPaid && isClaimed)
         ) {
           setOpenClaimedOrderModal(true);
         } else {
@@ -868,7 +932,13 @@ const TableDiy = (props: any) => {
         }
       }
     },
-    [orderToUpdate, _updateOrder, itemSufficiencyState, itemToUpdate]
+    [
+      orderToUpdate,
+      _updateOrder,
+      itemSufficiencyState,
+      itemToUpdate,
+      resetBulkUpdateInventoryStock,
+    ]
   );
 
   const _openClaimedMultiOrderModal = useCallback(() => {
