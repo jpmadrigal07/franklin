@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.0.16
+
+- Added README file for installation instruction
+- Added new command in package.json for dependency installation
+
 ## 3.0.15
 
 - Fix bugs for https://docs.google.com/document/d/1dbR71KzH77lgaYsWv7lggoLMEg1PrQYAaInnLoNEBtQ

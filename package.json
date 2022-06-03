@@ -1,12 +1,13 @@
 {
   "name": "franklin",
-  "version": "3.0.15",
+  "version": "3.0.16",
   "description": "Develop by John Madrigal for Franklin's Dry and Wash Fold. To contact the developer, you can message him through Messenger.",
   "main": "server.js",
   "scripts": {
     "server": "set REACT_APP_STAGE=local && nodemon server.js",
     "client": "npm start --prefix client",
     "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "install-client": "yarn --cwd ./client install",
     "pretty": "prettier --write \"./**/*.{js,jsx,json}\"",
     "prepare": "husky install",
     "heroku-postbuild": "NPM_CONFIG_PRODUCTION=false npm install --prefix client && npm run build --prefix client"

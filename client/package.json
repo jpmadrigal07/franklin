@@ -43,6 +43,7 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
+    "install": "yarn",
     "prepare": "husky install"
   },
   "eslintConfig": {
