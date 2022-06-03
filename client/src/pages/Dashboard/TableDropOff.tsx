@@ -21,6 +21,7 @@ import { bulkUpdateItem } from "../../utils/api/orderItem";
 import TotalModal from "./TotalModal";
 import ComputeTotalLoading from "./ComputeTotalLoading";
 import SmallLoading from "../../components/SmallLoading";
+import { forEach } from "lodash";
 
 type T_Header = {
   header: string;
@@ -424,11 +425,14 @@ const TableDiy = (props: any) => {
         }
         if (key !== "id" && newOrderToUpdate.length > 0) {
           const newValue = newOrderToUpdate.map((res: any) => {
+            const item = orderData.find((res3: any) => res3._id === res.id);
             const isItemAllowedClaimed = orderData.find(
               (res3: any) =>
                 res3._id === res.id &&
                 (res3.paidStatus === "Paid" ||
-                  res3.paidStatus === "To Transfer") &&
+                  res3.paidStatus === "To Transfer" ||
+                  res.paidStatus === "Paid" ||
+                  res.paidStatus === "To Transfer") &&
                 ((res3.laundryId && res3.foldCompleted) || !res3.laundryId)
             );
             const isItemAllowedFold = orderData.find(
@@ -437,10 +441,25 @@ const TableDiy = (props: any) => {
                 res3.orderWash?.machineNumber &&
                 res3.orderDry?.machineNumber
             );
+            const isItemAllowedPaid = orderData.find(
+              (res3: any) =>
+                res3._id === res.id &&
+                ((res3.laundryId && res3.foldCompleted) || !res3.laundryId)
+            );
             const isFoldCompleted = orderData.find(
               (res3: any) => res3._id === res.id && res3.foldCompleted
             );
             let updatedValue: any = "";
+            if (key === "paidStatus" && value === "Paid" && isItemAllowedPaid) {
+              updatedValue = "Paid";
+            } else if (
+              key === "paidStatus" &&
+              value === "Paid" &&
+              !isItemAllowedPaid
+            ) {
+              updatedValue = item?.paidStatus;
+            }
+
             if (
               key === "claimStatus" &&
               value === "Claimed" &&
@@ -452,7 +471,9 @@ const TableDiy = (props: any) => {
               (value !== "Claimed" || !isItemAllowedClaimed)
             ) {
               updatedValue = "Unclaimed";
-            } else if (key === "foldCompleted" && !isItemAllowedFold) {
+            }
+
+            if (key === "foldCompleted" && !isItemAllowedFold) {
               updatedValue = null;
             } else if (
               key === "foldCompleted" &&
@@ -460,18 +481,34 @@ const TableDiy = (props: any) => {
               isFoldCompleted
             ) {
               updatedValue = isFoldCompleted?.foldCompleted;
-            } else {
+            } else if (key === "foldCompleted" && isItemAllowedFold) {
               updatedValue = value;
             }
+
             let toReturn = {
               ...res,
               [key]: value === "null" ? null : updatedValue,
             };
+
+            if (
+              key !== "claimStatus" &&
+              res.claimStatus &&
+              isItemAllowedClaimed
+            ) {
+              toReturn.claimStatus = "Claimed";
+            }
+
+            if (key !== "paidStatus" && res.paidStatus && isItemAllowedPaid) {
+              toReturn.paidStatus = "Paid";
+            }
+
             const isToClose = orderData.find(
               (res3: any) =>
                 res3._id === res.id &&
                 ((res3.paidStatus === "Paid" && updatedValue === "Claimed") ||
-                  (res3.claimStatus === "Claimed" && updatedValue === "Paid"))
+                  (res3.claimStatus === "Claimed" && updatedValue === "Paid") ||
+                  (toReturn?.claimStatus === "Claimed" &&
+                    toReturn?.paidStatus === "Paid"))
             );
             if (isToClose) {
               toReturn.orderStatus = "Closed";
@@ -938,6 +975,7 @@ const TableDiy = (props: any) => {
       itemSufficiencyState,
       itemToUpdate,
       resetBulkUpdateInventoryStock,
+      resetBulkUpdateItem,
     ]
   );
 

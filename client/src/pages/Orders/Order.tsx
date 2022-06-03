@@ -11,6 +11,7 @@ import { dateSlashWithTime } from "../../utils/formatDate";
 import numberWithCommas from "../../utils/numberWithCommas";
 import DataTable from "../../components/Table";
 import { getAllOrderItem } from "../../utils/api/orderItem";
+import { getAllStaff } from "../../utils/staff";
 
 type T_Header = {
   header: string;
@@ -30,6 +31,20 @@ const Order = () => {
   const [orderItemDataRemapped, setOrderItemDataRemapped] = useState<any>([]);
   const [dropOffFee, setDropOffFee] = useState<any>({});
   const [payment, setPayment] = useState<any>({});
+
+  const [selectedStaffId, setSelectedStaffId] = useState("");
+
+  const {
+    data: orderStaffData,
+    isLoading: isOrderStaffDataLoading,
+    refetch: refetchOrderStaffData,
+  } = useQuery(
+    "orderStaff",
+    () => getAllStaff(`{"userId":"${selectedStaffId}"}`),
+    {
+      enabled: false,
+    }
+  );
 
   const { data: orderData, isLoading: isOrderLoading } = useQuery(
     "viewOrder",
@@ -77,10 +92,23 @@ const Order = () => {
     if (orderDataObj.laundryId) {
       refetchLaundryData();
     }
+    if (orderDataObj.staffId) {
+      setSelectedStaffId(orderDataObj?.staffId?._id);
+    }
     return () => {
       queryClient.removeQueries("orderDropOffFee");
+      setSelectedStaffId("");
     };
   }, [orderDataObj, refetchLaundryData, queryClient]);
+
+  useEffect(() => {
+    if (selectedStaffId !== "") {
+      refetchOrderStaffData();
+    }
+    return () => {
+      queryClient.removeQueries("orderStaff");
+    };
+  }, [selectedStaffId, refetchOrderStaffData, queryClient]);
 
   useEffect(() => {
     if (laundryData && laundryData.length > 0) {
@@ -383,8 +411,10 @@ const Order = () => {
             <p className="font-bold">
               <span className="font-bold text-primary">Cashier:</span>{" "}
               {!isOrderLoading
-                ? orderDataObj?.staffId
-                  ? orderDataObj?.staffId?.name
+                ? orderDataObj?.staffId &&
+                  orderStaffData &&
+                  orderStaffData.length > 0
+                  ? orderStaffData[0].name
                   : "Admin"
                 : "..."}
             </p>

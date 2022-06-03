@@ -40,7 +40,7 @@ router.get("/", async (req, res) => {
       { $match: condition },
       {
         $lookup: {
-          from: "staffs",
+          from: "users",
           localField: "staffId",
           foreignField: "_id",
           as: "staffId",

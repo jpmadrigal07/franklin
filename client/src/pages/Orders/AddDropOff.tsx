@@ -619,7 +619,7 @@ const AddDropOff = (props: any) => {
     const orderToFilter = {
       staffId:
         staffData && loggedInUserType === "Staff"
-          ? staffData[0]._id
+          ? staffData[0].userId?._id
           : loggedInUserId,
       laundryId: laundryData[0]?._id,
       customerId: selectedCustomer && JSON.parse(selectedCustomer)._id,
@@ -649,7 +649,7 @@ const AddDropOff = (props: any) => {
     const order = {
       staffId:
         staffData && loggedInUserType === "Staff"
-          ? staffData[0]._id
+          ? staffData[0].userId?._id
           : loggedInUserId,
       laundryId: laundryData[0]?._id,
       customerId: selectedCustomer && JSON.parse(selectedCustomer)._id,

@@ -636,7 +636,7 @@ const AddDiy = (props: any) => {
     const orderToFilter = {
       staffId:
         staffData && loggedInUserType === "Staff"
-          ? staffData[0]._id
+          ? staffData[0].userId?._id
           : loggedInUserId,
       customerId: selectedCustomer && JSON.parse(selectedCustomer)._id,
       jobOrderNumber:
@@ -666,7 +666,7 @@ const AddDiy = (props: any) => {
     const order = {
       staffId:
         staffData && loggedInUserType === "Staff"
-          ? staffData[0]._id
+          ? staffData[0].userId?._id
           : loggedInUserId,
       customerId: selectedCustomer && JSON.parse(selectedCustomer)._id,
       jobOrderNumber:
