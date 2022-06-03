@@ -27,6 +27,5 @@ Just double click the start_system.bat file to start the system. Starting the sy
 
 To login, just use this admin account:
 
-## `username: admin`
-
-## `password: franklin`
+username: admin<br />
+password: franklin
