@@ -1,6 +1,8 @@
 const mongoose = require("mongoose");
 const Laundry = require("./models/laundry");
 const Inventory = require("./models/inventory");
+const User = require("./models/user");
+const Staff = require("./models/staff");
 const keys = require("./config/keys");
 
 const mongoDbFunction = async () => {
@@ -17,6 +19,8 @@ const mongoDbFunction = async () => {
     process.exit(-1);
   }
 
+  const user = await User.find({});
+  const staff = await Staff.find({});
   const laundry = await Laundry.find({});
   const zonrox = await Inventory.find({ type: "Bleach", name: "Zonrox" });
   const fabcon = await Inventory.find({ type: "FabCon", name: "Surf" });
@@ -72,6 +76,29 @@ const mongoDbFunction = async () => {
       stock: 20,
     });
     console.log("Response detergent: ", insert);
+  }
+
+  if (!user || user.length === 0) {
+    const insert = await User.create({
+      username: "admin",
+      password: "franklin",
+      userType: "Admin",
+    });
+    console.log("Response admin: ", insert);
+  }
+
+  if (!staff || staff.length === 0) {
+    const insert = await User.create({
+      username: "johndoe",
+      password: "john123",
+      userType: "Staff",
+    });
+    const insert2 = await Staff.create({
+      userId: insert._id,
+      name: "John Doe",
+    });
+    console.log("Response staff: ", insert);
+    console.log("Response staff: ", insert2);
   }
 };
 

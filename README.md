@@ -24,3 +24,8 @@
 You are finish!
 
 Just double click the start_system.bat file to start the system. Starting the system will also get the latest updated code from the developer. Just close it when you want to close the system.
+
+To login, just use this admin account:
+
+username: admin
+password: franklin
