@@ -22,4 +22,5 @@
 ---
 
 You are finish!
-Just double click the start_system.bat file to start the system. Starting the system will also find the latest update of from the developer. Just close it when you want to close the system
+
+Just double click the start_system.bat file to start the system. Starting the system will also get the latest update of from the developer. Just close it when you want to close the system.
